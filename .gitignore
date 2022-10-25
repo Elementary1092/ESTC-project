@@ -1,0 +1,7 @@
+# Object files and executables output directory 
+_build/
+
+# Kernel Module Compile Results
+*.cmd
+Module.symvers
+Mkfile.old
