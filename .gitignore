@@ -1,3 +1,6 @@
+# Editor files
+.vscode/
+
 # Object files and executables output directory 
 _build/
 
