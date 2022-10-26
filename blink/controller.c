@@ -1,7 +1,7 @@
 #include "controller.h"
 #include <malloc.h>
 
-void init_time_controller(struct controller_t *c, uint32_t sequence)
+void init_time_controller(struct time_controller_t *c, uint32_t sequence)
 {
 	c->a = malloc(18 * sizeof(uint8_t));
 	c->len = 0;
@@ -14,7 +14,7 @@ void init_time_controller(struct controller_t *c, uint32_t sequence)
 		c->len++;
 	}
 
-	for (size_t i = 0; i < c->len / 2; i++) 
+	for (size_t i = 0; i < c->len / 2; i++)
 	{
 		size_t j = c->len - i - 1;
 		uint8_t temp = c->a[i];
@@ -23,7 +23,7 @@ void init_time_controller(struct controller_t *c, uint32_t sequence)
 	}
 }
 
-uint8_t next(struct controller_t *c)
+uint8_t next(struct time_controller_t *c)
 {
 	if (c->index >= c->len)
 	{
@@ -33,7 +33,7 @@ uint8_t next(struct controller_t *c)
 	return c->a[c->index++];
 }
 
-void destruct_time_controller(struct controller_t *c)
+void destruct_time_controller(struct time_controller_t *c)
 {
 	c->len = 0;
 	c->index = 0;

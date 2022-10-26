@@ -6,7 +6,7 @@ DFU_PORT         ?= /dev/ttyACM0
 
 
 SDK_ROOT ?= /usr/bin
-PROJ_DIR ?= /home/user/project
+PROJ_DIR := ../../
 
 $(OUTPUT_DIRECTORY)/nrf52840_xxaa.out: \
   LINKER_SCRIPT  := blinky_gcc_nrf52.ld
