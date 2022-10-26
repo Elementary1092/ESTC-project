@@ -50,6 +50,8 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+
+#include "blink/controller.h"
 #include "nrf_delay.h"
 #include "boards.h"
 
@@ -61,15 +63,25 @@ int main(void)
     /* Configure board. */
     bsp_board_init(BSP_INIT_LEDS);
 
+    /* Initialize blink time controller */
+    struct controller_t c;
+    init_time_controller(&c, BOARD_ID);
+
     /* Toggle LEDs. */
     while (true)
     {
-        for (int i = 0; i < LEDS_NUMBER; i++)
+        for (uint8_t i = next(&c); i > 0; i--)
         {
-            bsp_board_led_invert(i);
-            nrf_delay_ms(500);
+            bsp_board_leds_on();
+            nrf_delay_ms(300);
+            bsp_board_leds_off();
+            nrf_delay_ms(300);
         }
+
+        nrf_delay_ms(2000);
     }
+
+    destruct_time_controller(&c);
 }
 
 /**
