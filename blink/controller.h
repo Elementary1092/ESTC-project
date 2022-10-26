@@ -11,8 +11,8 @@ struct time_controller_t
 	size_t index;
 };
 
-void init_time_controller(struct time_controller_t *, uint32_t);
-uint8_t next(struct time_controller_t *);
-void destruct_time_controller(struct time_controller_t *);
+void init_time_controller(struct time_controller_t*, uint32_t);
+uint8_t next(struct time_controller_t*);
+void destruct_time_controller(struct time_controller_t*);
 
 #endif
