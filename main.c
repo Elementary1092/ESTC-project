@@ -27,11 +27,15 @@ int main(void)
     {
         for (uint8_t i = next(&c); i > 0; i--)
         {
-            bsp_board_led_invert(0);
-            nrf_delay_ms(LED_INVERT_DELAY);
-            bsp_board_led_invert(0);
-            if (i != 1) {
+            for (int j = 0; j < LEDS_NUMBER; j++) {
+                bsp_board_led_invert(j);
                 nrf_delay_ms(LED_INVERT_DELAY);
+                bsp_board_led_invert(j);
+                if (i != 1) {
+                    nrf_delay_ms(LED_INVERT_DELAY);
+                } else {
+                    bsp_board_led_off(j);
+                }
             }
         }
 
