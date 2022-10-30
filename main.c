@@ -30,12 +30,9 @@ int main(void)
             for (int j = 0; j < LEDS_NUMBER; j++) {
                 bsp_board_led_invert(j);
                 nrf_delay_ms(LED_INVERT_DELAY);
-                bsp_board_led_invert(j);
-                if (i != 1) {
-                    nrf_delay_ms(LED_INVERT_DELAY);
-                } else {
-                    bsp_board_led_off(j);
-                }
+            }
+            if (i == 1) {
+                bsp_board_leds_off();
             }
         }
 
