@@ -5,7 +5,7 @@
 #define SWITCH_LED_ON_SIGNAL 0
 #define SWITCH_LED_OFF_SIGNAL 1
 
-void init_led_controller(led_controller_t *c, const char *sequence, uint8_t nseq)
+void init_led_controller(struct led_controller_t *c, const char *sequence, uint8_t nseq)
 {
 	NRFX_ASSERT(c != NULL);
 	NRFX_ASSERT(sequence != NULL);
@@ -19,6 +19,11 @@ void init_led_controller(led_controller_t *c, const char *sequence, uint8_t nseq
 	nrf_gpio_cfg_output(red);
 	nrf_gpio_cfg_output(green);
 	nrf_gpio_cfg_output(blue);
+
+	/* Switching off leds */
+	nrf_gpio_pin_write(red, SWITCH_LED_OFF_SIGNAL);
+	nrf_gpio_pin_write(green, SWITCH_LED_OFF_SIGNAL);
+	nrf_gpio_pin_write(blue, SWITCH_LED_OFF_SIGNAL);
 
 	/* Initializing leds blink sequence */
 	c->gpio_pin_sequence = malloc(((size_t)nseq) * sizeof(uint32_t));
@@ -42,7 +47,7 @@ void init_led_controller(led_controller_t *c, const char *sequence, uint8_t nseq
 	c->sequence_size = sequence_last_idx;
 }
 
-void switch_on_next_led(led_controller_t *c)
+void switch_on_next_led(struct led_controller_t *c)
 {
 	if (c->pin_idx >= c->sequence_size)
 	{
@@ -52,12 +57,22 @@ void switch_on_next_led(led_controller_t *c)
 	nrf_gpio_pin_write(c->gpio_pin_sequence[c->pin_idx++], SWITCH_LED_ON_SIGNAL);
 }
 
-void switch_off_led(led_controller_t *c)
+void switch_off_led(struct led_controller_t *c)
 {
-	nrf_gpio_pin_write(c->gpio_pin_sequence[c->pin_idx++], SWITCH_LED_OFF_SIGNAL);
+	uint32_t switch_off_pin_idx = c->pin_idx - 1;
+	if (c->pin_idx == 0 && c->sequence_size != 0)
+	{
+		switch_off_pin_idx = c->sequence_size - 1;
+	}
+	else if (c->sequence_size == 0)
+	{
+		switch_off_pin_idx = 0;
+	}
+
+	nrf_gpio_pin_write(c->gpio_pin_sequence[switch_off_pin_idx], SWITCH_LED_OFF_SIGNAL);
 }
 
-void free_led_controller(led_controller_t *c)
+void free_led_controller(struct led_controller_t *c)
 {
 	free(c->gpio_pin_sequence);
 	c->pin_idx = 0;

@@ -31,6 +31,8 @@ int main(void)
     {
         while (is_pressed(&button))
         {
+            switch_off_led(&leds);
+            
             switch_on_next_led(&leds);
             nrf_delay_ms(LED_ON_TIME);
 
