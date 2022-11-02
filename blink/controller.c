@@ -1,9 +1,9 @@
 #include "controller.h"
 #include <malloc.h>
 
-void init_time_controller(struct time_controller_t *c, uint32_t sequence)
+void init_time_controller(struct time_controller_t *c, uint8_t *blink_queue, uint32_t sequence)
 {
-	c->a = malloc(9 * sizeof(uint8_t));
+	c->a = blink_queue;
 	c->len = 0;
 	c->index = 0;
 
@@ -29,5 +29,4 @@ void destruct_time_controller(struct time_controller_t *c)
 {
 	c->len = 0;
 	c->index = 0;
-	free(c->a);
 }
