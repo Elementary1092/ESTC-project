@@ -13,8 +13,7 @@ struct time_controller_t
 	size_t index;
 };
 
-void init_time_controller(struct time_controller_t *controller, uint8_t *sequence_queue, uint32_t sequence);
-uint8_t next(struct time_controller_t *controller);
-void destruct_time_controller(struct time_controller_t *controller);
+void blink_time_controller_init(struct time_controller_t *controller, uint8_t *sequence_queue, uint32_t sequence);
+uint8_t blink_time_controller_next(struct time_controller_t *controller);
 
 #endif

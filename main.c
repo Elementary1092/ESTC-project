@@ -21,12 +21,12 @@ int main(void)
     /* Initialize blink time controller */
     struct time_controller_t c;
     uint8_t blink_queue[BLINK_QUEUE_MAX_SIZE] = {0};
-    init_time_controller(&c, blink_queue, BOARD_ID_REVERSED);
+    blink_time_controller_init(&c, blink_queue, BOARD_ID_REVERSED);
 
     /* Toggle LEDs. */
     while (true)
     {
-        for (uint8_t i = next(&c); i > 0; i--)
+        for (uint8_t i = blink_time_controller_next(&c); i > 0; i--)
         {
             for (int j = 0; j < LEDS_NUMBER; j++) 
             {
@@ -42,8 +42,6 @@ int main(void)
 
         nrf_delay_ms(ITERATION_DELAY_TIME);
     }
-
-    destruct_time_controller(&c);
 }
 
 /**
