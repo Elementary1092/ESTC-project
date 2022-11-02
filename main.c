@@ -20,7 +20,8 @@ int main(void)
 
     /* Initialize blink time controller */
     struct time_controller_t c;
-    init_time_controller(&c, BOARD_ID_REVERSED);
+    uint8_t blink_queue[BLINK_QUEUE_MAX_SIZE] = {0};
+    init_time_controller(&c, blink_queue, BOARD_ID_REVERSED);
 
     /* Toggle LEDs. */
     while (true)
