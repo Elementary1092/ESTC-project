@@ -1,7 +1,7 @@
 #include "controller.h"
 #include <malloc.h>
 
-void init_time_controller(struct time_controller_t *c, uint8_t *blink_queue, uint32_t sequence)
+void blink_time_controller_init(struct time_controller_t *c, uint8_t *blink_queue, uint32_t sequence)
 {
 	c->a = blink_queue;
 	c->len = 0;
@@ -15,7 +15,7 @@ void init_time_controller(struct time_controller_t *c, uint8_t *blink_queue, uin
 	}
 }
 
-uint8_t next(struct time_controller_t *c)
+uint8_t blink_time_controller_next(struct time_controller_t *c)
 {
 	if (c->index >= c->len)
 	{
@@ -23,10 +23,4 @@ uint8_t next(struct time_controller_t *c)
 	}
 
 	return c->a[(c->index)++];
-}
-
-void destruct_time_controller(struct time_controller_t *c)
-{
-	c->len = 0;
-	c->index = 0;
 }
