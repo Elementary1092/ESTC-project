@@ -1,46 +1,46 @@
 #include <stdbool.h>
+#include <string.h>
 #include <stdint.h>
 
-#include "blink/controller.h"
+#include "modules/button/board_button.h"
+#include "modules/led/sequence_ctx.h"
 #include "nrf_delay.h"
-#include "boards.h"
 
-#define LED_INVERT_DELAY 500
-#define ITERATION_DELAY_TIME 3000
+#define BLINK_SEQUENCE  "RGBBGRRRGGBB"
 
-#define BOARD_ID_REVERSED 8917
+#define LED_ON_TIME_MS  750
+#define LED_OFF_TIME_MS 250
 
 /**
  * @brief Function for application main entry.
  */
 int main(void)
 {
-    /* Configure board. */
-    bsp_board_init(BSP_INIT_LEDS);
+    uint32_t button = BOARD_BUTTON_SW1;
 
-    /* Initialize blink time controller */
-    struct time_controller_t c;
-    uint8_t blink_queue[BLINK_QUEUE_MAX_SIZE] = {0};
-    blink_time_controller_init(&c, blink_queue, BOARD_ID_REVERSED);
+    button_init(button);
+
+    /* Initializing leds and setting blinking sequence */
+    led_sequence_ctx_t leds;
+    uint32_t blink_queue[BLINK_SEQUENCE_MAX_SIZE] = {0};
+    led_init_ctx(&leds, blink_queue, BLINK_SEQUENCE);
 
     /* Toggle LEDs. */
     while (true)
     {
-        for (uint8_t i = blink_time_controller_next(&c); i > 0; i--)
+        while (button_is_pressed(button))
         {
-            for (int j = 0; j < LEDS_NUMBER; j++) 
+            led_switch_off(&leds);
+
+            led_switch_on_next(&leds);
+            nrf_delay_ms(LED_ON_TIME_MS);
+
+            if (button_is_pressed(button))
             {
-                bsp_board_led_invert(j);
-                nrf_delay_ms(LED_INVERT_DELAY);
-                bsp_board_led_invert(j);
-            }
-            if (i == 1) 
-            {
-                bsp_board_leds_off();
+                led_switch_off(&leds);
+                nrf_delay_ms(LED_OFF_TIME_MS);
             }
         }
-
-        nrf_delay_ms(ITERATION_DELAY_TIME);
     }
 }
 
