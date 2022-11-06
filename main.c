@@ -1,50 +1,47 @@
 #include <stdbool.h>
 #include <string.h>
+#include <stdint.h>
 
-#include "blink/button_controller.h"
-#include "blink/led_controller.h"
+#include "modules/button/board_button.h"
+#include "modules/led/sequence_ctx.h"
 #include "nrf_delay.h"
 
-#define SW1_PORT 1
-#define SW1_PIN 6
+#define BLINK_SEQUENCE          "RGBBGRRRGGBB"
 
-#define BLINK_SEQUENCE "RGBBGRRRGGBB"
-
-#define LED_ON_TIME  750
-#define LED_OFF_TIME 250
+#define LED_ON_TIME_MS  750
+#define LED_OFF_TIME_MS 250
 
 /**
  * @brief Function for application main entry.
  */
 int main(void)
 {
-    /* Initializing SW1 button */
-    struct button_controller_t button;
-    init_button_controller(&button, SW1_PORT, SW1_PIN);
+    uint32_t button = BOARD_BUTTON_SW1;
+
+    button_init(button);
 
     /* Initializing leds and setting blinking sequence */
-    struct led_controller_t leds;
-    init_led_controller(&leds, BLINK_SEQUENCE, ((uint8_t)strlen(BLINK_SEQUENCE)));
+    led_sequence_ctx_t leds;
+    uint32_t blink_queue[BLINK_SEQUENCE_MAX_SIZE] = {0};
+    led_init_ctx(&leds, blink_queue, BLINK_SEQUENCE);
 
     /* Toggle LEDs. */
     while (true)
     {
-        while (is_pressed(&button))
+        while (button_is_pressed(button))
         {
-            switch_off_led(&leds);
-            
-            switch_on_next_led(&leds);
-            nrf_delay_ms(LED_ON_TIME);
+            led_switch_off(&leds);
 
-            if (is_pressed(&button))
+            led_switch_on_next(&leds);
+            nrf_delay_ms(LED_ON_TIME_MS);
+
+            if (button_is_pressed(button))
             {
-                switch_off_led(&leds);
-                nrf_delay_ms(LED_OFF_TIME);
+                led_switch_off(&leds);
+                nrf_delay_ms(LED_OFF_TIME_MS);
             }
         }
     }
-
-    free_led_controller(&leds);
 }
 
 /**
