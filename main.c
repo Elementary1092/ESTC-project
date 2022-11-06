@@ -6,7 +6,7 @@
 #include "modules/led/sequence_ctx.h"
 #include "nrf_delay.h"
 
-#define BLINK_SEQUENCE          "RGBBGRRRGGBB"
+#define BLINK_SEQUENCE  "RGBBGRRRGGBB"
 
 #define LED_ON_TIME_MS  750
 #define LED_OFF_TIME_MS 250
