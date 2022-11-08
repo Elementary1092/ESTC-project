@@ -9,7 +9,8 @@ typedef struct
 {
 	uint32_t *gpio_pin_sequence;
 	uint8_t sequence_size;
-	uint8_t pin_idx;
+	uint8_t next_pin_idx;
+	uint8_t curr_pin_idx;
 } led_sequence_ctx_t;
 
 /*
@@ -23,6 +24,11 @@ void led_init_ctx(led_sequence_ctx_t *ctx, uint32_t *blink_queue, const char *bl
 	Sends on signal to a led according to a sequence order
 */
 void led_switch_on_next(led_sequence_ctx_t *ctx);
+
+/*
+	Switches on the led which pointed by ctx now
+*/
+void led_switch_on_current(led_sequence_ctx_t *ctx);
 
 /*
 	Switches off currently active led
