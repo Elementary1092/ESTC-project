@@ -46,7 +46,21 @@
 #ifdef USE_APP_CONFIG
 #include "app_config.h"
 #endif
-// <h> nRF_Libraries 
+
+//==========================================================
+// <q> NRFX_SYSTICK_ENABLED  - nrfx_systick - ARM(R) SysTick driver
+
+#ifndef NRFX_SYSTICK_ENABLED
+#define NRFX_SYSTICK_ENABLED 1
+#endif
+
+// <q> SYSTICK_ENABLED  - nrf_drv_systick - ARM(R) SysTick driver - legacy layer
+
+#ifndef SYSTICK_ENABLED
+#define SYSTICK_ENABLED 1
+#endif
+
+// <h> nRF_Libraries
 
 //==========================================================
 // <e> NRF_BALLOC_ENABLED - nrf_balloc - Block allocator module
@@ -3114,4 +3128,3 @@
 
 // <<< end of configuration section >>>
 #endif //SDK_CONFIG_H
-

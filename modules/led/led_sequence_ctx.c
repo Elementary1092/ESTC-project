@@ -1,6 +1,6 @@
 #include <hal/nrf_gpio.h>
 #include <string.h>
-#include "sequence_ctx.h"
+#include "led_sequence_ctx.h"
 
 #define SWITCH_LED_ON_SIGNAL 0
 #define SWITCH_LED_OFF_SIGNAL 1
