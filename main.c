@@ -1,17 +1,15 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdint.h>
-#include "nordic_common.h"
-#include "boards.h"
 
-#include "nrf_log.h"
-#include "nrf_log_ctrl.h"
-#include "nrf_log_default_backends.h"
-
-#include "nrf_log_backend_usb.h"
-
-#include "app_usbd.h"
-#include "app_usbd_serial_num.h"
+#include <nrfx_gpiote.h>
+#include <nordic_common.h>
+#include <nrf_log.h>
+#include <nrf_log_ctrl.h>
+#include <nrf_log_default_backends.h>
+#include <nrf_log_backend_usb.h>
+#include <app_usbd.h>
+#include <app_usbd_serial_num.h>
 
 #include "modules/gpio/button/board_button.h"
 #include "modules/gpio/led/sequence_ctx.h"
@@ -30,6 +28,9 @@
  */
 int main(void)
 {
+    nrfx_err_t err_code = nrfx_gpiote_init();
+    APP_ERROR_CHECK(err_code);
+
     NRF_LOG_INIT(NULL);
 
     NRF_LOG_DEFAULT_BACKENDS_INIT();
@@ -38,7 +39,7 @@ int main(void)
 
     timer_rtc_init();
 
-    uint32_t button = BOARD_BUTTON_SW1;
+    board_button_t button = BOARD_BUTTON_SW1;
 
     button_init(button);
 
