@@ -2,7 +2,7 @@
 #include "systick_sequence_ctx.h"
 
 #define MICROSECONDS_IN_SECOND           1000000
-#define SYSTICK_SEQUENCE_CTX_INITIAL_IDX 5
+#define SYSTICK_SEQUENCE_CTX_INITIAL_IDX 0
 
 void timer_systick_sequence_ctx_init(systick_sequence_ctx_t *ctx, uint32_t *on_seq_queue_us, uint16_t frequency)
 {
