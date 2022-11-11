@@ -66,7 +66,8 @@ SRC_FILES += \
   $(PROJ_DIR)/modules/timer/rtc.c \
   $(PROJ_DIR)/modules/gpio/button/board_button.c \
   $(PROJ_DIR)/modules/gpio/led/sequence_ctx.c \
-  $(PROJ_DIR)/modules/timer/systick_sequence_ctx.c \
+  $(PROJ_DIR)/modules/timer/systick_ctx.c \
+  $(PROJ_DIR)/modules/pwm/pwm_led.c \
   $(PROJ_DIR)/main.c \
   $(SDK_ROOT)/modules/nrfx/mdk/system_nrf52840.c \
 
@@ -117,6 +118,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/ringbuf \
   $(SDK_ROOT)/components/libraries/button \
   $(SDK_ROOT)/modules/nrfx \
+  $(SDK_ROOT)/modules/nrfx/soc \
   $(SDK_ROOT)/integration/nrfx/legacy \
   $(SDK_ROOT)/components/libraries/atomic_fifo \
   $(SDK_ROOT)/components/libraries/atomic \

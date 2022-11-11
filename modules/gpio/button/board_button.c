@@ -1,32 +1,42 @@
 #include "board_button.h"
 #include <hal/nrf_gpiote.h>
 #include <app_timer.h>
-#include <nrf_atomic.h>
+#include <nrfx_atomic.h>
+#include <nrf_log.h>
 
-#define BUTTON_PRESSED_DELAY_TICKS       APP_TIMER_TICKS(10)
-#define BUTTON_PRESSED_RESET_DELAY_TICKS APP_TIMER_TICKS(5000)
+#define BUTTON_PRESSED_DELAY_TICKS       APP_TIMER_TICKS(50)
+#define BUTTON_PRESSED_RESET_DELAY_TICKS APP_TIMER_TICKS(300)
 
-APP_TIMER_DEF(button_pressed_reset_timer);
-APP_TIMER_DEF(button_pressed_timer);
+#define HANDLABLE_BUTTONS_NUMBER 2
 
-static uint32_t recent_pressed_cnt = 0UL;
+#define BUTTON_IDX(pin) (pin>>5)
+
+APP_TIMER_DEF(button_click_reset_timer);
+APP_TIMER_DEF(button_click_register_timer);
+
+static nrfx_atomic_u32_t volatile recent_button_event_cnt[HANDLABLE_BUTTONS_NUMBER] = {0UL};
 
 static void SW1_IRQHandler(nrfx_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
-	app_timer_stop(button_pressed_timer);
-	app_timer_start(button_pressed_timer, BUTTON_PRESSED_DELAY_TICKS, NULL);
+	NRF_LOG_INFO("Handling interrupt on %ld pin", pin);
+	app_timer_stop(button_click_register_timer);
+	app_timer_start(button_click_register_timer, BUTTON_PRESSED_DELAY_TICKS, (void *)pin);
 }
 
-static void button_pressed_timeout_handler(void *p_context)
+static void button_click_register_handler(void *p_context)
 {
-	recent_pressed_cnt += 1UL;
-	app_timer_stop(button_pressed_reset_timer);
-	app_timer_start(button_pressed_reset_timer, BUTTON_PRESSED_RESET_DELAY_TICKS, NULL);
+	NRF_LOG_INFO("Registering click");
+	uint32_t pin = *((uint32_t *)p_context);
+	NRF_LOG_INFO("Recent clicks number: %ld", nrfx_atomic_u32_add(&(recent_button_event_cnt[BUTTON_IDX(pin)]), 1UL));
+	app_timer_stop(button_click_reset_timer);
+	app_timer_start(button_click_reset_timer, BUTTON_PRESSED_RESET_DELAY_TICKS, p_context);
 }
 
-static void button_pressed_reset_timeout_handler(void *p_context)
+static void button_click_reset_handler(void *p_context)
 {
-	recent_pressed_cnt = 0UL;
+	NRF_LOG_INFO("Resetting clicks counter");
+	uint32_t pin = *((uint32_t *)p_context);
+	nrfx_atomic_u32_store(&(recent_button_event_cnt[BUTTON_IDX(pin)]), 0UL);
 }
 
 void button_init(board_button_t button)
@@ -36,8 +46,8 @@ void button_init(board_button_t button)
 	nrfx_gpiote_in_init(button, &cfg, SW1_IRQHandler);
 	nrfx_gpiote_in_event_enable(button, true);
 
-	app_timer_create(&button_pressed_timer, APP_TIMER_MODE_SINGLE_SHOT, button_pressed_timeout_handler);
-	app_timer_create(&button_pressed_reset_timer, APP_TIMER_MODE_SINGLE_SHOT, button_pressed_reset_timeout_handler);
+	app_timer_create(&button_click_register_timer, APP_TIMER_MODE_SINGLE_SHOT, button_click_register_handler);
+	app_timer_create(&button_click_reset_timer, APP_TIMER_MODE_SINGLE_SHOT, button_click_reset_handler);
 }
 
 uint32_t button_is_pressed(board_button_t button)
@@ -47,15 +57,19 @@ uint32_t button_is_pressed(board_button_t button)
 
 button_recent_state_t button_get_recent_state(board_button_t button)
 {
-	switch (recent_pressed_cnt)
+	/*
+		Current implementation increments clicks counter when button is pressed and released.
+		So, to count number of clicks this counter's value should be divided by 2.
+	*/
+	switch (nrfx_atomic_u32_fetch_add(&(recent_button_event_cnt[BUTTON_IDX(button)]), 0UL))
 	{
 		case 0:
 			return BUTTON_NOT_PRESSED_RECENTLY;
 		
-		case 1:
+		case 2:
 			return BUTTON_PRESSED_ONCE_RECENTLY;
 		
-		case 2:
+		case 4:
 			return BUTTON_PRESSED_TWICE_RECENTLY;
 	}
 

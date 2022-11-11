@@ -13,15 +13,13 @@
 
 #include "modules/gpio/button/board_button.h"
 #include "modules/gpio/led/sequence_ctx.h"
-#include "modules/timer/systick_sequence_ctx.h"
+#include "modules/timer/systick_ctx.h"
 #include "modules/timer/rtc.h"
+#include "modules/pwm/pwm_led.h"
 
 #define BLINK_SEQUENCE  "RGBBGRRRGGBB"
 
 #define LED_PWM_FREQUENCY_HZ 1000
-
-#define N_CYCLES_ONE_LED 1000
-#define PWM_CYCLE_MOVE_NEXT 200
 
 /**
  * @brief Function for application main entry.
@@ -32,12 +30,11 @@ int main(void)
     APP_ERROR_CHECK(err_code);
 
     NRF_LOG_INIT(NULL);
-
     NRF_LOG_DEFAULT_BACKENDS_INIT();
-
     NRF_LOG_INFO("Starting project");
 
     timer_rtc_init();
+    timer_systick_ctx_init();
 
     board_button_t button = BOARD_BUTTON_SW1;
 
@@ -45,62 +42,23 @@ int main(void)
 
     /* Initializing leds and setting blinking sequence */
     led_sequence_ctx_t leds;
-    uint32_t blink_queue[BLINK_SEQUENCE_MAX_SIZE] = {0};
+    uint32_t blink_queue[BLINK_SEQUENCE_MAX_SIZE] = {0UL};
     led_init_ctx(&leds, blink_queue, BLINK_SEQUENCE);
 
-    systick_sequence_ctx_t systick_ctx;
-    uint32_t systick_delay_sequence_us[SYSTICK_CTX_SEQ_SIZE] = {0};
-    timer_systick_sequence_ctx_init(&systick_ctx, systick_delay_sequence_us, LED_PWM_FREQUENCY_HZ);
+    pwm_led_ctx_t pwm_ctx;
+    uint32_t pwm_led_seq_queue[PWM_LED_SEQ_SIZE] = {0UL};
+    pwm_led_ctx_init(&pwm_ctx, &leds, pwm_led_seq_queue, LED_PWM_FREQUENCY_HZ);
 
-    bool led_turned_on = false;
-    bool is_blink_on = false;
-    uint16_t led_ncycles = 0;
-    uint16_t pwm_ncycles = 0;
-
-    timer_systick_sequence_ctx_probe(&systick_ctx);
+    timer_systick_ctx_probe();
     /* Toggle LEDs. */
     while (true)
     {
-        if (pwm_ncycles == 0)
-        {
-            led_switch_off(&leds);
-        }
-
         if (button_get_recent_state(button) == BUTTON_PRESSED_TWICE_RECENTLY)
         {
-            is_blink_on = !is_blink_on;
+            pwm_led_ctx_freeze_unfreeze();
         }
 
-        if (timer_systick_sequence_ctx_has_time_elapsed(&systick_ctx, led_turned_on))
-        {
-            if (!led_turned_on)
-            {
-                if (led_ncycles >= N_CYCLES_ONE_LED - 1 && is_blink_on)
-                {
-                    led_switch_on_next(&leds);
-                    led_ncycles = 0;
-                }
-                else
-                {
-                    led_switch_on_current(&leds);
-                    led_ncycles = (uint32_t)((led_ncycles + 1) % N_CYCLES_ONE_LED);
-                }
-                led_turned_on = true;
-            }
-            else
-            {
-                led_switch_off(&leds);
-                led_turned_on = false;
-
-                if (is_blink_on && pwm_ncycles >= PWM_CYCLE_MOVE_NEXT)
-                {
-                    timer_systick_sequence_ctx_next(&systick_ctx);
-                    pwm_ncycles = 0;
-                }
-            }
-            timer_systick_sequence_ctx_probe(&systick_ctx);
-            pwm_ncycles++;
-        }
+        pwm_led_ctx_process(&pwm_ctx);
 
         LOG_BACKEND_USB_PROCESS();
         NRF_LOG_PROCESS();
