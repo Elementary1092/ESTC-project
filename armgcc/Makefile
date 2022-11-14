@@ -64,6 +64,7 @@ SRC_FILES += \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf_format.c \
   $(SDK_ROOT)/external/utf_converter/utf.c \
   $(PROJ_DIR)/modules/timer/rtc.c \
+  $(PROJ_DIR)/modules/hsv/hsv_helper.c \
   $(PROJ_DIR)/modules/gpio/led/led.c \
   $(PROJ_DIR)/modules/gpio/button/board_button.c \
   $(PROJ_DIR)/modules/gpio/led/sequence_ctx.c \
@@ -132,6 +133,7 @@ INC_FOLDERS += \
   $(PROJ_DIR)/modules/gpio/led \
   $(PROJ_DIR)/modules/timer \
   $(PROJ_DIR)/modules/pwm \
+  $(PROJ_DIR)/modules/hsv \
 
 # Libraries common to all targets
 LIB_FILES += \
