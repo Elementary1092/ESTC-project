@@ -16,6 +16,7 @@ typedef struct
 	uint8_t idx;
 	bool should_invert;
 	bool should_inc_idx;
+	bool should_move_next_led;
 } pwm_led_ctx_t;
 
 void pwm_led_ctx_init(pwm_led_ctx_t *c, led_sequence_ctx_t *led_ctx, uint32_t *sequence, uint16_t frequency);

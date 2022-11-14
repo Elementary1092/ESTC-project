@@ -17,7 +17,8 @@
 #include "modules/timer/rtc.h"
 #include "modules/pwm/pwm_led.h"
 
-#define BLINK_SEQUENCE  "RGBBGRRRGGBB"
+// Board ID: 7198, so, 7 - Red, 1 - Green, 9 - Blue, 8 - Green (led1) 
+#define BLINK_SEQUENCE  "RRRRRRRGBBBBBBBBBYYYYYYYY"
 
 #define LED_PWM_FREQUENCY_HZ 1000
 

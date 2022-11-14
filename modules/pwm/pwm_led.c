@@ -8,7 +8,6 @@
 #define MICROSECONDS_IN_SECOND      1000000
 #define PWM_LED_SEQ_CTX_INITIAL_IDX 0
 
-#define N_CYCLES_ONE_LED 1000
 #define PWM_CYCLE_MOVE_NEXT 200
 
 #define CHANGE_IS_FREEZED_DELAY APP_TIMER_TICKS(200)
@@ -32,6 +31,7 @@ void pwm_led_ctx_init(pwm_led_ctx_t *ctx, led_sequence_ctx_t *led_ctx, uint32_t 
 	ctx->on_delay_seq = on_seq_queue_us;
 	ctx->should_inc_idx = PWM_LED_SEQ_CTX_INITIAL_IDX < PWM_LED_SEQ_SIZE;
 	ctx->should_invert = false;
+	ctx->should_move_next_led = false;
 	ctx->idx = PWM_LED_SEQ_CTX_INITIAL_IDX;
 	ctx->led_ctx = led_ctx;
 
@@ -65,9 +65,10 @@ void pwm_led_ctx_process(pwm_led_ctx_t *ctx)
 	{
 		if (!(ctx->should_invert))
 		{
-			if (ctx->led_ncycles >= N_CYCLES_ONE_LED && !is_freezed)
+			if (ctx->should_move_next_led)
 			{
 				led_switch_on_next(ctx->led_ctx);
+				ctx->should_move_next_led = false;
 				ctx->led_ncycles = 0UL;
 			}
 			else
@@ -87,6 +88,7 @@ void pwm_led_ctx_process(pwm_led_ctx_t *ctx)
 				if (ctx->idx == 0)
 				{
 					ctx->should_inc_idx = true;
+					ctx->should_move_next_led = true;
 				}
 				else if (ctx->idx >= PWM_LED_SEQ_SIZE - 1)
 				{

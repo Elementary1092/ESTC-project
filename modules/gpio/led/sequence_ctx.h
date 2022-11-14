@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define BLINK_SEQUENCE_MAX_SIZE 13
+#define BLINK_SEQUENCE_MAX_SIZE 40
 
 typedef struct
 {

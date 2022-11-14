@@ -5,9 +5,10 @@
 #define SWITCH_LED_ON_SIGNAL 0
 #define SWITCH_LED_OFF_SIGNAL 1
 
-#define LED_PCA10059_RED   NRF_GPIO_PIN_MAP(0, 8)
-#define LED_PCA10059_GREEN NRF_GPIO_PIN_MAP(1, 9)
-#define LED_PCA10059_BLUE  NRF_GPIO_PIN_MAP(0, 12)
+#define LED_PCA10059_RED    NRF_GPIO_PIN_MAP(0, 8)
+#define LED_PCA10059_GREEN  NRF_GPIO_PIN_MAP(1, 9)
+#define LED_PCA10059_BLUE   NRF_GPIO_PIN_MAP(0, 12)
+#define LED_PCA10059_YELLOW NRF_GPIO_PIN_MAP(0, 6)
 
 void led_init_ctx(led_sequence_ctx_t *c, uint32_t *blink_queue, const char *sequence)
 {
@@ -18,11 +19,13 @@ void led_init_ctx(led_sequence_ctx_t *c, uint32_t *blink_queue, const char *sequ
 	nrf_gpio_cfg_output(LED_PCA10059_RED);
 	nrf_gpio_cfg_output(LED_PCA10059_GREEN);
 	nrf_gpio_cfg_output(LED_PCA10059_BLUE);
+	nrf_gpio_cfg_output(LED_PCA10059_YELLOW);
 
 	/* Switching off leds */
 	nrf_gpio_pin_write(LED_PCA10059_RED, SWITCH_LED_OFF_SIGNAL);
 	nrf_gpio_pin_write(LED_PCA10059_GREEN, SWITCH_LED_OFF_SIGNAL);
 	nrf_gpio_pin_write(LED_PCA10059_BLUE, SWITCH_LED_OFF_SIGNAL);
+	nrf_gpio_pin_write(LED_PCA10059_YELLOW, SWITCH_LED_OFF_SIGNAL);
 
 	/* Initializing leds blink sequence */
 	c->gpio_pin_sequence = blink_queue;
@@ -42,6 +45,9 @@ void led_init_ctx(led_sequence_ctx_t *c, uint32_t *blink_queue, const char *sequ
 			break;
 		case 'B':
 			c->gpio_pin_sequence[sequence_last_idx++] = LED_PCA10059_BLUE;
+			break;
+		case 'Y':
+			c->gpio_pin_sequence[sequence_last_idx++] = LED_PCA10059_YELLOW;
 			break;
 		}
 	}
