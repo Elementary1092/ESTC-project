@@ -55,7 +55,7 @@ int main(void)
         {
             hsv_picker_next_mode();
         }
-
+        
         LOG_BACKEND_USB_PROCESS();
         NRF_LOG_PROCESS();
     }

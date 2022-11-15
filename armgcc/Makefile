@@ -133,7 +133,6 @@ INC_FOLDERS += \
   $(PROJ_DIR)/modules/gpio/button \
   $(PROJ_DIR)/modules/gpio/led \
   $(PROJ_DIR)/modules/timer \
-  $(PROJ_DIR)/modules/pwm \
   $(PROJ_DIR)/modules/hsv \
 
 # Libraries common to all targets

@@ -1,6 +1,7 @@
 #include <nrf_log.h>
 #include <app_timer.h>
 #include "../gpio/led/led.h"
+#include "../gpio/button/board_button.h"
 #include "hsv_picker.h"
 #include "hsv_helper.h"
 
@@ -8,9 +9,12 @@
 #define PWM_CFG_INDICATOR_TOP_VALUE 10000
 #define PWM_CFG_INDICATOR_STEP      200
 #define INDICATOR_ARR_SIZE          (PWM_CFG_INDICATOR_TOP_VALUE / PWM_CFG_INDICATOR_STEP + 1) * 2
-#define CHANGE_MODE_DELAY_TICKS     APP_TIMER_TICKS(200)
+
+#define EDIT_SHADE_DELAY_TICKS  APP_TIMER_TICKS(30)
+#define CHANGE_MODE_DELAY_TICKS APP_TIMER_TICKS(200)
 
 APP_TIMER_DEF(change_mode_timer);
+APP_TIMER_DEF(edit_shade_timer);
 
 static nrfx_pwm_t pwm_rgb = NRFX_PWM_INSTANCE(0);
 static nrfx_pwm_t pwm_edit_indicator = NRFX_PWM_INSTANCE(1);
@@ -225,6 +229,14 @@ static void change_mode_handler(void *p_ctx)
 	hsv_picker_start_indicator_playback();
 }
 
+static void edit_shade_handler(void *p_ctx)
+{
+	if (button_is_pressed(BOARD_BUTTON_SW1))
+	{
+		hsv_picker_edit_param();
+	}
+}
+
 void hsv_picker_init(uint16_t initial_hue, uint8_t initial_saturation, uint8_t initial_brightness)
 {
 	if (!is_indicator_seq_inited)
@@ -246,6 +258,9 @@ void hsv_picker_init(uint16_t initial_hue, uint8_t initial_saturation, uint8_t i
 	curr_mode = HSV_PICKER_MODE_VIEW;
 
 	app_timer_create(&change_mode_timer, APP_TIMER_MODE_SINGLE_SHOT, change_mode_handler);
+	app_timer_create(&edit_shade_timer, APP_TIMER_MODE_REPEATED, edit_shade_handler);
+
+	app_timer_start(edit_shade_timer, EDIT_SHADE_DELAY_TICKS, NULL);
 }
 
 void hsv_picker_next_mode(void)
