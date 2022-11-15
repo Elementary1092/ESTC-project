@@ -1,5 +1,7 @@
+#include <nrf_log.h>
 #include "../gpio/led/led.h"
 #include "hsv_picker.h"
+#include "hsv_helper.h"
 
 #define PWM_CFG_RGB_TOP_VALUE       255
 #define PWM_CFG_INDICATOR_TOP_VALUE 100
@@ -17,7 +19,7 @@ static nrf_pwm_values_individual_t rgb_values =
 	.channel_3 = 0
 };
 
-static nrf_pwm_values_common_t edit_indicator_high_low[1] = {0};
+static nrf_pwm_values_common_t edit_indicator_high[1] = {PWM_CFG_INDICATOR_TOP_VALUE};
 
 static bool is_indicator_seq_inited = false;
 static nrf_pwm_values_common_t volatile edit_indicator_values[INDICATOR_ARR_SIZE];
@@ -48,9 +50,9 @@ static nrfx_pwm_config_t const cfg_rgb =
 	.step_mode = NRF_PWM_STEP_AUTO
 };
 
-static nrf_pwm_sequence_t const edit_indicator_high_low_seq =
+static nrf_pwm_sequence_t const edit_indicator_high_seq =
 {
-	.values = edit_indicator_high_low,
+	.values = edit_indicator_high,
 	.length = NRF_PWM_VALUES_LENGTH(edit_indicator_high_low),
 	.repeats = 0,
 	.end_delay = 0
@@ -87,7 +89,7 @@ static nrfx_pwm_config_t const cfg_edit_sat_ind =
 {
 	.output_pins = 
 	{
-		LED_PCA10059_YELLOW,
+		LED_PCA10059_YELLOW | NRFX_PWM_PIN_INVERTED,
 		NRFX_PWM_PIN_NOT_USED,
 		NRFX_PWM_PIN_NOT_USED,
 		NRFX_PWM_PIN_NOT_USED
@@ -100,6 +102,12 @@ static nrfx_pwm_config_t const cfg_edit_sat_ind =
 	.step_mode = NRF_PWM_STEP_AUTO,
 };
 
+static hsv_ctx_t hsv_ctx;
+
+static rgb_value_t rgb_ctx;
+
+static hsv_picker_mode_t curr_mode;
+
 static void hsv_picker_init_indicator_seq(void)
 {
 	uint16_t delay = 0;
@@ -110,6 +118,71 @@ static void hsv_picker_init_indicator_seq(void)
 	}
 
 	is_indicator_seq_inited = true;
+}
+
+static void init_hsv_ctx(uint16_t hue, uint8_t saturation, uint8_t brightness)
+{
+	hsv_ctx.hue = hue;
+	hsv_ctx.saturation = saturation;
+	hsv_ctx.brightness = brightness;
+}
+
+static void hsv_picker_display_rgb(void)
+{
+	nrfx_pwm_simple_playback(&pwm_rgb, &rgb_values, 1, NRFX_PWM_FLAG_LOOP);
+}
+
+static void hsv_picker_update_rgb(void)
+{
+	hsv_helper_convert(&hsv_ctx, &rgb_ctx);
+
+	rgb_values.channel_0 = rgb_ctx.red;
+	rgb_values.channel_1 = rgb_ctx.green;
+	rgb_values.channel_2 = rgb_ctx.blue;
+}
+
+static void hsv_picker_start_indicator_playback(void)
+{
+	nrfx_err_t err_code = nrfx_pwm_stop(&pwm_edit_indicator, false);
+	APP_ERROR_CHECK(err_code);
+
+	switch (curr_mode)
+	{
+	case HSV_PICKER_MODE_VIEW:
+		// If hsv picker is in view mode, pwm_edit_indicator should use config with frequency 125Khz.
+		// But starting playback is not necessary.
+		nrfx_pwm_uninit(&pwm_edit_indicator);
+		err_code = nrfx_pwm_init(&pwm_edit_indicator, &cfg_edit_hue_ind, NULL);
+		APP_ERROR_CHECK(err_code);
+		break;
+	
+	case HSV_PICKER_MODE_EDIT_HUE:
+		err_code = nrfx_pwm_simple_playback(&pwm_edit_indicator, &edit_indicator_seq, 1, NRFX_PWM_FLAG_LOOP);
+		APP_ERROR_CHECK(err_code);
+		break;
+
+	case HSV_PICKER_MODE_EDIT_SATURATION:
+		// When hsv picker moves to edit saturation mode indicator should start blinking faster.
+		// To make indicator to start blink faster frequency of this led should be changed.
+		// So, pwm_edit_indicator config should be changed to update frequency.
+		// To update frequency pwm_edit_indicator should be reinitialized.
+		nrfx_pwm_uninit(&pwm_edit_indicator);
+		err_code = nrfx_pwm_init(&pwm_edit_indicator, &cfg_edit_hue_ind, NULL);
+		APP_ERROR_CHECK(err_code);
+
+		err_code = nrfx_pwm_simple_playback(&pwm_edit_indicator, &edit_indicator_seq, 1, NRFX_PWM_FLAG_LOOP);
+		APP_ERROR_CHECK(err_code);
+		break;
+
+	case HSV_PICKER_MODE_EDIT_BRIGHTNESS:
+		err_code = nrfx_pwm_simple_playback(&pwm_edit_indicator, &edit_indicator_high_seq, 1, NRFX_PWM_FLAG_LOOP);
+		APP_ERROR_CHECK(err_code);
+		break;
+	
+	default:
+		return;
+	}
+
 }
 
 void hsv_picker_init(uint16_t initial_hue, uint8_t initial_saturation, uint8_t initial_brightness)
@@ -124,4 +197,68 @@ void hsv_picker_init(uint16_t initial_hue, uint8_t initial_saturation, uint8_t i
 
 	err_code = nrfx_pwm_init(&pwm_edit_indicator, &cfg_edit_hue_ind, NULL);
 	APP_ERROR_CHECK(err_code);
+
+	init_hsv_ctx(initial_hue, initial_saturation, initial_brightness);
+
+	curr_mode = HSV_PICKER_MODE_VIEW;
+}
+
+void hsv_picker_next_mode(void)
+{
+	switch (curr_mode)
+	{
+	case HSV_PICKER_MODE_VIEW:
+		curr_mode = HSV_PICKER_MODE_EDIT_HUE;
+		break;
+	
+	case HSV_PICKER_MODE_EDIT_HUE:
+		curr_mode = HSV_PICKER_MODE_EDIT_SATURATION;
+		break;
+
+	case HSV_PICKER_MODE_EDIT_SATURATION:
+		curr_mode = HSV_PICKER_MODE_EDIT_BRIGHTNESS;
+		break;
+
+	case HSV_PICKER_MODE_EDIT_BRIGHTNESS:
+		curr_mode = HSV_PICKER_MODE_VIEW;
+		break;
+	
+	default:
+		curr_mode = HSV_PICKER_MODE_VIEW;
+		break;
+	}
+
+	hsv_picker_start_indicator_playback();
+}
+
+void hsv_picker_edit_param(void)
+{
+	switch (curr_mode)
+	{
+	case HSV_PICKER_MODE_VIEW:
+		// No parameter should be edited in the view mode
+		return;
+	
+	case HSV_PICKER_MODE_EDIT_HUE:
+		// Maximum value of hue may be 360 and mod 361 will always generate values >= 360,
+		hsv_ctx.hue = (hsv_ctx.hue + 1) % 361;
+		break;
+
+	case HSV_PICKER_MODE_EDIT_SATURATION:
+		// Maximum value of saturation may be 100 and mod 101 will always generate values >= 100,
+		hsv_ctx.saturation = (hsv_ctx.saturation + 1) % 101;
+		break;
+
+	case HSV_PICKER_MODE_EDIT_BRIGHTNESS:
+		// Maximum value of brightness may be 100 and mod 101 will always generate values >= 100,
+		hsv_ctx.brightness = (hsv_ctx.brightness + 1) % 101;
+		break;
+
+	default:
+		NRF_LOG_ERROR("hsv_picker: Unknown edit state: %d", curr_mode);
+		return;
+	}
+
+	hsv_picker_update_rgb();
+	hsv_picker_display_rgb();
 }

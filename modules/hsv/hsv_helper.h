@@ -12,9 +12,9 @@ typedef struct
 
 typedef struct
 {
-	uint8_t red;
-	uint8_t green;
-	uint8_t blue;
+	uint16_t red;
+	uint16_t green;
+	uint16_t blue;
 } rgb_value_t;
 
 void hsv_helper_convert(hsv_ctx_t *hsv, rgb_value_t *rgb);
