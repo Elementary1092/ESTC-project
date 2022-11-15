@@ -54,6 +54,8 @@ int main(void)
     /* Toggle LEDs. */
     while (true)
     {
+        __WFI();
+        
         if (button_get_recent_state(button) == BUTTON_PRESSED_TWICE_RECENTLY)
         {
             hsv_picker_next_mode();
