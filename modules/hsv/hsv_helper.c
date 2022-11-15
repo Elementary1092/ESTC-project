@@ -1,58 +1,108 @@
 #include <nrfx.h>
+#include <math.h>
 #include "hsv_helper.h"
 
-#define HSV_MAX_HUE        360
-#define HSV_MAX_SATURATION 100
-#define HSV_MAX_BRIGHTNESS 100
+static float const max_uint16_f = (float)UINT16_MAX;
+
+float hsv_helper_modf(float value, float mod_base)
+{
+	return value - (mod_base * floorf(value / mod_base));
+}
+
+static float hsv_helper_absf(float value)
+{
+	if (value < 0.0F)
+	{
+		return -value;
+	}
+
+	return value;
+}
+
+static uint16_t hsv_helper_float_to_uint16(float value, uint16_t max_value)
+{
+	float max_value_f = (float)max_value;
+	if (value > max_value_f || max_uint16_f < value)
+	{
+		return max_value;
+	}
+	if (value < 0.0F)
+	{
+		return 0U;
+	}
+
+	return (uint16_t)((unsigned int)(floorf(value)));
+}
+
+static void hsv_helper_align_hsv(hsv_ctx_t *hsv)
+{
+	if (hsv->hue > HSV_MAX_HUE)
+	{
+		hsv->hue = HSV_MAX_HUE;
+	}
+
+	if (hsv->saturation > HSV_MAX_SATURATION)
+	{
+		hsv->saturation = HSV_MAX_SATURATION;
+	}
+
+	if (hsv->brightness > HSV_MAX_BRIGHTNESS)
+	{
+		hsv->brightness = HSV_MAX_BRIGHTNESS;
+	}
+}
 
 void hsv_helper_convert(hsv_ctx_t *hsv, rgb_value_t *res)
 {
 	NRFX_ASSERT(hsv != NULL);
 	NRFX_ASSERT(res != NULL);
-	NRFX_ASSERT(hsv->hue <= HSV_MAX_HUE);
-	NRFX_ASSERT(hsv->saturation <= HSV_MAX_SATURATION);
-	NRFX_ASSERT(hsv->brightness <= HSV_MAX_BRIGHTNESS);
 
-	uint16_t M = ( 255 * ( (uint16_t)hsv->brightness ) ) / 100;
-	uint16_t m = M * ( 100 - ( (uint16_t)hsv->saturation ) ) / 100;
-	uint16_t hue_mod_2 = ( hsv->hue / 60 ) % 2;
-	uint16_t z = (M - m) * hue_mod_2;
+	hsv_helper_align_hsv(hsv);	
 
-	uint16_t hue = hsv->hue;
-	if (hue < 60 || hue == 360)
+	float M = 255.0F * hsv->brightness / 100.0F;
+	float m = M * ( 1.0F - ( hsv->saturation / 100.0F) );
+	float hue_mod_2 = hsv_helper_modf( (hsv->hue / 60.0F ), 2);
+	float z = (M - m) * ( 1 - hsv_helper_absf(hue_mod_2 - 1) );
+
+	uint16_t shade0 = hsv_helper_float_to_uint16(M, HSV_HELPER_MAX_RGB);
+	uint16_t shade1 = hsv_helper_float_to_uint16(m, HSV_HELPER_MAX_RGB);
+	uint16_t shade2 = hsv_helper_float_to_uint16(z + m, HSV_HELPER_MAX_RGB); 
+
+	float hue = hsv->hue;
+	if (hue < 60.0F || hue == HSV_MAX_HUE)
 	{
-		res->red = M;
-		res->green = z + m;
-		res->blue = m;
+		res->red = shade0;
+		res->green = shade2;
+		res->blue = shade1;
 	}
-	else if (hue < 120)
+	else if (hue < 120.0F)
 	{
-		res->red = z + m;
-		res->green = M;
-		res->blue = m;
+		res->red = shade2;
+		res->green = shade0;
+		res->blue = shade1;
 	}
-	else if (hue < 180)
+	else if (hue < 180.0F)
 	{
-		res->red = m;
-		res->green = M;
-		res->blue = z + m;
+		res->red = shade1;
+		res->green = shade0;
+		res->blue = shade2;
 	}
-	else if (hue < 240)
+	else if (hue < 240.0F)
 	{
-		res->red = m;
-		res->green = z + m;
-		res->blue = M;
+		res->red = shade1;
+		res->green = shade2;
+		res->blue = shade0;
 	}
-	else if (hue < 300)
+	else if (hue < 300.0F)
 	{
-		res->red = z + m;
-		res->green = m;
-		res->blue = M;
+		res->red = shade2;
+		res->green = shade1;
+		res->blue = shade0;
 	}
 	else
 	{
-		res->red = M;
-		res->green = m;
-		res->blue = z + m;
+		res->red = shade0;
+		res->green = shade1;
+		res->blue = shade2;
 	}
 }

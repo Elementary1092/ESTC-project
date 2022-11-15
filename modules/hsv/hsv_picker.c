@@ -130,7 +130,7 @@ static void hsv_picker_init_indicator_seq(void)
 	is_indicator_seq_inited = true;
 }
 
-static void hsv_picker_init_hsv_ctx(uint16_t hue, uint8_t saturation, uint8_t brightness)
+static void hsv_picker_init_hsv_ctx(float hue, float saturation, float brightness)
 {
 	hsv_ctx.hue = hue;
 	hsv_ctx.saturation = saturation;
@@ -237,7 +237,7 @@ static void edit_shade_handler(void *p_ctx)
 	}
 }
 
-void hsv_picker_init(uint16_t initial_hue, uint8_t initial_saturation, uint8_t initial_brightness)
+void hsv_picker_init(float initial_hue, float initial_saturation, float initial_brightness)
 {
 	if (!is_indicator_seq_inited)
 	{
@@ -278,18 +278,21 @@ void hsv_picker_edit_param(void)
 		return;
 	
 	case HSV_PICKER_MODE_EDIT_HUE:
-		// Maximum value of hue may be 360 and mod 361 will always generate values >= 360,
-		hsv_ctx.hue = (hsv_ctx.hue + 1) % 361;
+		// Maximum value of hue may be 360 and mod 360.1 will always generate values >= 360
+		// and does not generate big inaccuracy
+		hsv_ctx.hue = hsv_helper_modf(hsv_ctx.hue + 0.5F, 360.1F);
 		break;
 
 	case HSV_PICKER_MODE_EDIT_SATURATION:
-		// Maximum value of saturation may be 100 and mod 101 will always generate values >= 100,
-		hsv_ctx.saturation = (hsv_ctx.saturation + 1) % 101;
+		// Maximum value of saturation may be 100 and mod 100.1 will always generate values >= 100
+		// and does not generate big inaccuracy
+		hsv_ctx.saturation = hsv_helper_modf(hsv_ctx.saturation + 1.0F, 100.1F);
 		break;
 
 	case HSV_PICKER_MODE_EDIT_BRIGHTNESS:
-		// Maximum value of brightness may be 100 and mod 101 will always generate values >= 100,
-		hsv_ctx.brightness = (hsv_ctx.brightness + 1) % 101;
+		// Maximum value of brightness may be 100 and mod 100.1 will always generate values >= 100
+		// and does not generate big inaccuracy
+		hsv_ctx.brightness = hsv_helper_modf(hsv_ctx.brightness + 1.0F, 100.1F);
 		break;
 
 	default:

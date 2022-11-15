@@ -5,8 +5,6 @@
 #include <nrf_drv_pwm.h>
 #include <app_util_platform.h>
 
-void hsv_picker_init(uint16_t initial_hue, uint8_t initial_saturation, uint8_t initial_brightness);
-
 typedef enum
 {
 	HSV_PICKER_MODE_VIEW,
@@ -14,6 +12,8 @@ typedef enum
 	HSV_PICKER_MODE_EDIT_SATURATION,
 	HSV_PICKER_MODE_EDIT_BRIGHTNESS
 } hsv_picker_mode_t;
+
+void hsv_picker_init(float initial_hue, float initial_saturation, float initial_brightness);
 
 void hsv_picker_next_mode(void);
 
