@@ -12,15 +12,17 @@
 #include <app_usbd_serial_num.h>
 
 #include "modules/gpio/button/board_button.h"
-#include "modules/gpio/led/sequence_ctx.h"
-#include "modules/timer/systick_ctx.h"
+#include "modules/gpio/led/led.h"
 #include "modules/timer/rtc.h"
-#include "modules/pwm/pwm_led.h"
+#include "modules/hsv/hsv_picker.h"
 
 // Board ID: 7198, so, 7 - Red, 1 - Green, 9 - Blue, 8 - Green (led1) 
 #define BLINK_SEQUENCE  "RRRRRRRGBBBBBBBBBYYYYYYYY"
 
-#define LED_PWM_FREQUENCY_HZ 1000
+// 360 * 0.98
+#define INITIAL_HSV_HUE        353
+#define INITIAL_HSV_SATURATION 100
+#define INITIAL_HSV_BRIGHTNESS 100
 
 /**
  * @brief Function for application main entry.
@@ -35,32 +37,19 @@ int main(void)
     NRF_LOG_INFO("Starting project");
 
     timer_rtc_init();
-    timer_systick_ctx_init();
 
     board_button_t button = BOARD_BUTTON_SW1;
 
     button_init(button);
 
-    /* Initializing leds and setting blinking sequence */
-    led_sequence_ctx_t leds;
-    uint32_t blink_queue[BLINK_SEQUENCE_MAX_SIZE] = {0UL};
-    led_init_ctx(&leds, blink_queue, BLINK_SEQUENCE);
+    /* Initializing leds */
+    led_init_all();
 
-    pwm_led_ctx_t pwm_ctx;
-    uint32_t pwm_led_seq_queue[PWM_LED_SEQ_SIZE] = {0UL};
-    pwm_led_ctx_init(&pwm_ctx, &leds, pwm_led_seq_queue, LED_PWM_FREQUENCY_HZ);
+    hsv_picker_init(INITIAL_HSV_HUE, INITIAL_HSV_SATURATION, INITIAL_HSV_BRIGHTNESS);
 
-    timer_systick_ctx_probe();
     /* Toggle LEDs. */
     while (true)
     {
-        if (button_get_recent_state(button) == BUTTON_PRESSED_TWICE_RECENTLY)
-        {
-            pwm_led_ctx_freeze_unfreeze();
-        }
-
-        pwm_led_ctx_process(&pwm_ctx);
-
         LOG_BACKEND_USB_PROCESS();
         NRF_LOG_PROCESS();
     }

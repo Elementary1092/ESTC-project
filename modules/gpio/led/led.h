@@ -1,6 +1,8 @@
 #ifndef APP_LED_H
 #define APP_LED_H
 
+#include <hal/nrf_gpio.h>
+
 #define LED_SWITCH_ON_SIGNAL  0
 #define LED_SWITCH_OFF_SIGNAL 1
 
