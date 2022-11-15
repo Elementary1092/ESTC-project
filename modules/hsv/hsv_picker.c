@@ -286,13 +286,13 @@ void hsv_picker_edit_param(void)
 	case HSV_PICKER_MODE_EDIT_SATURATION:
 		// Maximum value of saturation may be 100 and mod 100.1 will always generate values >= 100
 		// and does not generate big inaccuracy
-		hsv_ctx.saturation = hsv_helper_modf(hsv_ctx.saturation + 1.0F, 100.1F);
+		hsv_ctx.saturation = hsv_helper_modf(hsv_ctx.saturation + 0.5F, 100.1F);
 		break;
 
 	case HSV_PICKER_MODE_EDIT_BRIGHTNESS:
 		// Maximum value of brightness may be 100 and mod 100.1 will always generate values >= 100
 		// and does not generate big inaccuracy
-		hsv_ctx.brightness = hsv_helper_modf(hsv_ctx.brightness + 1.0F, 100.1F);
+		hsv_ctx.brightness = hsv_helper_modf(hsv_ctx.brightness + 0.5F, 100.1F);
 		break;
 
 	default:
