@@ -1,12 +1,16 @@
 #include <nrf_log.h>
+#include <app_timer.h>
 #include "../gpio/led/led.h"
 #include "hsv_picker.h"
 #include "hsv_helper.h"
 
 #define PWM_CFG_RGB_TOP_VALUE       255
-#define PWM_CFG_INDICATOR_TOP_VALUE 100
-#define PWM_CFG_INDICATOR_STEP      1
-#define INDICATOR_ARR_SIZE          PWM_CFG_INDICATOR_TOP_VALUE / PWM_CFG_INDICATOR_STEP + 1
+#define PWM_CFG_INDICATOR_TOP_VALUE 10000
+#define PWM_CFG_INDICATOR_STEP      200
+#define INDICATOR_ARR_SIZE          (PWM_CFG_INDICATOR_TOP_VALUE / PWM_CFG_INDICATOR_STEP + 1) * 2
+#define CHANGE_MODE_DELAY_TICKS     APP_TIMER_TICKS(200)
+
+APP_TIMER_DEF(change_mode_timer);
 
 static nrfx_pwm_t pwm_rgb = NRFX_PWM_INSTANCE(0);
 static nrfx_pwm_t pwm_edit_indicator = NRFX_PWM_INSTANCE(1);
@@ -22,18 +26,18 @@ static nrf_pwm_values_individual_t rgb_values =
 static nrf_pwm_values_common_t edit_indicator_high[1] = {PWM_CFG_INDICATOR_TOP_VALUE};
 
 static bool is_indicator_seq_inited = false;
-static nrf_pwm_values_common_t volatile edit_indicator_values[INDICATOR_ARR_SIZE];
+static nrf_pwm_values_common_t edit_indicator_values[INDICATOR_ARR_SIZE];
 
-static nrf_pwm_sequence_t const seq_rgb =
+static nrf_pwm_sequence_t const rgb_seq =
 {
-	.values.p_individual = rgb_values,
+	.values.p_individual = &rgb_values,
 	.length = NRF_PWM_VALUES_LENGTH(rgb_values),
 	.repeats = 0,
 	.end_delay = 0
 };
 
 // config of rgb leds
-static nrfx_pwm_config_t const cfg_rgb = 
+static nrfx_pwm_config_t const rgb_cfg = 
 {
 	.output_pins = 
 	{
@@ -43,7 +47,7 @@ static nrfx_pwm_config_t const cfg_rgb =
 		NRFX_PWM_PIN_NOT_USED
 	},
 	.irq_priority = APP_IRQ_PRIORITY_LOWEST,
-	.base_clock = NRF_PWM_CLK_1MHz,
+	.base_clock = NRF_PWM_CLK_125kHz,
 	.count_mode = NRF_PWM_MODE_UP,
 	.top_value = PWM_CFG_RGB_TOP_VALUE,
 	.load_mode = NRF_PWM_LOAD_INDIVIDUAL,
@@ -53,7 +57,7 @@ static nrfx_pwm_config_t const cfg_rgb =
 static nrf_pwm_sequence_t const edit_indicator_high_seq =
 {
 	.values = edit_indicator_high,
-	.length = NRF_PWM_VALUES_LENGTH(edit_indicator_high_low),
+	.length = NRF_PWM_VALUES_LENGTH(edit_indicator_high),
 	.repeats = 0,
 	.end_delay = 0
 };
@@ -77,8 +81,8 @@ static nrfx_pwm_config_t const cfg_edit_hue_ind =
 		NRFX_PWM_PIN_NOT_USED
 	},
 	.irq_priority = APP_IRQ_PRIORITY_LOWEST,
-	.base_clock = NRF_PWM_CLK_125kHz,
-	.count_mode = NRF_PWM_MODE_UP,
+	.base_clock = NRF_PWM_CLK_1MHz,
+	.count_mode = NRF_PWM_MODE_UP_AND_DOWN,
 	.top_value = PWM_CFG_INDICATOR_TOP_VALUE,
 	.load_mode = NRF_PWM_LOAD_COMMON,
 	.step_mode = NRF_PWM_STEP_AUTO,
@@ -89,13 +93,13 @@ static nrfx_pwm_config_t const cfg_edit_sat_ind =
 {
 	.output_pins = 
 	{
-		LED_PCA10059_YELLOW | NRFX_PWM_PIN_INVERTED,
+		LED_PCA10059_YELLOW,
 		NRFX_PWM_PIN_NOT_USED,
 		NRFX_PWM_PIN_NOT_USED,
 		NRFX_PWM_PIN_NOT_USED
 	},
 	.irq_priority = APP_IRQ_PRIORITY_LOWEST,
-	.base_clock = NRF_PWM_CLK_250kHz,
+	.base_clock = NRF_PWM_CLK_4MHz,
 	.count_mode = NRF_PWM_MODE_UP_AND_DOWN,
 	.top_value = PWM_CFG_INDICATOR_TOP_VALUE,
 	.load_mode = NRF_PWM_LOAD_COMMON,
@@ -111,16 +115,18 @@ static hsv_picker_mode_t curr_mode;
 static void hsv_picker_init_indicator_seq(void)
 {
 	uint16_t delay = 0;
-	for (uint16_t i = 0; i < INDICATOR_ARR_SIZE; i++)
+	size_t border = INDICATOR_ARR_SIZE / 2;
+	for (size_t i = 0; i < border; i++)
 	{
 		edit_indicator_values[i] = delay;
+		edit_indicator_values[INDICATOR_ARR_SIZE - i - 1] = delay;
 		delay += PWM_CFG_INDICATOR_STEP;
 	}
 
 	is_indicator_seq_inited = true;
 }
 
-static void init_hsv_ctx(uint16_t hue, uint8_t saturation, uint8_t brightness)
+static void hsv_picker_init_hsv_ctx(uint16_t hue, uint8_t saturation, uint8_t brightness)
 {
 	hsv_ctx.hue = hue;
 	hsv_ctx.saturation = saturation;
@@ -129,7 +135,7 @@ static void init_hsv_ctx(uint16_t hue, uint8_t saturation, uint8_t brightness)
 
 static void hsv_picker_display_rgb(void)
 {
-	nrfx_pwm_simple_playback(&pwm_rgb, &rgb_values, 1, NRFX_PWM_FLAG_LOOP);
+	nrfx_pwm_simple_playback(&pwm_rgb, &rgb_seq, 1, NRFX_PWM_FLAG_LOOP);
 }
 
 static void hsv_picker_update_rgb(void)
@@ -143,9 +149,11 @@ static void hsv_picker_update_rgb(void)
 
 static void hsv_picker_start_indicator_playback(void)
 {
-	nrfx_err_t err_code = nrfx_pwm_stop(&pwm_edit_indicator, false);
-	APP_ERROR_CHECK(err_code);
+	nrfx_pwm_stop(&pwm_edit_indicator, false);
 
+	NRF_LOG_INFO("hsv_picker: Changing indicator playback.");
+
+	nrfx_err_t err_code;
 	switch (curr_mode)
 	{
 	case HSV_PICKER_MODE_VIEW:
@@ -167,7 +175,7 @@ static void hsv_picker_start_indicator_playback(void)
 		// So, pwm_edit_indicator config should be changed to update frequency.
 		// To update frequency pwm_edit_indicator should be reinitialized.
 		nrfx_pwm_uninit(&pwm_edit_indicator);
-		err_code = nrfx_pwm_init(&pwm_edit_indicator, &cfg_edit_hue_ind, NULL);
+		err_code = nrfx_pwm_init(&pwm_edit_indicator, &cfg_edit_sat_ind, NULL);
 		APP_ERROR_CHECK(err_code);
 
 		err_code = nrfx_pwm_simple_playback(&pwm_edit_indicator, &edit_indicator_seq, 1, NRFX_PWM_FLAG_LOOP);
@@ -182,29 +190,12 @@ static void hsv_picker_start_indicator_playback(void)
 	default:
 		return;
 	}
-
 }
 
-void hsv_picker_init(uint16_t initial_hue, uint8_t initial_saturation, uint8_t initial_brightness)
+static void change_mode_handler(void *p_ctx)
 {
-	if (!is_indicator_seq_inited)
-	{
-		hsv_picker_init_indicator_seq();
-	}
+	NRF_LOG_INFO("hsv_picker: Changing picker mode. Current mode: %d", curr_mode);
 
-	nrfx_err_t err_code = nrfx_pwm_init(&pwm_rgb, &cfg_rgb, NULL);
-	APP_ERROR_CHECK(err_code);
-
-	err_code = nrfx_pwm_init(&pwm_edit_indicator, &cfg_edit_hue_ind, NULL);
-	APP_ERROR_CHECK(err_code);
-
-	init_hsv_ctx(initial_hue, initial_saturation, initial_brightness);
-
-	curr_mode = HSV_PICKER_MODE_VIEW;
-}
-
-void hsv_picker_next_mode(void)
-{
 	switch (curr_mode)
 	{
 	case HSV_PICKER_MODE_VIEW:
@@ -225,10 +216,42 @@ void hsv_picker_next_mode(void)
 	
 	default:
 		curr_mode = HSV_PICKER_MODE_VIEW;
+		NRF_LOG_INFO("hsv_picker: Invalid picker mode encountered. Changed to view mode");
 		break;
 	}
 
+	NRF_LOG_INFO("hsv_picker: Changed picker mode. New mode: %d", curr_mode);
+	
 	hsv_picker_start_indicator_playback();
+}
+
+void hsv_picker_init(uint16_t initial_hue, uint8_t initial_saturation, uint8_t initial_brightness)
+{
+	if (!is_indicator_seq_inited)
+	{
+		hsv_picker_init_indicator_seq();
+	}
+
+	nrfx_err_t err_code = nrfx_pwm_init(&pwm_rgb, &rgb_cfg, NULL);
+	APP_ERROR_CHECK(err_code);
+
+	err_code = nrfx_pwm_init(&pwm_edit_indicator, &cfg_edit_hue_ind, NULL);
+	APP_ERROR_CHECK(err_code);
+
+	hsv_picker_init_hsv_ctx(initial_hue, initial_saturation, initial_brightness);
+
+	hsv_picker_update_rgb();
+	hsv_picker_display_rgb();
+
+	curr_mode = HSV_PICKER_MODE_VIEW;
+
+	app_timer_create(&change_mode_timer, APP_TIMER_MODE_SINGLE_SHOT, change_mode_handler);
+}
+
+void hsv_picker_next_mode(void)
+{
+	app_timer_stop(change_mode_timer);
+	app_timer_start(change_mode_timer, CHANGE_MODE_DELAY_TICKS, NULL);
 }
 
 void hsv_picker_edit_param(void)

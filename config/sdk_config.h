@@ -2268,7 +2268,7 @@
 // <e> NRFX_PWM_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef NRFX_PWM_CONFIG_LOG_ENABLED
-#define NRFX_PWM_CONFIG_LOG_ENABLED 1
+#define NRFX_PWM_CONFIG_LOG_ENABLED 0
 #endif
 // <o> NRFX_PWM_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -7872,7 +7872,7 @@
 // <e> PWM_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef PWM_CONFIG_LOG_ENABLED
-#define PWM_CONFIG_LOG_ENABLED 1
+#define PWM_CONFIG_LOG_ENABLED 0
 #endif
 // <o> PWM_CONFIG_LOG_LEVEL  - Default Severity level
  

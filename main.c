@@ -15,6 +15,7 @@
 #include "modules/gpio/led/led.h"
 #include "modules/timer/rtc.h"
 #include "modules/hsv/hsv_picker.h"
+// #include "modules/logs/logs.h"
 
 // Board ID: 7198, so, 7 - Red, 1 - Green, 9 - Blue, 8 - Green (led1) 
 #define BLINK_SEQUENCE  "RRRRRRRGBBBBBBBBBYYYYYYYY"
@@ -50,6 +51,11 @@ int main(void)
     /* Toggle LEDs. */
     while (true)
     {
+        if (button_get_recent_state(button) == BUTTON_PRESSED_TWICE_RECENTLY)
+        {
+            hsv_picker_next_mode();
+        }
+
         LOG_BACKEND_USB_PROCESS();
         NRF_LOG_PROCESS();
     }
