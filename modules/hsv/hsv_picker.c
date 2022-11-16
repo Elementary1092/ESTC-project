@@ -10,13 +10,9 @@
 #define PWM_CFG_INDICATOR_STEP      200
 #define INDICATOR_ARR_SIZE          (PWM_CFG_INDICATOR_TOP_VALUE / PWM_CFG_INDICATOR_STEP + 1) * 2
 
-#define CHANGE_MODE_DELAY_TICKS APP_TIMER_TICKS(200)
-
 #define HSV_PICKER_HUE_STEP        0.5F
 #define HSV_PICKER_SATURATION_STEP 0.5F
 #define HSV_PICKER_BRIGHTNESS_STEP 0.5F
-
-APP_TIMER_DEF(change_mode_timer);
 
 static bool should_inc_saturation = false;
 static bool should_inc_brightness = false;
@@ -227,7 +223,28 @@ static void hsv_picker_start_indicator_playback(void)
 	}
 }
 
-static void change_mode_handler(void *p_ctx)
+void hsv_picker_init(float initial_hue, float initial_saturation, float initial_brightness)
+{
+	if (!is_indicator_seq_inited)
+	{
+		hsv_picker_init_indicator_seq();
+	}
+
+	nrfx_err_t err_code = nrfx_pwm_init(&pwm_rgb, &rgb_cfg, NULL);
+	APP_ERROR_CHECK(err_code);
+
+	err_code = nrfx_pwm_init(&pwm_edit_indicator, &cfg_edit_hue_ind, NULL);
+	APP_ERROR_CHECK(err_code);
+
+	hsv_picker_init_hsv_ctx(initial_hue, initial_saturation, initial_brightness);
+
+	hsv_picker_update_rgb();
+	hsv_picker_display_rgb();
+
+	curr_mode = HSV_PICKER_MODE_VIEW;
+}
+
+void hsv_picker_next_mode(void)
 {
 	NRF_LOG_INFO("hsv_picker: Changing picker mode. Current mode: %d", curr_mode);
 
@@ -258,35 +275,6 @@ static void change_mode_handler(void *p_ctx)
 	NRF_LOG_INFO("hsv_picker: Changed picker mode. New mode: %d", curr_mode);
 	
 	hsv_picker_start_indicator_playback();
-}
-
-void hsv_picker_init(float initial_hue, float initial_saturation, float initial_brightness)
-{
-	if (!is_indicator_seq_inited)
-	{
-		hsv_picker_init_indicator_seq();
-	}
-
-	nrfx_err_t err_code = nrfx_pwm_init(&pwm_rgb, &rgb_cfg, NULL);
-	APP_ERROR_CHECK(err_code);
-
-	err_code = nrfx_pwm_init(&pwm_edit_indicator, &cfg_edit_hue_ind, NULL);
-	APP_ERROR_CHECK(err_code);
-
-	hsv_picker_init_hsv_ctx(initial_hue, initial_saturation, initial_brightness);
-
-	hsv_picker_update_rgb();
-	hsv_picker_display_rgb();
-
-	curr_mode = HSV_PICKER_MODE_VIEW;
-
-	app_timer_create(&change_mode_timer, APP_TIMER_MODE_SINGLE_SHOT, change_mode_handler);
-}
-
-void hsv_picker_next_mode(void)
-{
-	app_timer_stop(change_mode_timer);
-	app_timer_start(change_mode_timer, CHANGE_MODE_DELAY_TICKS, NULL);
 }
 
 void hsv_picker_edit_param(void)
