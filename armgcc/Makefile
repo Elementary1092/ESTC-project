@@ -25,6 +25,7 @@ SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_usbd.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_systick.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_gpiote.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_pwm.c \
   $(SDK_ROOT)/modules/nrfx/mdk/system_nrf52840.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_frontend.c \
@@ -64,10 +65,12 @@ SRC_FILES += \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf_format.c \
   $(SDK_ROOT)/external/utf_converter/utf.c \
   $(PROJ_DIR)/modules/timer/rtc.c \
+  $(PROJ_DIR)/modules/hsv/hsv_helper.c \
+  $(PROJ_DIR)/modules/hsv/hsv_picker.c \
+  $(PROJ_DIR)/modules/gpio/led/led.c \
   $(PROJ_DIR)/modules/gpio/button/board_button.c \
   $(PROJ_DIR)/modules/gpio/led/sequence_ctx.c \
   $(PROJ_DIR)/modules/timer/systick_ctx.c \
-  $(PROJ_DIR)/modules/pwm/pwm_led.c \
   $(PROJ_DIR)/main.c \
   $(SDK_ROOT)/modules/nrfx/mdk/system_nrf52840.c \
 
@@ -130,7 +133,7 @@ INC_FOLDERS += \
   $(PROJ_DIR)/modules/gpio/button \
   $(PROJ_DIR)/modules/gpio/led \
   $(PROJ_DIR)/modules/timer \
-  $(PROJ_DIR)/modules/pwm \
+  $(PROJ_DIR)/modules/hsv \
 
 # Libraries common to all targets
 LIB_FILES += \
@@ -162,7 +165,7 @@ CFLAGS += -DuECC_SUPPORT_COMPRESSED_POINT=0
 CFLAGS += -DuECC_VLI_NATIVE_LITTLE_ENDIAN=1
 CFLAGS += -mcpu=cortex-m4
 CFLAGS += -mthumb -mabi=aapcs
-CFLAGS += -Wall -Werror
+CFLAGS += -Wall -Werror -Wno-missing-braces
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 # keep every function in a separate section, this allows linker to discard unused ones
 CFLAGS += -ffunction-sections -fdata-sections -fno-strict-aliasing

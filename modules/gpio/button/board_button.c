@@ -7,8 +7,6 @@
 #define BUTTON_PRESSED_DELAY_TICKS       APP_TIMER_TICKS(20)
 #define BUTTON_PRESSED_RESET_DELAY_TICKS APP_TIMER_TICKS(200)
 
-#define HANDLABLE_BUTTONS_NUMBER 2
-
 APP_TIMER_DEF(button_click_reset_timer);
 APP_TIMER_DEF(button_click_register_timer);
 

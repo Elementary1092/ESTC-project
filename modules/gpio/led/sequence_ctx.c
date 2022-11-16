@@ -1,31 +1,14 @@
 #include <hal/nrf_gpio.h>
 #include <string.h>
 #include "sequence_ctx.h"
-
-#define SWITCH_LED_ON_SIGNAL 0
-#define SWITCH_LED_OFF_SIGNAL 1
-
-#define LED_PCA10059_RED    NRF_GPIO_PIN_MAP(0, 8)
-#define LED_PCA10059_GREEN  NRF_GPIO_PIN_MAP(1, 9)
-#define LED_PCA10059_BLUE   NRF_GPIO_PIN_MAP(0, 12)
-#define LED_PCA10059_YELLOW NRF_GPIO_PIN_MAP(0, 6)
+#include "led.h"
 
 void led_init_ctx(led_sequence_ctx_t *c, uint32_t *blink_queue, const char *sequence)
 {
 	NRFX_ASSERT(c != NULL);
 	NRFX_ASSERT(sequence != NULL);
 
-	/* Configuring these pins as output */
-	nrf_gpio_cfg_output(LED_PCA10059_RED);
-	nrf_gpio_cfg_output(LED_PCA10059_GREEN);
-	nrf_gpio_cfg_output(LED_PCA10059_BLUE);
-	nrf_gpio_cfg_output(LED_PCA10059_YELLOW);
-
-	/* Switching off leds */
-	nrf_gpio_pin_write(LED_PCA10059_RED, SWITCH_LED_OFF_SIGNAL);
-	nrf_gpio_pin_write(LED_PCA10059_GREEN, SWITCH_LED_OFF_SIGNAL);
-	nrf_gpio_pin_write(LED_PCA10059_BLUE, SWITCH_LED_OFF_SIGNAL);
-	nrf_gpio_pin_write(LED_PCA10059_YELLOW, SWITCH_LED_OFF_SIGNAL);
+	led_init_all();
 
 	/* Initializing leds blink sequence */
 	c->gpio_pin_sequence = blink_queue;
@@ -62,15 +45,15 @@ void led_switch_on_next(led_sequence_ctx_t *c)
 	}
 	c->curr_pin_idx = c->next_pin_idx;
 
-	nrf_gpio_pin_write(c->gpio_pin_sequence[c->next_pin_idx++], SWITCH_LED_ON_SIGNAL);
+	nrf_gpio_pin_write(c->gpio_pin_sequence[c->next_pin_idx++], LED_SWITCH_ON_SIGNAL);
 }
 
 void led_switch_on_current(led_sequence_ctx_t *c)
 {
-	nrf_gpio_pin_write(c->gpio_pin_sequence[c->curr_pin_idx], SWITCH_LED_ON_SIGNAL);
+	nrf_gpio_pin_write(c->gpio_pin_sequence[c->curr_pin_idx], LED_SWITCH_ON_SIGNAL);
 }
 
 void led_switch_off(led_sequence_ctx_t *c)
 {
-	nrf_gpio_pin_write(c->gpio_pin_sequence[c->curr_pin_idx], SWITCH_LED_OFF_SIGNAL);
+	nrf_gpio_pin_write(c->gpio_pin_sequence[c->curr_pin_idx], LED_SWITCH_OFF_SIGNAL);
 }
