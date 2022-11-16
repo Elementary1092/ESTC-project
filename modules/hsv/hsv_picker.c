@@ -13,8 +13,15 @@
 #define EDIT_SHADE_DELAY_TICKS  APP_TIMER_TICKS(30)
 #define CHANGE_MODE_DELAY_TICKS APP_TIMER_TICKS(200)
 
+#define HSV_PICKER_HUE_STEP        0.5F
+#define HSV_PICKER_SATURATION_STEP 0.5F
+#define HSV_PICKER_BRIGHTNESS_STEP 0.5F
+
 APP_TIMER_DEF(change_mode_timer);
 APP_TIMER_DEF(edit_shade_timer);
+
+static bool should_inc_saturation = false;
+static bool should_inc_brightness = false;
 
 static nrfx_pwm_t pwm_rgb = NRFX_PWM_INSTANCE(0);
 static nrfx_pwm_t pwm_edit_indicator = NRFX_PWM_INSTANCE(1);
@@ -128,6 +135,32 @@ static void hsv_picker_init_indicator_seq(void)
 	}
 
 	is_indicator_seq_inited = true;
+}
+
+static void hsv_picker_cyclic_var_set_indicator(float *value, float max_value, bool *indicator)
+{
+	if ((*value) <= 0.0F)
+	{
+		*indicator = true;
+	}
+	else if ((*value) >= max_value)
+	{
+		*indicator = false;
+	}
+}
+
+static void hsv_picker_cyclic_var_next_value(float *value, float step, float max_value, bool *indicator)
+{
+	if (*indicator)
+	{
+		*value += step;
+	}
+	else
+	{
+		*value -= step;
+	}
+
+	hsv_picker_cyclic_var_set_indicator(value, max_value, indicator);
 }
 
 static void hsv_picker_init_hsv_ctx(float hue, float saturation, float brightness)
@@ -271,6 +304,7 @@ void hsv_picker_next_mode(void)
 
 void hsv_picker_edit_param(void)
 {
+	float temp_value = 0.0F;
 	switch (curr_mode)
 	{
 	case HSV_PICKER_MODE_VIEW:
@@ -280,19 +314,19 @@ void hsv_picker_edit_param(void)
 	case HSV_PICKER_MODE_EDIT_HUE:
 		// Maximum value of hue may be 360 and mod 360.1 will always generate values >= 360
 		// and does not generate big inaccuracy
-		hsv_ctx.hue = hsv_helper_modf(hsv_ctx.hue + 0.5F, 360.1F);
+		hsv_ctx.hue = hsv_helper_modf(hsv_ctx.hue + HSV_PICKER_HUE_STEP, 360.1F);
 		break;
 
 	case HSV_PICKER_MODE_EDIT_SATURATION:
-		// Maximum value of saturation may be 100 and mod 100.1 will always generate values >= 100
-		// and does not generate big inaccuracy
-		hsv_ctx.saturation = hsv_helper_modf(hsv_ctx.saturation + 0.5F, 100.1F);
+		temp_value = hsv_ctx.saturation;
+		hsv_picker_cyclic_var_next_value(&temp_value, HSV_PICKER_SATURATION_STEP, HSV_MAX_SATURATION, &should_inc_saturation);
+		hsv_ctx.saturation = temp_value;
 		break;
 
 	case HSV_PICKER_MODE_EDIT_BRIGHTNESS:
-		// Maximum value of brightness may be 100 and mod 100.1 will always generate values >= 100
-		// and does not generate big inaccuracy
-		hsv_ctx.brightness = hsv_helper_modf(hsv_ctx.brightness + 0.5F, 100.1F);
+		temp_value = hsv_ctx.brightness;
+		hsv_picker_cyclic_var_next_value(&temp_value, HSV_PICKER_BRIGHTNESS_STEP, HSV_MAX_BRIGHTNESS, &should_inc_brightness);
+		hsv_ctx.brightness = temp_value;
 		break;
 
 	default:
