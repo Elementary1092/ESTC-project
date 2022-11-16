@@ -10,7 +10,6 @@
 #define PWM_CFG_INDICATOR_STEP      200
 #define INDICATOR_ARR_SIZE          (PWM_CFG_INDICATOR_TOP_VALUE / PWM_CFG_INDICATOR_STEP + 1) * 2
 
-#define EDIT_SHADE_DELAY_TICKS  APP_TIMER_TICKS(30)
 #define CHANGE_MODE_DELAY_TICKS APP_TIMER_TICKS(200)
 
 #define HSV_PICKER_HUE_STEP        0.5F
@@ -18,7 +17,6 @@
 #define HSV_PICKER_BRIGHTNESS_STEP 0.5F
 
 APP_TIMER_DEF(change_mode_timer);
-APP_TIMER_DEF(edit_shade_timer);
 
 static bool should_inc_saturation = false;
 static bool should_inc_brightness = false;
@@ -262,14 +260,6 @@ static void change_mode_handler(void *p_ctx)
 	hsv_picker_start_indicator_playback();
 }
 
-static void edit_shade_handler(void *p_ctx)
-{
-	if (button_is_pressed(BOARD_BUTTON_SW1))
-	{
-		hsv_picker_edit_param();
-	}
-}
-
 void hsv_picker_init(float initial_hue, float initial_saturation, float initial_brightness)
 {
 	if (!is_indicator_seq_inited)
@@ -291,9 +281,6 @@ void hsv_picker_init(float initial_hue, float initial_saturation, float initial_
 	curr_mode = HSV_PICKER_MODE_VIEW;
 
 	app_timer_create(&change_mode_timer, APP_TIMER_MODE_SINGLE_SHOT, change_mode_handler);
-	app_timer_create(&edit_shade_timer, APP_TIMER_MODE_REPEATED, edit_shade_handler);
-
-	app_timer_start(edit_shade_timer, EDIT_SHADE_DELAY_TICKS, NULL);
 }
 
 void hsv_picker_next_mode(void)

@@ -13,8 +13,12 @@
 static button_clicks_subscriber_t volatile clicks_subscribers[BUTTON_RECENT_STATES_NUMBER][BUTTON_MAX_STATE_SUBSCRIBERS];
 static uint8_t volatile clicks_subscribers_idxs[BUTTON_RECENT_STATES_NUMBER] = {0};
 
+static button_hold_subscriber_t volatile hold_subcribers[BUTTON_MAX_STATE_SUBSCRIBERS];
+static uint8_t volatile hold_subcribers_idx = 0;
+
 APP_TIMER_DEF(button_click_reset_timer);
 APP_TIMER_DEF(button_click_register_timer);
+APP_TIMER_DEF(button_hold_process_timer);
 
 static nrfx_atomic_u32_t recent_button_event_cnt = 0UL;
 
@@ -55,6 +59,17 @@ static void button_click_reset_handler(void *p_context)
 	nrfx_atomic_u32_store(&recent_button_event_cnt, 0UL);
 }
 
+static void button_hold_process_handler(void *p_ctx)
+{
+	if (button_is_pressed(BOARD_BUTTON_SW1))
+	{
+		for (uint8_t i = 0; i < hold_subcribers_idx; i++)
+		{
+			(*hold_subcribers[i])();
+		}
+	}
+}
+
 void button_init(board_button_t button)
 {
 	nrfx_gpiote_in_config_t cfg = NRFX_GPIOTE_CONFIG_IN_SENSE_TOGGLE(true);
@@ -64,6 +79,9 @@ void button_init(board_button_t button)
 
 	app_timer_create(&button_click_register_timer, APP_TIMER_MODE_SINGLE_SHOT, button_click_register_handler);
 	app_timer_create(&button_click_reset_timer, APP_TIMER_MODE_SINGLE_SHOT, button_click_reset_handler);
+	app_timer_create(&button_hold_process_timer, APP_TIMER_MODE_REPEATED, button_hold_process_handler);
+
+	app_timer_start(button_hold_process_timer, BUTTON_HOLD_PROCESS_DELAY_TICKS, NULL);
 }
 
 uint32_t button_is_pressed(board_button_t button)
@@ -113,4 +131,17 @@ void button_subscribe_for_state(button_recent_state_t state, button_clicks_subsc
 
 	clicks_subscribers[state][sub_idx] = handler;
 	clicks_subscribers_idxs[state]++;
+}
+
+void button_subscribe_for_hold(button_hold_subscriber_t handler)
+{
+	NRFX_ASSERT(handler != NULL);
+
+	if (hold_subcribers_idx >= BUTTON_MAX_STATE_SUBSCRIBERS - 1)
+	{
+		NRF_LOG_INFO("board_button: Buffer overflow. Cannot add subscriber for a hold state.");
+		return;
+	}
+
+	hold_subcribers[hold_subcribers_idx++] = handler;
 }

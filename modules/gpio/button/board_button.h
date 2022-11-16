@@ -22,6 +22,8 @@ typedef enum
 
 typedef void (*button_clicks_subscriber_t)(void);
 
+typedef void (*button_hold_subscriber_t)(void);
+
 /* 
 	Initialize button input with pull-up resistor.
 	Requires nrfx_gpiote to be initialized.
@@ -35,5 +37,8 @@ button_recent_state_t button_get_recent_state(board_button_t button);
 
 /* Will try to add a subscriber for some recent state */
 void button_subscribe_for_state(button_recent_state_t state, button_clicks_subscriber_t handler);
+
+/* Will try to add a subscriber for hold of a button (SW1) */
+void button_subscribe_for_hold(button_hold_subscriber_t handler);
 
 #endif
