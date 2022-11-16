@@ -51,16 +51,13 @@ int main(void)
     /* Initializing hsv shade picker */
     hsv_picker_init(INITIAL_HSV_HUE, INITIAL_HSV_SATURATION, INITIAL_HSV_BRIGHTNESS);
 
+    /* Making hsv_picker_next_mode function to be called on double click of a button */
+    button_subscribe_for_state(BUTTON_PRESSED_TWICE_RECENTLY, hsv_picker_next_mode);
+
     /* Toggle LEDs. */
     while (true)
     {
         __WFI();
-        
-        if (button_get_recent_state(button) == BUTTON_PRESSED_TWICE_RECENTLY)
-        {
-            hsv_picker_next_mode();
-        }
-        
         LOG_BACKEND_USB_PROCESS();
         NRF_LOG_PROCESS();
     }
