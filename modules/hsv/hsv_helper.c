@@ -9,31 +9,6 @@ float hsv_helper_modf(float value, float mod_base)
 	return value - (mod_base * floorf(value / mod_base));
 }
 
-static float hsv_helper_absf(float value)
-{
-	if (value < 0.0F)
-	{
-		return -value;
-	}
-
-	return value;
-}
-
-static uint16_t hsv_helper_float_to_uint16(float value, uint16_t max_value)
-{
-	float max_value_f = (float)max_value;
-	if (value > max_value_f || max_uint16_f < value)
-	{
-		return max_value;
-	}
-	if (value < 0.0F)
-	{
-		return 0U;
-	}
-
-	return (uint16_t)((unsigned int)(floorf(value)));
-}
-
 static void hsv_helper_align_hsv(hsv_ctx_t *hsv)
 {
 	if (hsv->hue > HSV_MAX_HUE)
@@ -50,6 +25,31 @@ static void hsv_helper_align_hsv(hsv_ctx_t *hsv)
 	{
 		hsv->brightness = HSV_MAX_BRIGHTNESS;
 	}
+}
+
+uint16_t hsv_helper_float_to_uint16(float value, uint16_t max_value)
+{
+	float max_value_f = (float)max_value;
+	if (value > max_value_f || max_uint16_f < value)
+	{
+		return max_value;
+	}
+	if (value < 0.0F)
+	{
+		return 0U;
+	}
+
+	return (uint16_t)((unsigned int)(floorf(value)));
+}
+
+float hsv_helper_absf(float value)
+{
+	if (value < 0.0F)
+	{
+		return -value;
+	}
+
+	return value;
 }
 
 void hsv_helper_convert(hsv_ctx_t *hsv, rgb_value_t *res)
