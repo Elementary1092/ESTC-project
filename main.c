@@ -52,10 +52,10 @@ int main(void)
     hsv_picker_init(INITIAL_HSV_HUE, INITIAL_HSV_SATURATION, INITIAL_HSV_BRIGHTNESS);
 
     /* Making hsv_picker_next_mode function to be called on double click of a button */
-    button_subscribe_for_state(BUTTON_PRESSED_TWICE_RECENTLY, hsv_picker_next_mode);
+    button_subscribe_to_SW1_state(BUTTON_PRESSED_TWICE_RECENTLY, hsv_picker_next_mode);
 
     /* Making hsv_picker_edit_param function to be called on hold of a SW1 button */
-    button_subscribe_for_hold(hsv_picker_edit_param);
+    button_subscribe_to_SW1_hold(hsv_picker_edit_param);
 
     /* Toggle LEDs. */
     while (true)

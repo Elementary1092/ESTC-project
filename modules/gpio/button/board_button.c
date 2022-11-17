@@ -111,7 +111,7 @@ button_recent_state_t button_get_recent_state(board_button_t button)
 	return BUTTON_UNKNOWN_RECENT_STATE;
 }
 
-void button_subscribe_for_state(button_recent_state_t state, button_clicks_subscriber_t handler)
+void button_subscribe_to_SW1_state(button_recent_state_t state, button_clicks_subscriber_t handler)
 {
 	NRFX_ASSERT(state < BUTTON_RECENT_STATES_NUMBER);
 	NRFX_ASSERT(handler != NULL);
@@ -133,7 +133,7 @@ void button_subscribe_for_state(button_recent_state_t state, button_clicks_subsc
 	clicks_subscribers_idxs[state]++;
 }
 
-void button_subscribe_for_hold(button_hold_subscriber_t handler)
+void button_subscribe_to_SW1_hold(button_hold_subscriber_t handler)
 {
 	NRFX_ASSERT(handler != NULL);
 
