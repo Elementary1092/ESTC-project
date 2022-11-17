@@ -36,9 +36,9 @@ uint32_t button_is_pressed(board_button_t button);
 button_recent_state_t button_get_recent_state(board_button_t button);
 
 /* Will try to add a subscriber for some recent state */
-void button_subscribe_for_state(button_recent_state_t state, button_clicks_subscriber_t handler);
+void button_subscribe_to_SW1_state(button_recent_state_t state, button_clicks_subscriber_t handler);
 
 /* Will try to add a subscriber for hold of a button (SW1) */
-void button_subscribe_for_hold(button_hold_subscriber_t handler);
+void button_subscribe_to_SW1_hold(button_hold_subscriber_t handler);
 
 #endif
