@@ -15,6 +15,11 @@
 
 static const uint32_t addr = FLASH_MEMORY_DATA_STARTING_ADDRESS;
 
+static void flash_memory_wait_for_write_complition(void)
+{
+	while (!nrfx_nvmc_write_done_check());
+}
+
 flash_memory_err_t flash_memory_read(uint32_t *buffer, uint32_t limit, uint32_t offset, uint32_t control_w, flash_memory_flag_t flags)
 {
 	bool ignore_control_w = (flags & FLASH_MEMORY_IGNORE_CONTROL_W) != 0;
@@ -31,13 +36,16 @@ flash_memory_err_t flash_memory_read(uint32_t *buffer, uint32_t limit, uint32_t 
 
 	uint32_t *s_addr = (uint32_t *)(addr + (offset * sizeof(uint32_t)));
 
+	NRF_LOG_INFO("flash_memory_read: Reading from %ld", s_addr);
+
 	if (!ignore_control_w)
 	{
 		NRF_LOG_INFO("flash_memory_read: Checking control word.");
 
-		uint32_t word = s_addr[0];
+		uint32_t word = *s_addr;
 		if (word != control_w)
 		{
+			NRF_LOG_ERROR("flash_memory_read: Control word expected: %ld, got: %ld", control_w, word);
 			return FLASH_MEMORY_ERR_INVALID_CONTROL_W;
 		}
 		s_addr += sizeof(uint32_t);
@@ -45,13 +53,14 @@ flash_memory_err_t flash_memory_read(uint32_t *buffer, uint32_t limit, uint32_t 
 
 	for (uint32_t i = 0; i < limit; i++)
 	{
-		uint32_t word = s_addr[i];
+		uint32_t word = *s_addr;
 		if (!ignore_default_values && word == FLASH_MEMORY_DEFAULT_VALUE)
 		{
 			return FLASH_MEMORY_ERR_POSSIBLY_INVALID_DATA;
 		}
 
 		buffer[i] = word;
+		s_addr += sizeof(uint32_t);
 	}
 
 	return FLASH_MEMORY_NO_ERR;
@@ -73,16 +82,18 @@ flash_memory_err_t flash_memory_write(uint32_t *buffer, uint32_t buf_size, uint3
 
 	if (should_erase_page)
 	{
-		uint32_t p_addr = addr + ((addr + offset) / FLASH_MEMORY_PAGE_SIZE) * FLASH_MEMORY_PAGE_SIZE;
+		uint32_t p_addr = ((addr + offset) / FLASH_MEMORY_PAGE_SIZE) * FLASH_MEMORY_PAGE_SIZE;
 		NRF_LOG_INFO("flash_memory_write: Erasing page starting from address: %ld", p_addr);
 		NRFX_ASSERT(nrfx_nvmc_page_erase(p_addr));
 	}
 
 	uint32_t s_addr = addr + (offset * sizeof(uint32_t));
+	
+	NRF_LOG_INFO("flash_memory_write: Start writing from %ld", s_addr);
 
 	if (!ignore_control_w)
 	{
-		NRF_LOG_INFO("flash_memory_write: Writing control word");
+		NRF_LOG_INFO("flash_memory_write: Writing control word: %ld", control_w);
 
 		if (control_w == FLASH_MEMORY_DEFAULT_VALUE)
 		{
@@ -91,12 +102,18 @@ flash_memory_err_t flash_memory_write(uint32_t *buffer, uint32_t buf_size, uint3
 
 		if (nrfx_nvmc_word_writable_check(s_addr, control_w))
 		{
-			NRF_LOG_INFO("flash_memory_write: Could not write control word.")
+			NRF_LOG_INFO("flash_memory_write: Could not write control word: %ld", control_w);
 
 			return FLASH_MEMORY_ERR_WORD_IS_NOT_WRITABLE;
 		}
 
 		nrfx_nvmc_word_write(s_addr, control_w);
+
+		flash_memory_wait_for_write_complition();
+
+		uint32_t *p_addr = (uint32_t *)(s_addr);
+		NRF_LOG_INFO("flash_memory_write: Written: %ld", *p_addr);
+
 		s_addr += sizeof(uint32_t);
 	}
 
@@ -108,8 +125,14 @@ flash_memory_err_t flash_memory_write(uint32_t *buffer, uint32_t buf_size, uint3
 		}
 
 		nrfx_nvmc_word_write(s_addr, buffer[i]);
+
+		flash_memory_wait_for_write_complition();
+
+		NRF_LOG_INFO("flash_memory_write: Written %ld to %ld", buffer[i], s_addr);
 		s_addr += sizeof(uint32_t);
 	}
+
+	NRF_LOG_INFO("flash_memory_write: Successfully saved words");
 
 	return FLASH_MEMORY_NO_ERR;
 }

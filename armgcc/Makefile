@@ -26,6 +26,7 @@ SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_systick.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_gpiote.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_pwm.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_nvmc.c \
   $(SDK_ROOT)/modules/nrfx/mdk/system_nrf52840.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_frontend.c \
@@ -65,6 +66,7 @@ SRC_FILES += \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf_format.c \
   $(SDK_ROOT)/external/utf_converter/utf.c \
   $(PROJ_DIR)/modules/timer/rtc.c \
+  $(PROJ_DIR)/modules/flash/flash_memory.c \
   $(PROJ_DIR)/modules/hsv/hsv_helper.c \
   $(PROJ_DIR)/modules/hsv/hsv_picker.c \
   $(PROJ_DIR)/modules/gpio/led/led.c \
@@ -88,6 +90,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/boards \
   $(SDK_ROOT)/external/utf_converter \
   $(SDK_ROOT)/modules/nrfx/drivers/include \
+  $(SDK_ROOT)/components/libraries/bootloader \
   $(SDK_ROOT)/components/libraries/cli \
   $(SDK_ROOT)/components/libraries/queue \
   $(SDK_ROOT)/components/libraries/pwr_mgmt \
@@ -134,6 +137,7 @@ INC_FOLDERS += \
   $(PROJ_DIR)/modules/gpio/led \
   $(PROJ_DIR)/modules/timer \
   $(PROJ_DIR)/modules/hsv \
+  $(PROJ_DIR)/modules/flash \
 
 # Libraries common to all targets
 LIB_FILES += \
