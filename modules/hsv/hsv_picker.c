@@ -339,7 +339,6 @@ void hsv_picker_next_mode(void)
 		{
 			hsv_picker_update_saved_value();
 			should_update_saved_value = false;
-			hsv_picker_try_init_from_flash();
 		}
 		break;
 	
