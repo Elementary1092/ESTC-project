@@ -24,7 +24,7 @@ static nrfx_atomic_u32_t recent_button_event_cnt = 0UL;
 
 static void SW1_IRQHandler(nrfx_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
-	NRF_LOG_INFO("Handling interrupt on %ld pin", pin);
+	NRF_LOG_INFO("board_button: Handling interrupt on %ld pin", pin);
 	app_timer_stop(button_click_register_timer);
 	app_timer_start(button_click_register_timer, BUTTON_PRESSED_DELAY_TICKS, (void*)pin);
 }
@@ -46,8 +46,8 @@ static void button_process_clicks_subscribers(void *p_ctx)
 
 static void button_click_register_handler(void *p_context)
 {
-	NRF_LOG_INFO("Registering click");
-	NRF_LOG_INFO("Recent clicks number: %ld", nrfx_atomic_u32_add(&recent_button_event_cnt, 1UL));
+	NRF_LOG_INFO("board_button: Registering click");
+	NRF_LOG_INFO("board_button: Recent clicks number: %ld", nrfx_atomic_u32_add(&recent_button_event_cnt, 1UL));
 	button_process_clicks_subscribers(p_context);
 	app_timer_stop(button_click_reset_timer);
 	app_timer_start(button_click_reset_timer, BUTTON_PRESSED_RESET_DELAY_TICKS, p_context);
@@ -55,7 +55,7 @@ static void button_click_register_handler(void *p_context)
 
 static void button_click_reset_handler(void *p_context)
 {
-	NRF_LOG_INFO("Resetting clicks counter");
+	NRF_LOG_INFO("board_button: Resetting clicks counter");
 	nrfx_atomic_u32_store(&recent_button_event_cnt, 0UL);
 }
 

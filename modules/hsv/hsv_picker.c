@@ -18,8 +18,8 @@
 #define HSV_PICKER_SATURATION_STEP 0.5F
 #define HSV_PICKER_BRIGHTNESS_STEP 0.5F
 
-#define HSV_SAVED_VALUE_CONTROL_WORD (uint32_t)111111
-#define HSV_SAVED_VALUE_OFFSET       (uint32_t)0
+#define HSV_SAVED_VALUE_CONTROL_WORD 0xF0F0F0F0
+#define HSV_SAVED_VALUE_OFFSET       0UL
 
 #define HSV_SAVED_BUFFER_IDX_RED     0
 #define HSV_SAVED_BUFFER_IDX_GREEN   1
@@ -252,7 +252,7 @@ static void hsv_picker_init_pwm_module(void)
 static bool hsv_picker_try_init_from_flash(void)
 {
 	uint32_t buffer[3] = {0UL};
-	flash_memory_err_t err = flash_memory_read(buffer, 3, HSV_SAVED_VALUE_OFFSET, HSV_SAVED_VALUE_CONTROL_WORD, FLASH_MEMORY_NO_FLAGS);
+	flash_memory_err_t err = flash_memory_read(buffer, 3UL, HSV_SAVED_VALUE_OFFSET, HSV_SAVED_VALUE_CONTROL_WORD, FLASH_MEMORY_NO_FLAGS);
 	if (err != FLASH_MEMORY_NO_ERR)
 	{
 		NRF_LOG_INFO("hsv_picker_try_init_from_flash: Could not initialize from the flash. Error: %d", err);
@@ -318,6 +318,7 @@ void hsv_picker_next_mode(void)
 		{
 			hsv_picker_update_saved_value();
 			should_update_saved_value = false;
+			hsv_picker_try_init_from_flash();
 		}
 		break;
 	
