@@ -21,9 +21,16 @@
 #define HSV_SAVED_VALUE_CONTROL_WORD 0xF0F0F0F0
 #define HSV_SAVED_VALUE_OFFSET       0UL
 
-#define HSV_SAVED_BUFFER_IDX_RED     0
-#define HSV_SAVED_BUFFER_IDX_GREEN   1
-#define HSV_SAVED_BUFFER_IDX_BLUE    2
+#define HSV_SAVED_BUFFER_IDX_HUE     0
+#define HSV_SAVED_BUFFER_IDX_SATUR   1
+#define HSV_SAVED_BUFFER_IDX_BRIGHT  2
+
+typedef union
+{
+	float    fl;
+	uint32_t ui;
+} float_uint32_union_t;
+
 
 static bool should_inc_saturation = false;
 static bool should_inc_brightness = false;
@@ -259,18 +266,32 @@ static bool hsv_picker_try_init_from_flash(void)
 		return false;
 	}
 
-	rgb_ctx.red = (uint16_t)(buffer[HSV_SAVED_BUFFER_IDX_RED]);
-	rgb_ctx.green = (uint16_t)(buffer[HSV_SAVED_BUFFER_IDX_GREEN]);
-	rgb_ctx.blue = (uint16_t)(buffer[HSV_SAVED_BUFFER_IDX_BLUE]);
+	float_uint32_union_t hue;
+	hue.ui = buffer[HSV_SAVED_BUFFER_IDX_HUE];
+	float_uint32_union_t satur;
+	satur.ui = buffer[HSV_SAVED_BUFFER_IDX_SATUR];
+	float_uint32_union_t bright;
+	bright.ui = buffer[HSV_SAVED_BUFFER_IDX_BRIGHT];
+	
+	hsv_ctx.hue = hue.fl;
+	hsv_ctx.saturation = satur.fl;
+	hsv_ctx.brightness = bright.fl;
 
-	hsv_picker_update_rgb_channels();
+	NRF_LOG_INFO("HSV values from the flash: %x, %x, %x.", hue.fl, satur.fl, bright.fl);
 
 	return true;
 }
 
 static void hsv_picker_update_saved_value(void)
 {
-	uint32_t buffer[3] = {(uint32_t)(rgb_ctx.red), (uint32_t)(rgb_ctx.green), (uint32_t)(rgb_ctx.blue)};
+	float_uint32_union_t hue;
+	hue.fl = hsv_ctx.hue;
+	float_uint32_union_t satur;
+	satur.fl = hsv_ctx.saturation;
+	float_uint32_union_t bright;
+	bright.fl = hsv_ctx.brightness;
+
+	uint32_t buffer[3] = {hue.ui, satur.ui, bright.ui};
 	flash_memory_err_t err = flash_memory_write(buffer, 3UL, HSV_SAVED_VALUE_OFFSET, HSV_SAVED_VALUE_CONTROL_WORD, FLASH_MEMORY_ERASE_PAGE_BEFORE_WRITE);
 	if (err != FLASH_MEMORY_NO_ERR)
 	{
@@ -286,9 +307,9 @@ void hsv_picker_init(float initial_hue, float initial_saturation, float initial_
 	if (!hsv_picker_try_init_from_flash())
 	{
 		hsv_picker_init_hsv_ctx(initial_hue, initial_saturation, initial_brightness);
-		hsv_picker_update_rgb();
 	}
 
+	hsv_picker_update_rgb();
 	hsv_picker_flush_pwm_values();
 
 	curr_mode = HSV_PICKER_MODE_VIEW;

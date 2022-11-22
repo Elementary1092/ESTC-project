@@ -55,7 +55,7 @@ flash_memory_err_t flash_memory_read(uint32_t buffer[], uint32_t limit, uint32_t
 	{
 		uint32_t word = s_addr[i];
 
-		NRF_LOG_INFO("flash_memory_read: Read %x from %lu (idx = %lu)", word, s_addr + i);
+		NRF_LOG_INFO("flash_memory_read: Read %x from %lu.", word, s_addr + i);
 		if (!ignore_default_values && word == FLASH_MEMORY_DEFAULT_VALUE)
 		{
 			return FLASH_MEMORY_ERR_POSSIBLY_INVALID_DATA;
@@ -112,8 +112,6 @@ flash_memory_err_t flash_memory_write(uint32_t *buffer, uint32_t buf_size, uint3
 
 		flash_memory_wait_for_write_complition();
 
-		NRF_LOG_INFO("flash_memory_write: Written control word %lu to %lu", *((uint32_t *)s_addr), s_addr);
-
 		s_addr += sizeof(uint32_t);
 	}
 
@@ -128,7 +126,7 @@ flash_memory_err_t flash_memory_write(uint32_t *buffer, uint32_t buf_size, uint3
 
 		flash_memory_wait_for_write_complition();
 
-		NRF_LOG_INFO("flash_memory_write: Written %lu (%lu) to %lu", buffer[i], *((uint32_t *)s_addr), s_addr);
+		NRF_LOG_INFO("flash_memory_write: Written %x to %lu", buffer[i], s_addr);
 		s_addr += sizeof(uint32_t);
 	}
 
