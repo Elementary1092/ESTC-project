@@ -2,6 +2,7 @@
 #include <app_timer.h>
 #include "../gpio/led/led.h"
 #include "../gpio/button/board_button.h"
+#include "../flash/flash_memory.h"
 #include "hsv_picker.h"
 #include "hsv_helper.h"
 #include <math.h>
@@ -17,8 +18,26 @@
 #define HSV_PICKER_SATURATION_STEP 0.5F
 #define HSV_PICKER_BRIGHTNESS_STEP 0.5F
 
+#define HSV_SAVED_VALUE_CONTROL_WORD 0xF0F0F0F0
+#define HSV_SAVED_VALUE_OFFSET       0UL
+
+#define HSV_SAVED_BUFFER_IDX_HUE     0
+#define HSV_SAVED_BUFFER_IDX_SATUR   1
+#define HSV_SAVED_BUFFER_IDX_BRIGHT  2
+
+typedef union
+{
+	float    fl;
+	uint32_t ui;
+} float_uint32_union_t;
+
+
 static bool should_inc_saturation = false;
 static bool should_inc_brightness = false;
+
+static bool should_update_saved_value = false;
+
+static bool is_pwm_inited = false;
 
 static float indicator_function_angle = 0.0F;
 static float indicator_function_factor = 0.0F;
@@ -116,14 +135,20 @@ static void hsv_picker_flush_pwm_values(void)
 	nrfx_pwm_simple_playback(&pwm_rgb, &leds_seq, 1, 0);
 }
 
-// Sets up value of channels which are used to display values of rgb leds
+// Sets up values of rgb channels
+static void hsv_picker_update_rgb_channels(void)
+{
+	leds_values.channel_0 = RGB_CTX_VALUE_FACTOR * rgb_ctx.red;
+	leds_values.channel_1 = RGB_CTX_VALUE_FACTOR * rgb_ctx.green;
+	leds_values.channel_2 = RGB_CTX_VALUE_FACTOR * rgb_ctx.blue;
+}
+
+// Converts hsv to rgb & sets up values of channels which are used to display values of rgb leds
 static void hsv_picker_update_rgb(void)
 {
 	hsv_helper_convert(&hsv_ctx, &rgb_ctx);
 
-	leds_values.channel_0 = RGB_CTX_VALUE_FACTOR * rgb_ctx.red;
-	leds_values.channel_1 = RGB_CTX_VALUE_FACTOR * rgb_ctx.green;
-	leds_values.channel_2 = RGB_CTX_VALUE_FACTOR * rgb_ctx.blue;
+	hsv_picker_update_rgb_channels();
 }
 
 /*
@@ -216,12 +241,73 @@ static void pwm_event_handler(nrfx_pwm_evt_type_t event)
 	hsv_picker_flush_pwm_values();
 }
 
+static void hsv_picker_init_pwm_module(void)
+{
+	if (!is_pwm_inited)
+	{
+		nrfx_err_t err_code = nrfx_pwm_init(&pwm_rgb, &leds_pwm_cfg, pwm_event_handler);
+		APP_ERROR_CHECK(err_code);
+		is_pwm_inited = true;
+	}
+}
+
+/*
+	Tries to initialize hsv from the flash.
+	Return true if function succeds.
+	Otherwise, false is returned.
+*/
+static bool hsv_picker_try_init_from_flash(void)
+{
+	uint32_t buffer[3] = {0UL};
+	flash_memory_err_t err = flash_memory_read(buffer, 3UL, HSV_SAVED_VALUE_OFFSET, HSV_SAVED_VALUE_CONTROL_WORD, FLASH_MEMORY_NO_FLAGS);
+	if (err != FLASH_MEMORY_NO_ERR)
+	{
+		NRF_LOG_INFO("hsv_picker_try_init_from_flash: Could not initialize from the flash. Error: %d", err);
+		return false;
+	}
+
+	float_uint32_union_t hue;
+	hue.ui = buffer[HSV_SAVED_BUFFER_IDX_HUE];
+	float_uint32_union_t satur;
+	satur.ui = buffer[HSV_SAVED_BUFFER_IDX_SATUR];
+	float_uint32_union_t bright;
+	bright.ui = buffer[HSV_SAVED_BUFFER_IDX_BRIGHT];
+	
+	hsv_ctx.hue = hue.fl;
+	hsv_ctx.saturation = satur.fl;
+	hsv_ctx.brightness = bright.fl;
+
+	NRF_LOG_INFO("HSV values from the flash: %x, %x, %x.", hue.fl, satur.fl, bright.fl);
+
+	return true;
+}
+
+static void hsv_picker_update_saved_value(void)
+{
+	float_uint32_union_t hue;
+	hue.fl = hsv_ctx.hue;
+	float_uint32_union_t satur;
+	satur.fl = hsv_ctx.saturation;
+	float_uint32_union_t bright;
+	bright.fl = hsv_ctx.brightness;
+
+	uint32_t buffer[3] = {hue.ui, satur.ui, bright.ui};
+	flash_memory_err_t err = flash_memory_write(buffer, 3UL, HSV_SAVED_VALUE_OFFSET, HSV_SAVED_VALUE_CONTROL_WORD, FLASH_MEMORY_ERASE_PAGE_BEFORE_WRITE);
+	if (err != FLASH_MEMORY_NO_ERR)
+	{
+		NRF_LOG_INFO("hsv_picker_update_saved_value: Could not update saved value. Error: %d", err);
+		return;
+	}
+}
+
 void hsv_picker_init(float initial_hue, float initial_saturation, float initial_brightness)
 {
-	nrfx_err_t err_code = nrfx_pwm_init(&pwm_rgb, &leds_pwm_cfg, pwm_event_handler);
-	APP_ERROR_CHECK(err_code);
+	hsv_picker_init_pwm_module();
 
-	hsv_picker_init_hsv_ctx(initial_hue, initial_saturation, initial_brightness);
+	if (!hsv_picker_try_init_from_flash())
+	{
+		hsv_picker_init_hsv_ctx(initial_hue, initial_saturation, initial_brightness);
+	}
 
 	hsv_picker_update_rgb();
 	hsv_picker_flush_pwm_values();
@@ -249,6 +335,11 @@ void hsv_picker_next_mode(void)
 
 	case HSV_PICKER_MODE_EDIT_BRIGHTNESS:
 		curr_mode = HSV_PICKER_MODE_VIEW;
+		if (should_update_saved_value)
+		{
+			hsv_picker_update_saved_value();
+			should_update_saved_value = false;
+		}
 		break;
 	
 	default:
@@ -294,6 +385,7 @@ void hsv_picker_edit_param(void)
 		return;
 	}
 
+	should_update_saved_value = true;
 	hsv_picker_update_rgb();
 	hsv_picker_flush_pwm_values();
 }

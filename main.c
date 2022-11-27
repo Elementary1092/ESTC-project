@@ -38,7 +38,7 @@ int main(void)
     NRF_LOG_DEFAULT_BACKENDS_INIT();
     NRF_LOG_INFO("Starting project");
 
-    /* Initializing rtc timer. This kind of timer is used in hsv_picker & button modules */
+    /* Initializing rtc timer. This kind of timer is used in button module */
     timer_rtc_init();
 
     board_button_t button = BOARD_BUTTON_SW1;

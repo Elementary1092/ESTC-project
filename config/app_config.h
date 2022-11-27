@@ -99,6 +99,16 @@
 #define LOG_BACKEND_USB_UTILIZE_POWER_EVENTS 1
 #endif
 
+#ifndef NRF_DFU_APP_DATA_AREA_SIZE
+#define NRF_DFU_APP_DATA_AREA_SIZE 12288
+#endif // NRF_DFU_APP_DATA_AREA_SIZE
+
+// <e> NRFX_NVMC_ENABLED - nrfx_nvmc - NVMC peripheral driver
+//==========================================================
+#ifndef NRFX_NVMC_ENABLED
+#define NRFX_NVMC_ENABLED 1
+#endif
+
 // </e>
 
 #endif // APP_CONFIG_H
