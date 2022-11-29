@@ -12,7 +12,7 @@
 
 static char word_buf[HSV_CLI_MAX_WORD_SIZE] = {0};
 
-static char args_buf[HSV_CLI_MAX_ARGS_SIZE][HSV_CLI_MAX_WORD_SIZE];
+static char *args_buf[HSV_CLI_MAX_WORD_SIZE];
 
 static hsv_cli_command_desc_t curr_command;
 
@@ -157,7 +157,7 @@ static void hsv_cli_exec_update_hsv(hsv_cli_command_desc_t *command)
 		return;
 	}
 
-	uin32_t hsv_args[3];
+	uint32_t hsv_args[3];
 	hsv_cli_convert_nstrs_to_nuints(hsv_args, command->args, command->args_count);
 
 	hsv_picker_set_hsv((float)hsv_args[0], (float)hsv_args[1], (float)hsv_args[2]);
@@ -181,7 +181,7 @@ static void hsv_cli_exec_update_rgb(hsv_cli_command_desc_t *command)
 		return;
 	}
 
-	uin32_t rgb_args[3];
+	uint32_t rgb_args[3];
 	hsv_cli_convert_nstrs_to_nuints(rgb_args, command->args, command->args_count);
 
 	hsv_picker_set_rgb(rgb_args[0], rgb_args[1], rgb_args[2]);

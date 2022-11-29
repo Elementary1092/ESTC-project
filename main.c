@@ -15,6 +15,7 @@
 #include "modules/gpio/led/led.h"
 #include "modules/timer/rtc.h"
 #include "modules/hsv/hsv_picker.h"
+#include "modules/hsv/cli.h"
 
 // Board ID: 7198, so, 7 - Red, 1 - Green, 9 - Blue, 8 - Green (led1) 
 #define BLINK_SEQUENCE  "RRRRRRRGBBBBBBBBBYYYYYYYY"
@@ -50,6 +51,10 @@ int main(void)
 
     /* Initializing hsv shade picker */
     hsv_picker_init(INITIAL_HSV_HUE, INITIAL_HSV_SATURATION, INITIAL_HSV_BRIGHTNESS);
+
+#if ESTC_USB_CLI_ENABLED
+    hsv_cli_init();
+#endif
 
     /* Making hsv_picker_next_mode function to be called on double click of a button */
     button_subscribe_to_SW1_state(BUTTON_PRESSED_TWICE_RECENTLY, hsv_picker_next_mode);
