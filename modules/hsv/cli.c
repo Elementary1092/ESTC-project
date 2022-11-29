@@ -1,3 +1,4 @@
+#include <nrf_log.h>
 #include <app_usbd_cdc_acm.h>
 
 #include "cli.h"
@@ -6,6 +7,8 @@
 #include "../cdc_acm/cdc_acm.h"
 
 #define HSV_CLI_MAX_WORD_SIZE 4
+
+#define HSV_CLI_UNKNOWN_COMMAND_PROMPT "Unknown command. Try again.\n"
 
 static char word_buf[HSV_CLI_MAX_WORD_SIZE] = {0};
 
@@ -92,6 +95,34 @@ static void hsv_cli_resolve_command(hsv_cli_command_desc_t *command,
 	else
 	{
 		command->cmd = HSV_CLI_COMMAND_UNKNOWN;
+	}
+}
+
+static void hsv_cli_exec_command(hsv_cli_command_desc_t *cmd)
+{
+	switch (cmd->cmd)
+	{
+		case HSV_CLI_COMMAND_UNKNOWN:
+			cdc_acm_write(&hsv_cli_usb_cdc_acm, HSV_CLI_UNKNOWN_COMMAND_PROMPT, strlen(HSV_CLI_UNKNOWN_COMMAND_PROMPT));
+			break;
+
+		case HSV_CLI_COMMAND_HELP:
+			hsv_cli_exec_help(cmd);
+			break;
+
+		case HSV_CLI_COMMAND_UPDATE_HSV:
+			hsv_cli_exec_update_hsv(cmd);
+			break;
+
+		case HSV_CLI_COMMAND_UPDATE_RGB:
+			hsv_cli_exec_update_rgb(cmd);
+			break;
+
+		default:
+#if NRF_LOG_ENABLED
+			NRF_LOG_ERROR("hsv_cli_exec_command: Unknown command: %d", cmd->cmd);
+#endif
+			break;
 	}
 }
 
