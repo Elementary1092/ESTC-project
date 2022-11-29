@@ -46,7 +46,6 @@ typedef struct
 	hsv_cli_command_t cmd;
 	char              **args;
 	uint8_t           args_count;
-	bool              is_finished;
 	bool              cmd_resolved;
 } hsv_cli_command_desc_t;
 

@@ -8,7 +8,9 @@
 
 #define HSV_CLI_MAX_WORD_SIZE 4
 
-#define HSV_CLI_UNKNOWN_COMMAND_PROMPT "Unknown command. Try again.\n"
+#define HSV_CLI_UNKNOWN_COMMAND_PROMPT "Unknown command. Try again.\r\n"
+
+#define HSV_CLI_INVALID_NUMBER_OF_ARGS "Invalid number of args. Try again.\r\n"
 
 static char word_buf[HSV_CLI_MAX_WORD_SIZE] = {0};
 
@@ -30,6 +32,11 @@ static void hsv_cli_exec_command(hsv_cli_command_desc_t *command);
 static void hsv_cli_exec_help(hsv_cli_command_desc_t *command);
 
 static void hsv_cli_exec_update_hsv(hsv_cli_command_desc_t *command);
+
+/* Invalid numbers are treated as 0 */
+static uint32_t hsv_cli_convert_str_to_uint(char *str);
+
+static void hsv_cli_convert_nstrs_to_nuints(uint32_t *converted_args, char **args, uint8_t args_count);
 
 static void hsv_cli_exec_update_rgb(hsv_cli_command_desc_t *command);
 
@@ -126,6 +133,17 @@ static void hsv_cli_exec_command(hsv_cli_command_desc_t *cmd)
 	}
 }
 
+static void hsv_cli_exec_help(hsv_cli_command_desc_t *command)
+{
+	char *help_prompt = 
+						"Available commands:\r\n"
+						"\t1. help - get list of available commands;\r\n"
+						"\t2. hsv <hue> <saturation> <brightness> - set hue, saturation, and brightness of RGB LEDs;\r\n"
+						"\t3. rgb <red> <green> <blue> - set values of RGB LEDs.\r\n";
+
+	cdc_acm_write(&hsv_cli_usb_cdc_acm, help_prompt, strlen(help_prompt));
+}
+
 static void hsv_cli_clear_command(hsv_cli_command_desc_t *command)
 {
 	command->cmd = HSV_CLI_COMMAND_UNKNOWN;
@@ -133,7 +151,6 @@ static void hsv_cli_clear_command(hsv_cli_command_desc_t *command)
 	memset(args_buf, 0, sizeof(args_buf));
 	command->args = args_buf;
 	command->args_count = 0;
-	command->is_finished = false;
 }
 
 void hsv_cli_init(void)
