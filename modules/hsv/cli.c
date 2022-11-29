@@ -166,6 +166,30 @@ static void hsv_cli_exec_update_hsv(hsv_cli_command_desc_t *command)
 #endif
 }
 
+static void hsv_cli_exec_update_rgb(hsv_cli_command_desc_t *command)
+{
+	if (!command->cmd_resolved || command->args_count < 3)
+	{
+		return;
+	}
+	else if (command->args_count > 3)
+	{
+#if NRF_LOG_ENABLED
+		NRF_LOG_ERROR("hsv_cli_exec_update_hsv: Invalid number of args: %u", command->args_count);
+#endif
+		hsv_cli_clear_command(command);
+		return;
+	}
+
+	uin32_t rgb_args[3];
+	hsv_cli_convert_nstrs_to_nuints(rgb_args, command->args, command->args_count);
+
+	hsv_picker_set_rgb(rgb_args[0], rgb_args[1], rgb_args[2]);
+#if NRF_LOG_ENABLED
+	NRF_LOG_INFO("hsv_cli_exec_update_rgb: Updated rgb");
+#endif
+}
+
 static uint32_t hsv_cli_convert_str_to_uint(char *str)
 {
 	uint32_t res = 0;
