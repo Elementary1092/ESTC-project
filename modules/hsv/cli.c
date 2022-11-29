@@ -10,8 +10,6 @@
 
 #define HSV_CLI_UNKNOWN_COMMAND_PROMPT "Unknown command. Try again.\r\n"
 
-#define HSV_CLI_INVALID_NUMBER_OF_ARGS "Invalid number of args. Try again.\r\n"
-
 static char word_buf[HSV_CLI_MAX_WORD_SIZE] = {0};
 
 static char args_buf[HSV_CLI_MAX_ARGS_SIZE][HSV_CLI_MAX_WORD_SIZE];
@@ -142,6 +140,63 @@ static void hsv_cli_exec_help(hsv_cli_command_desc_t *command)
 						"\t3. rgb <red> <green> <blue> - set values of RGB LEDs.\r\n";
 
 	cdc_acm_write(&hsv_cli_usb_cdc_acm, help_prompt, strlen(help_prompt));
+}
+
+static void hsv_cli_exec_update_hsv(hsv_cli_command_desc_t *command)
+{
+	if (!command->cmd_resolved || command->args_count < 3)
+	{
+		return;
+	}
+	else if (command->args_count > 3)
+	{
+#if NRF_LOG_ENABLED
+		NRF_LOG_ERROR("hsv_cli_exec_update_hsv: Invalid number of args: %u", command->args_count);
+#endif
+		hsv_cli_clear_command(command);
+		return;
+	}
+
+	uin32_t hsv_args[3];
+	hsv_cli_convert_nstrs_to_nuints(hsv_args, command->args, command->args_count);
+
+	hsv_picker_set_hsv((float)hsv_args[0], (float)hsv_args[1], (float)hsv_args[2]);
+#if NRF_LOG_ENABLED
+	NRF_LOG_INFO("hsv_cli_exec_update_hsv: Updated hsv");
+#endif
+}
+
+static uint32_t hsv_cli_convert_str_to_uint(char *str)
+{
+	uint32_t res = 0;
+	if (strlen(str) > 10)
+	{
+#if NRF_LOG_ENABLED
+		NRF_LOG_ERROR("hsv_cli_convert_str_to_uint: String is too long: %s", str);
+#endif
+		return res;
+	}
+	for (size_t i = 0; i < strlen(str); i++)
+	{
+		if (str[i] >= '0' && str[i] <= '9')
+		{
+			res = res * 10 + (uint32_t)(str[i] - '0');
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	return res;
+}
+
+static void hsv_cli_convert_nstrs_to_nuints(uint32_t *converted_args, char **args, uint8_t args_count)
+{
+	for (uint8_t i = 0; i < args_count; i++)
+	{
+		converted_args[i] = hsv_cli_convert_str_to_uint(args[i]);
+	}
 }
 
 static void hsv_cli_clear_command(hsv_cli_command_desc_t *command)
