@@ -7,30 +7,29 @@
 #include "hsv_helper.h"
 #include <math.h>
 
-#define RGB_CTX_VALUE_FACTOR        100U
-#define PWM_CFG_TOP_VALUE           HSV_HELPER_MAX_RGB * RGB_CTX_VALUE_FACTOR
+#define RGB_CTX_VALUE_FACTOR 100U
+#define PWM_CFG_TOP_VALUE HSV_HELPER_MAX_RGB *RGB_CTX_VALUE_FACTOR
 
-#define PWM_INDICATOR_HUE_MODE_FACTOR        2.0F
+#define PWM_INDICATOR_HUE_MODE_FACTOR 2.0F
 #define PWM_INDICATOR_SATURATION_MODE_FACTOR 8.0F
-#define PWM_INDICATOR_FUNCTION_FACTOR        3.14F / 180.0F
+#define PWM_INDICATOR_FUNCTION_FACTOR 3.14F / 180.0F
 
-#define HSV_PICKER_HUE_STEP        0.5F
+#define HSV_PICKER_HUE_STEP 0.5F
 #define HSV_PICKER_SATURATION_STEP 0.5F
 #define HSV_PICKER_BRIGHTNESS_STEP 0.5F
 
 #define HSV_SAVED_VALUE_CONTROL_WORD 0xF0F0F0F0
-#define HSV_SAVED_VALUE_OFFSET       0UL
+#define HSV_SAVED_VALUE_OFFSET 0UL
 
-#define HSV_SAVED_BUFFER_IDX_HUE     0
-#define HSV_SAVED_BUFFER_IDX_SATUR   1
-#define HSV_SAVED_BUFFER_IDX_BRIGHT  2
+#define HSV_SAVED_BUFFER_IDX_HUE 0
+#define HSV_SAVED_BUFFER_IDX_SATUR 1
+#define HSV_SAVED_BUFFER_IDX_BRIGHT 2
 
 typedef union
 {
-	float    fl;
+	float fl;
 	uint32_t ui;
 } float_uint32_union_t;
-
 
 static bool should_inc_saturation = false;
 static bool should_inc_brightness = false;
@@ -46,44 +45,40 @@ static float const pwm_cfg_top_value_f = (float)PWM_CFG_TOP_VALUE;
 
 static nrfx_pwm_t pwm_rgb = NRFX_PWM_INSTANCE(0);
 
-static nrf_pwm_values_individual_t leds_values = 
-{
-	.channel_0 = 0, 
-	.channel_1 = 0, 
-	.channel_2 = 0, 
-	.channel_3 = 0
-};
+static nrf_pwm_values_individual_t leds_values =
+	{
+		.channel_0 = 0,
+		.channel_1 = 0,
+		.channel_2 = 0,
+		.channel_3 = 0};
 
 static nrf_pwm_sequence_t const leds_seq =
-{
-	.values.p_individual = &leds_values,
-	.length = NRF_PWM_VALUES_LENGTH(leds_values),
-	.repeats = 0,
-	.end_delay = 0
-};
+	{
+		.values.p_individual = &leds_values,
+		.length = NRF_PWM_VALUES_LENGTH(leds_values),
+		.repeats = 0,
+		.end_delay = 0};
 
 // config of pwm instance which should control all leds
-static nrfx_pwm_config_t const leds_pwm_cfg = 
-{
-	.output_pins = 
+static nrfx_pwm_config_t const leds_pwm_cfg =
 	{
-		LED_PCA10059_RED | NRFX_PWM_PIN_INVERTED,
-		LED_PCA10059_GREEN | NRFX_PWM_PIN_INVERTED,
-		LED_PCA10059_BLUE | NRFX_PWM_PIN_INVERTED,
-		LED_PCA10059_YELLOW | NRFX_PWM_PIN_INVERTED
-	},
-	.irq_priority = APP_IRQ_PRIORITY_LOWEST,
-	.base_clock = NRF_PWM_CLK_1MHz,
-	.count_mode = NRF_PWM_MODE_UP,
-	.top_value = PWM_CFG_TOP_VALUE,
-	.load_mode = NRF_PWM_LOAD_INDIVIDUAL,
-	.step_mode = NRF_PWM_STEP_AUTO
-};
+		.output_pins =
+			{
+				LED_PCA10059_RED | NRFX_PWM_PIN_INVERTED,
+				LED_PCA10059_GREEN | NRFX_PWM_PIN_INVERTED,
+				LED_PCA10059_BLUE | NRFX_PWM_PIN_INVERTED,
+				LED_PCA10059_YELLOW | NRFX_PWM_PIN_INVERTED},
+		.irq_priority = APP_IRQ_PRIORITY_LOWEST,
+		.base_clock = NRF_PWM_CLK_1MHz,
+		.count_mode = NRF_PWM_MODE_UP,
+		.top_value = PWM_CFG_TOP_VALUE,
+		.load_mode = NRF_PWM_LOAD_INDIVIDUAL,
+		.step_mode = NRF_PWM_STEP_AUTO};
 
 // This variable stores current value of hue, saturation & value (brightness)
 static hsv_ctx_t hsv_ctx;
 
-// This variable stores current value of rgb (which is calculated using hsv_ctx & hsv_helper_convert)
+// This variable stores current value of rgb (which is calculated using hsv_ctx & hsv_helper_convert_hsv_to_rgb)
 static rgb_value_t rgb_ctx;
 
 // Current mode of hsv picker is stored (HSV_PICKER_(VIEW_MODE, EDIT_HUE_MODE, EDIT_SATURATION_MODE, EDIT_BRIGHTNESS_MODE))
@@ -103,7 +98,7 @@ static void hsv_picker_cyclic_var_set_indicator(float *value, float max_value, b
 }
 
 /*
-	Adds to value or subscribes from value step & 
+	Adds to value or subscribes from value step &
 	sets indicator which shows if cyclic variable should be incremented or decremented
 */
 static void hsv_picker_cyclic_var_next_value(float *value, float step, float max_value, bool *indicator)
@@ -120,7 +115,7 @@ static void hsv_picker_cyclic_var_next_value(float *value, float step, float max
 	hsv_picker_cyclic_var_set_indicator(value, max_value, indicator);
 }
 
-// Sets up fields of hsv_ctx variable 
+// Sets up fields of hsv_ctx variable
 static void hsv_picker_init_hsv_ctx(float hue, float saturation, float brightness)
 {
 	hsv_ctx.hue = hue;
@@ -135,6 +130,13 @@ static void hsv_picker_flush_pwm_values(void)
 	nrfx_pwm_simple_playback(&pwm_rgb, &leds_seq, 1, 0);
 }
 
+static void hsv_picker_update_rgb_ctx(uint16_t red, uint16_t green, uint16_t blue)
+{
+	rgb_ctx.red = red;
+	rgb_ctx.green = green;
+	rgb_ctx.blue = blue;
+}
+
 // Sets up values of rgb channels
 static void hsv_picker_update_rgb_channels(void)
 {
@@ -146,7 +148,7 @@ static void hsv_picker_update_rgb_channels(void)
 // Converts hsv to rgb & sets up values of channels which are used to display values of rgb leds
 static void hsv_picker_update_rgb(void)
 {
-	hsv_helper_convert(&hsv_ctx, &rgb_ctx);
+	hsv_helper_convert_hsv_to_rgb(&hsv_ctx, &rgb_ctx);
 
 	hsv_picker_update_rgb_channels();
 }
@@ -156,9 +158,9 @@ static void hsv_picker_update_rgb(void)
 	Otherwise, generates pwm value of indicator led using formula:
 
 		PWM_CFG_TOP_VALUE * sin(PWM_INDICATOR_FUNCTION_VALUE * indicator_function_angle * indicator_function_factor),
-			where 
+			where
 				  PWM_CFG_TOP_VALUE            = top value from the pwm config;
-			      PWM_INDICATOR_FUNCTION_VALUE = PI / 180 (used to convert degrees to radians);
+				  PWM_INDICATOR_FUNCTION_VALUE = PI / 180 (used to convert degrees to radians);
 				  indicator_function_angle     = variable to determine in which phase of cycle is indicator;
 				  indicator_function_factor    = used to shrink/expand sine function (makes indicator blink faster/slower);
 
@@ -203,7 +205,7 @@ static void hsv_picker_start_indicator_playback(void)
 	case HSV_PICKER_MODE_VIEW:
 		leds_values.channel_3 = 0;
 		break;
-	
+
 	case HSV_PICKER_MODE_EDIT_HUE:
 		indicator_function_factor = PWM_INDICATOR_HUE_MODE_FACTOR;
 		indicator_function_angle = 0.0F;
@@ -217,7 +219,7 @@ static void hsv_picker_start_indicator_playback(void)
 	case HSV_PICKER_MODE_EDIT_BRIGHTNESS:
 		leds_values.channel_3 = PWM_CFG_TOP_VALUE;
 		break;
-	
+
 	default:
 		return;
 	}
@@ -227,7 +229,7 @@ static void hsv_picker_start_indicator_playback(void)
 }
 
 /*
-	If event_type = NRFX_PWM_EVT_FINISHED (playback is finished), 
+	If event_type = NRFX_PWM_EVT_FINISHED (playback is finished),
 	generate new pwm value of indicator and flush this value.
 */
 static void pwm_event_handler(nrfx_pwm_evt_type_t event)
@@ -272,7 +274,7 @@ static bool hsv_picker_try_init_from_flash(void)
 	satur.ui = buffer[HSV_SAVED_BUFFER_IDX_SATUR];
 	float_uint32_union_t bright;
 	bright.ui = buffer[HSV_SAVED_BUFFER_IDX_BRIGHT];
-	
+
 	hsv_ctx.hue = hue.fl;
 	hsv_ctx.saturation = satur.fl;
 	hsv_ctx.brightness = bright.fl;
@@ -324,7 +326,7 @@ void hsv_picker_next_mode(void)
 	case HSV_PICKER_MODE_VIEW:
 		curr_mode = HSV_PICKER_MODE_EDIT_HUE;
 		break;
-	
+
 	case HSV_PICKER_MODE_EDIT_HUE:
 		curr_mode = HSV_PICKER_MODE_EDIT_SATURATION;
 		break;
@@ -341,7 +343,7 @@ void hsv_picker_next_mode(void)
 			should_update_saved_value = false;
 		}
 		break;
-	
+
 	default:
 		curr_mode = HSV_PICKER_MODE_VIEW;
 		NRF_LOG_INFO("hsv_picker: Invalid picker mode encountered. Changed to view mode");
@@ -349,7 +351,7 @@ void hsv_picker_next_mode(void)
 	}
 
 	NRF_LOG_INFO("hsv_picker: Changed picker mode. New mode: %d", curr_mode);
-	
+
 	hsv_picker_start_indicator_playback();
 }
 
@@ -361,7 +363,7 @@ void hsv_picker_edit_param(void)
 	case HSV_PICKER_MODE_VIEW:
 		// No parameter should be edited in the view mode
 		return;
-	
+
 	case HSV_PICKER_MODE_EDIT_HUE:
 		// Maximum value of hue may be 360 and mod 360.1 will always generate values >= 360
 		// and does not generate big inaccuracy
@@ -386,6 +388,21 @@ void hsv_picker_edit_param(void)
 	}
 
 	should_update_saved_value = true;
+	hsv_picker_update_rgb();
+	hsv_picker_flush_pwm_values();
+}
+
+void hsv_picker_set_hsv(float hue, float satur, float bright)
+{
+	hsv_picker_init_hsv_ctx(hue, satur, bright);
+	hsv_picker_update_rgb();
+	hsv_picker_flush_pwm_values();
+}
+
+void hsv_picker_set_rgb(uint32_t red, uint32_t green, uint32_t blue)
+{
+	hsv_picker_update_rgb_ctx((uint16_t)red, (uint16_t)green, (uint16_t)blue);
+	hsv_helper_convert_rgb_to_hsv(&rgb_ctx, &hsv_ctx);
 	hsv_picker_update_rgb();
 	hsv_picker_flush_pwm_values();
 }

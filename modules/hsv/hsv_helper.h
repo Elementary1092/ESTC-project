@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define HSV_MAX_HUE        360.0F
+#define HSV_MAX_HUE 360.0F
 #define HSV_MAX_SATURATION 100.0F
 #define HSV_MAX_BRIGHTNESS 100.0F
 
@@ -23,7 +23,9 @@ typedef struct
 	uint16_t blue;
 } rgb_value_t;
 
-void hsv_helper_convert(hsv_ctx_t *hsv, rgb_value_t *rgb);
+void hsv_helper_convert_hsv_to_rgb(hsv_ctx_t *hsv, rgb_value_t *rgb);
+
+void hsv_helper_convert_rgb_to_hsv(rgb_value_t *rgb, hsv_ctx_t *hsv);
 
 float hsv_helper_modf(float value, float mod_base);
 
