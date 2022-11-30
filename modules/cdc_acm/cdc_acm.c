@@ -23,80 +23,78 @@ void cdc_acm_init(app_usbd_cdc_acm_t const *acm)
 	app_timer_start(event_queue_process_timer, EVENT_QUEUE_PROCESS_TIMEOUT, NULL);
 }
 
-ssize_t cdc_acm_echo(app_usbd_cdc_acm_t const *acm, char *buf, ssize_t buf_size)
+ssize_t cdc_acm_echo(app_usbd_cdc_acm_t const *acm, char *buf, ssize_t offset)
 {
 	char temp_buf[CDC_ACM_TEMP_BUF_SIZE] = {0};
-	ret_code_t ret;
-	ssize_t read_chars_count = 0;
+	ret_code_t ret = app_usbd_cdc_acm_read(acm, temp_buf, CDC_ACM_TEMP_BUF_SIZE);
 
-	for (ssize_t i = 0; i < buf_size; i++)
+	if (ret != NRF_SUCCESS)
 	{
-		ret = app_usbd_cdc_acm_read(acm, temp_buf, CDC_ACM_TEMP_BUF_SIZE);
-
-		if (ret != NRF_SUCCESS)
-		{
 #if NRF_LOG_ENABLED
-			NRF_LOG_ERROR("cdc_acm_echo: On reading from cdc acm: %u", ret);
+		NRF_LOG_ERROR("cdc_acm_echo: On reading from cdc acm: %u", ret);
 #endif
-			continue;
-		}
+		return CDC_ACM_ACTION_ERROR;
+	}
+	
+	buf[offset] = temp_buf[0];
 
-		if (temp_buf[0] == '\r' || temp_buf[0] == '\n')
-		{
-			(void)app_usbd_cdc_acm_write(acm, "\r\n", 2);
-			return read_chars_count;
-		}
-		else
-		{
-			(void)app_usbd_cdc_acm_write(acm, temp_buf, CDC_ACM_TEMP_BUF_SIZE);
-		}
-
-		if (temp_buf[0] == ' ' || temp_buf[0] == '\t')
-		{
-			return read_chars_count;
-		}
-
-		buf[i] = temp_buf[0];
-		read_chars_count++;
+	if (temp_buf[0] == '\r' \
+		|| temp_buf[0] == '\n')
+	{
+		(void)app_usbd_cdc_acm_write(acm, "\r\n", 2);
+		return CDC_ACM_READ_NEW_LINE;
+	}
+	else
+	{
+		(void)app_usbd_cdc_acm_write(acm, temp_buf, CDC_ACM_TEMP_BUF_SIZE);
 	}
 
-	return read_chars_count;
+	if (temp_buf[0] == ' ' \
+		|| temp_buf[0] == '\t')
+	{
+		return CDC_ACM_READ_WHITESPACE;
+	}
+
+	return CDC_ACM_SUCCESS;
 }
 
-ssize_t cdc_acm_read(app_usbd_cdc_acm_t const *acm, char *buf, ssize_t buf_size)
+cdc_acm_ret_code_t cdc_acm_read(app_usbd_cdc_acm_t const *acm, char *buf, ssize_t offset)
 {
 	char temp_buf[CDC_ACM_TEMP_BUF_SIZE] = {0};
-	ret_code_t ret;
-	ssize_t read_chars_count = 0;
 
-	for (ssize_t i = 0; i < buf_size; i++)
+	ret_code_t ret = app_usbd_cdc_acm_read(acm, temp_buf, CDC_ACM_TEMP_BUF_SIZE);
+
+	if (ret != NRF_SUCCESS)
 	{
-		ret = app_usbd_cdc_acm_read(acm, temp_buf, CDC_ACM_TEMP_BUF_SIZE);
-
-		if (ret != NRF_SUCCESS)
-		{
 #if NRF_LOG_ENABLED
-			NRF_LOG_ERROR("cdc_acm_read: On reading from cdc acm: %u", ret);
+		NRF_LOG_ERROR("cdc_acm_read: On reading from cdc acm: %u", ret);
 #endif
-			continue;
-		}
+		return CDC_ACM_ACTION_ERROR;
+	}
+	
+	buf[offset] = temp_buf[0];
 
-		if (temp_buf[0] == '\r' \
-			|| temp_buf[0] == '\n' \
-			|| temp_buf[0] == ' ' \
-			|| temp_buf[0] == '\t')
-		{
-			return read_chars_count;
-		}
-
-		buf[i] = temp_buf[0];
-		read_chars_count++;
+	if (temp_buf[0] == '\r' \
+		|| temp_buf[0] == '\n')
+	{
+		return CDC_ACM_READ_NEW_LINE;
 	}
 
-	return read_chars_count;
+	if (temp_buf[0] == ' ' \
+		|| temp_buf[0] == '\t')
+	{
+		return CDC_ACM_READ_WHITESPACE;
+	}
+
+	return CDC_ACM_SUCCESS;
 }
 
-void cdc_acm_write(app_usbd_cdc_acm_t const *acm, const char *str, ssize_t str_len)
+cdc_acm_ret_code_t cdc_acm_write(app_usbd_cdc_acm_t const *acm, const char *str, ssize_t str_len)
 {
-	(void)app_usbd_cdc_acm_write(acm, str, str_len);
+	if (app_usbd_cdc_acm_write(acm, str, str_len) != NRF_SUCCESS)
+	{
+		return CDC_ACM_ACTION_ERROR;
+	}
+
+	return CDC_ACM_SUCCESS;
 }
