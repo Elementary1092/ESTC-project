@@ -64,6 +64,7 @@ static void hsv_cli_handle_rx_done(void)
 			hsv_cli_resolve_command(&curr_command, &acm_buf_ctx);
 			hsv_cli_exec_command(&curr_command);
 			hsv_cli_clear_command(&curr_command);
+			cdc_acm_read_buf_ctx_clear(&acm_buf_ctx);
 		}
 	} 
 	while(ret == CDC_ACM_SUCCESS);
@@ -127,18 +128,16 @@ static size_t hsv_cli_tokenize_string(char buf[][HSV_CLI_MAX_WORD_SIZE], const c
 		}
 	}
 
-	return buf_str_idx++;
+	return buf_str_idx;
 }
 
 static void hsv_cli_resolve_command(hsv_cli_command_desc_t *command,
 									cdc_acm_read_buf_ctx_t const *read_buf)
 {
-	char args[HSV_CLI_MAX_ARGS + 1][HSV_CLI_MAX_WORD_SIZE];
+	char args[HSV_CLI_MAX_ARGS + 1][HSV_CLI_MAX_WORD_SIZE] = {0};
 	size_t nargs = hsv_cli_tokenize_string(args, read_buf->buf, " \r\n\t\0");
 	
 	command->cmd = HSV_CLI_COMMAND_UNKNOWN;
-	
-	NRF_LOG_INFO("Command: %s", NRF_LOG_INTERNAL_LOG_PUSH(args[0]));
 	
 	if (nargs == 0)
 	{
@@ -267,7 +266,7 @@ static void hsv_cli_convert_nstrs_to_nuints(uint32_t *converted_args, char **arg
 static void hsv_cli_clear_command(hsv_cli_command_desc_t *command)
 {
 	command->cmd = HSV_CLI_COMMAND_UNKNOWN;
-	memset(args_buf, '\0', sizeof(args_buf));
+	memset(args_buf, 0, sizeof(args_buf));
 	command->args = (char **)args_buf;
 	command->args_count = 0;
 }
