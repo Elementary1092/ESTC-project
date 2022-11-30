@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "app_config.h"
 
 #ifndef HSV_CLI_CDC_ACM_COMM_EPIN
 #define HSV_CLI_CDC_ACM_COMM_EPIN NRFX_USBD_EPIN3
@@ -46,7 +45,6 @@ typedef struct
 	hsv_cli_command_t cmd;
 	char              **args;
 	uint8_t           args_count;
-	bool              cmd_resolved;
 } hsv_cli_command_desc_t;
 
 void hsv_cli_init(void);

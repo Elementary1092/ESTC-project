@@ -68,6 +68,7 @@ SRC_FILES += \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf_format.c \
   $(SDK_ROOT)/external/utf_converter/utf.c \
+  $(PROJ_DIR)/modules/cdc_acm/cdc_acm_read_buf.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm.c \
   $(PROJ_DIR)/modules/timer/rtc.c \
   $(PROJ_DIR)/modules/flash/flash_memory.c \
@@ -160,7 +161,6 @@ CFLAGS += -DUSE_APP_CONFIG
 CFLAGS += -DAPP_TIMER_V2
 CFLAGS += -DAPP_TIMER_V2_RTC1_ENABLED
 CFLAGS += -DBOARD_PCA10059
-# CFLAGS += -DBSP_DEFINES_ONLY
 CFLAGS += -DCONFIG_GPIO_AS_PINRESET
 CFLAGS += -DFLOAT_ABI_HARD
 CFLAGS += -DMBR_PRESENT
@@ -192,7 +192,6 @@ ASMFLAGS += -DUSE_APP_CONFIG
 ASMFLAGS += -DAPP_TIMER_V2
 ASMFLAGS += -DAPP_TIMER_V2_RTC1_ENABLED
 ASMFLAGS += -DBOARD_PCA10059
-# ASMFLAGS += -DBSP_DEFINES_ONLY
 ASMFLAGS += -DCONFIG_GPIO_AS_PINRESET
 ASMFLAGS += -DFLOAT_ABI_HARD
 ASMFLAGS += -DMBR_PRESENT
