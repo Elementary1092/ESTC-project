@@ -13,9 +13,9 @@
 
 #define HSV_CLI_UNKNOWN_COMMAND_PROMPT "Unknown command. Try again.\r\n"
 
-static char word_buf[HSV_CLI_MAX_WORD_SIZE] = {'\0'};
+static char word_buf[HSV_CLI_MAX_WORD_SIZE] = {0};
 
-static char args_buf[HSV_CLI_MAX_ARGS][HSV_CLI_MAX_WORD_SIZE] = {'\0'};
+static char args_buf[HSV_CLI_MAX_ARGS][HSV_CLI_MAX_WORD_SIZE] = {0};
 
 static hsv_cli_command_desc_t curr_command;
 
@@ -66,7 +66,7 @@ static void hsv_cli_handle_rx_done(void)
 			hsv_cli_clear_command(&curr_command);
 		}
 	} 
-	while(ret != CDC_ACM_ACTION_ERROR);
+	while(ret == CDC_ACM_SUCCESS);
 }
 
 static void hsv_cli_usb_evt_handler(app_usbd_class_inst_t const *p_inst,
@@ -77,8 +77,7 @@ static void hsv_cli_usb_evt_handler(app_usbd_class_inst_t const *p_inst,
 		case APP_USBD_CDC_ACM_USER_EVT_PORT_OPEN:
 		{
 			NRF_LOG_INFO("Opened usb port");
-			ret_code_t ret = app_usbd_cdc_acm_read(&hsv_cli_usb_cdc_acm, resp_buf, 1U);
-			UNUSED_VARIABLE(ret);
+			cdc_acm_only_read(&hsv_cli_usb_cdc_acm);
 			break;
 		}
 
@@ -128,7 +127,7 @@ static size_t hsv_cli_tokenize_string(char buf[][HSV_CLI_MAX_WORD_SIZE], const c
 		}
 	}
 
-	return buf_str_idx;
+	return buf_str_idx++;
 }
 
 static void hsv_cli_resolve_command(hsv_cli_command_desc_t *command,
@@ -138,6 +137,9 @@ static void hsv_cli_resolve_command(hsv_cli_command_desc_t *command,
 	size_t nargs = hsv_cli_tokenize_string(args, read_buf->buf, " \r\n\t\0");
 	
 	command->cmd = HSV_CLI_COMMAND_UNKNOWN;
+	
+	NRF_LOG_INFO("Command: %s", NRF_LOG_INTERNAL_LOG_PUSH(args[0]));
+	
 	if (nargs == 0)
 	{
 		return;
