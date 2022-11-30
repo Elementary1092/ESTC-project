@@ -23,7 +23,7 @@ void cdc_acm_init(app_usbd_cdc_acm_t const *acm)
 	app_timer_start(event_queue_process_timer, EVENT_QUEUE_PROCESS_TIMEOUT, NULL);
 }
 
-ssize_t cdc_acm_echo(app_usbd_cdc_acm_t const *acm, char *buf, ssize_t offset)
+cdc_acm_ret_code_t cdc_acm_echo(app_usbd_cdc_acm_t const *acm, cdc_acm_read_buf_ctx_t *read_buf)
 {
 	char temp_buf[CDC_ACM_TEMP_BUF_SIZE] = {0};
 	ret_code_t ret = app_usbd_cdc_acm_read(acm, temp_buf, CDC_ACM_TEMP_BUF_SIZE);
@@ -36,7 +36,10 @@ ssize_t cdc_acm_echo(app_usbd_cdc_acm_t const *acm, char *buf, ssize_t offset)
 		return CDC_ACM_ACTION_ERROR;
 	}
 	
-	buf[offset] = temp_buf[0];
+	if ( !(read_buf->curr_idx >= read_buf->buf_size) )
+	{
+		read_buf->buf[read_buf->curr_idx++] = temp_buf[0];
+	}
 
 	if (temp_buf[0] == '\r' \
 		|| temp_buf[0] == '\n')
@@ -58,7 +61,7 @@ ssize_t cdc_acm_echo(app_usbd_cdc_acm_t const *acm, char *buf, ssize_t offset)
 	return CDC_ACM_SUCCESS;
 }
 
-cdc_acm_ret_code_t cdc_acm_read(app_usbd_cdc_acm_t const *acm, char *buf, ssize_t offset)
+cdc_acm_ret_code_t cdc_acm_read(app_usbd_cdc_acm_t const *acm, cdc_acm_read_buf_ctx_t *read_buf)
 {
 	char temp_buf[CDC_ACM_TEMP_BUF_SIZE] = {0};
 
@@ -72,7 +75,10 @@ cdc_acm_ret_code_t cdc_acm_read(app_usbd_cdc_acm_t const *acm, char *buf, ssize_
 		return CDC_ACM_ACTION_ERROR;
 	}
 	
-	buf[offset] = temp_buf[0];
+	if ( !(read_buf->curr_idx >= read_buf->buf_size) )
+	{
+		read_buf->buf[read_buf->curr_idx++] = temp_buf[0];
+	}
 
 	if (temp_buf[0] == '\r' \
 		|| temp_buf[0] == '\n')
