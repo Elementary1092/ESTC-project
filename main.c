@@ -10,6 +10,7 @@
 #include <nrf_log_backend_usb.h>
 #include <app_usbd.h>
 #include <app_usbd_serial_num.h>
+#include <app_usbd_cdc_acm.h>
 
 #include "modules/gpio/button/board_button.h"
 #include "modules/gpio/led/led.h"
@@ -65,7 +66,15 @@ int main(void)
     /* Toggle LEDs. */
     while (true)
     {
+    #if ESTC_USB_CLI_ENABLED
+        while (app_usbd_event_queue_process())
+        {
+
+        }
+    #else
         __WFI();
+    #endif
+
         LOG_BACKEND_USB_PROCESS();
         NRF_LOG_PROCESS();
     }

@@ -21,6 +21,8 @@ static hsv_cli_command_desc_t curr_command;
 
 static cdc_acm_read_buf_ctx_t acm_buf_ctx;
 
+char resp_buf[1];
+
 static void hsv_cli_usb_evt_handler(app_usbd_class_inst_t const *p_inst,
 									app_usbd_cdc_acm_user_event_t event);
 
@@ -74,14 +76,12 @@ static void hsv_cli_usb_evt_handler(app_usbd_class_inst_t const *p_inst,
 	{
 		case APP_USBD_CDC_ACM_USER_EVT_PORT_OPEN:
 		{
-			char buf[1];
-			cdc_acm_read_buf_ctx_t temp_buf = {
-				.buf = buf,
-				.buf_size = 1,
-			};
-			cdc_acm_read(&hsv_cli_usb_cdc_acm, &temp_buf);
+			NRF_LOG_INFO("Opened usb port");
+			ret_code_t ret = app_usbd_cdc_acm_read(&hsv_cli_usb_cdc_acm, resp_buf, 1U);
+			UNUSED_VARIABLE(ret);
 			break;
 		}
+
 		case APP_USBD_CDC_ACM_USER_EVT_RX_DONE:
 		{
 			hsv_cli_handle_rx_done();

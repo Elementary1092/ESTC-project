@@ -28,16 +28,6 @@ void cdc_acm_init(app_usbd_cdc_acm_t const *acm);
 cdc_acm_ret_code_t cdc_acm_echo(app_usbd_cdc_acm_t const *acm, cdc_acm_read_buf_ctx_t *read_buf);
 
 /*
-	cdc_acm_read reads entered char from { acm } to { read_buf } if read_buf has enough space.
-	Returns:
-		- CDC_ACM_SUCCESS: when function read successfully;
-		- CDC_ACM_ACTION_ERROR: when app_usbd_cdc_acm_read() returns error;
-		- CDC_ACM_READ_WHITESPACE: when function read ' ' or '\t';
-		- CDC_ACM_READ_NEW_LINE: when function read '\r' or '\n'.
-*/
-cdc_acm_ret_code_t cdc_acm_read(app_usbd_cdc_acm_t const *acm, cdc_acm_read_buf_ctx_t *read_buf);
-
-/*
 	cdc_acm_write write { buf_size } chars from { str } to { acm }.
 	Returns:
 		- CDC_ACM_SUCCESS: when function wrote successfully;
