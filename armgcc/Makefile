@@ -79,6 +79,7 @@ SRC_FILES += \
   $(PROJ_DIR)/modules/hsv/hsv_converter.c \
   $(PROJ_DIR)/modules/hsv/hsv_picker.c \
   $(PROJ_DIR)/modules/gpio/led/led.c \
+  $(PROJ_DIR)/modules/hsv/cli_handlers.c \
   $(PROJ_DIR)/modules/hsv/cli.c \
   $(PROJ_DIR)/modules/gpio/button/board_button.c \
   $(PROJ_DIR)/modules/gpio/led/sequence_ctx.c \
