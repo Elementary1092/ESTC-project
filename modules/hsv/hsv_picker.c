@@ -3,6 +3,7 @@
 #include "../gpio/led/led.h"
 #include "../gpio/button/board_button.h"
 #include "../flash/flash_memory.h"
+#include "../../utils/numeric/ops.h"
 #include "hsv_picker.h"
 #include "hsv_helper.h"
 #include <math.h>
@@ -50,7 +51,8 @@ static nrf_pwm_values_individual_t leds_values =
 		.channel_0 = 0,
 		.channel_1 = 0,
 		.channel_2 = 0,
-		.channel_3 = 0};
+		.channel_3 = 0
+	};
 
 static nrf_pwm_sequence_t const leds_seq =
 	{
@@ -176,7 +178,7 @@ static void hsv_picker_generate_indicator_playback(void)
 	}
 
 	float new_value_factor = sinf(PWM_INDICATOR_FUNCTION_FACTOR * indicator_function_angle * indicator_function_factor);
-	float new_value_f = pwm_cfg_top_value_f * hsv_helper_absf(new_value_factor);
+	float new_value_f = pwm_cfg_top_value_f * utils_numeric_ops_absf(new_value_factor);
 
 	indicator_function_angle += 1.0F;
 	if (indicator_function_angle > 360.0F)
@@ -367,7 +369,7 @@ void hsv_picker_edit_param(void)
 	case HSV_PICKER_MODE_EDIT_HUE:
 		// Maximum value of hue may be 360 and mod 360.1 will always generate values >= 360
 		// and does not generate big inaccuracy
-		hsv_ctx.hue = hsv_helper_modf(hsv_ctx.hue + HSV_PICKER_HUE_STEP, 360.1F);
+		hsv_ctx.hue = utils_numeric_ops_modf(hsv_ctx.hue + HSV_PICKER_HUE_STEP, 360.0F);
 		break;
 
 	case HSV_PICKER_MODE_EDIT_SATURATION:

@@ -1,13 +1,10 @@
 #include <nrfx.h>
 #include <math.h>
+
+#include "../../utils/numeric/ops.h"
 #include "hsv_helper.h"
 
 static float const max_uint16_f = (float)UINT16_MAX;
-
-float hsv_helper_modf(float value, float mod_base)
-{
-	return value - (mod_base * floorf(value / mod_base));
-}
 
 static void hsv_helper_align_hsv(hsv_ctx_t *hsv)
 {
@@ -42,16 +39,6 @@ uint16_t hsv_helper_float_to_uint16(float value, uint16_t max_value)
 	return (uint16_t)((unsigned int)(floorf(value)));
 }
 
-float hsv_helper_absf(float value)
-{
-	if (value < 0.0F)
-	{
-		return -value;
-	}
-
-	return value;
-}
-
 void hsv_helper_convert_hsv_to_rgb(hsv_ctx_t *hsv, rgb_value_t *res)
 {
 	NRFX_ASSERT(hsv != NULL);
@@ -61,8 +48,8 @@ void hsv_helper_convert_hsv_to_rgb(hsv_ctx_t *hsv, rgb_value_t *res)
 
 	float M = 255.0F * hsv->brightness / 100.0F;
 	float m = M * (1.0F - (hsv->saturation / 100.0F));
-	float hue_mod_2 = hsv_helper_modf((hsv->hue / 60.0F), 2);
-	float z = (M - m) * (1 - hsv_helper_absf(hue_mod_2 - 1));
+	float hue_mod_2 = utils_numeric_ops_modf((hsv->hue / 60.0F), 2);
+	float z = (M - m) * (1 - utils_numeric_ops_absf(hue_mod_2 - 1));
 
 	uint16_t shade0 = hsv_helper_float_to_uint16(M, HSV_HELPER_MAX_RGB);
 	uint16_t shade1 = hsv_helper_float_to_uint16(m, HSV_HELPER_MAX_RGB);
