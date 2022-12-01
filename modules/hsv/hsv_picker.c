@@ -4,6 +4,7 @@
 #include "../gpio/button/board_button.h"
 #include "../flash/flash_memory.h"
 #include "../../utils/numeric/ops.h"
+#include "../../utils/numeric/converter.h"
 #include "hsv_picker.h"
 #include "hsv_converter.h"
 #include <math.h>
@@ -185,7 +186,7 @@ static void hsv_picker_generate_indicator_playback(void)
 		indicator_function_angle = 0.0F;
 	}
 
-	leds_values.channel_3 = hsv_converter_float_to_uint16(new_value_f, PWM_CFG_TOP_VALUE);
+	leds_values.channel_3 = utils_numeric_converter_f_to_u16(new_value_f, PWM_CFG_TOP_VALUE);
 }
 
 /*

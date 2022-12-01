@@ -70,6 +70,7 @@ SRC_FILES += \
   $(SDK_ROOT)/external/utf_converter/utf.c \
   $(PROJ_DIR)/utils/strings/strings.c \
   $(PROJ_DIR)/utils/numeric/ops.c \
+  $(PROJ_DIR)/utils/numeric/converter.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm_read_buf.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm_cli.c \

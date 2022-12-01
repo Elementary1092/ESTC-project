@@ -2,9 +2,8 @@
 #include <math.h>
 
 #include "../../utils/numeric/ops.h"
+#include "../../utils/numeric/converter.h"
 #include "hsv_converter.h"
-
-static float const max_uint16_f = (float)UINT16_MAX;
 
 static void hsv_converter_align_hsv(hsv_ctx_t *hsv)
 {
@@ -24,21 +23,6 @@ static void hsv_converter_align_hsv(hsv_ctx_t *hsv)
 	}
 }
 
-uint16_t hsv_converter_float_to_uint16(float value, uint16_t max_value)
-{
-	float max_value_f = (float)max_value;
-	if (value > max_value_f || max_uint16_f < value)
-	{
-		return max_value;
-	}
-	if (value < 0.0F)
-	{
-		return 0U;
-	}
-
-	return (uint16_t)((unsigned int)(floorf(value)));
-}
-
 void hsv_converter_convert_hsv_to_rgb(hsv_ctx_t *hsv, rgb_value_t *res)
 {
 	NRFX_ASSERT(hsv != NULL);
@@ -51,9 +35,9 @@ void hsv_converter_convert_hsv_to_rgb(hsv_ctx_t *hsv, rgb_value_t *res)
 	float hue_mod_2 = utils_numeric_ops_modf((hsv->hue / 60.0F), 2);
 	float z = (M - m) * (1 - utils_numeric_ops_absf(hue_mod_2 - 1));
 
-	uint16_t shade0 = hsv_converter_float_to_uint16(M, HSV_CONVERTER_MAX_RGB);
-	uint16_t shade1 = hsv_converter_float_to_uint16(m, HSV_CONVERTER_MAX_RGB);
-	uint16_t shade2 = hsv_converter_float_to_uint16(z + m, HSV_CONVERTER_MAX_RGB);
+	uint16_t shade0 = utils_numeric_converter_f_to_u16(M, HSV_CONVERTER_MAX_RGB);
+	uint16_t shade1 = utils_numeric_converter_f_to_u16(m, HSV_CONVERTER_MAX_RGB);
+	uint16_t shade2 = utils_numeric_converter_f_to_u16(z + m, HSV_CONVERTER_MAX_RGB);
 
 	float hue = hsv->hue;
 	if (hue < 60.0F || hue == HSV_MAX_HUE)

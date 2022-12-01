@@ -27,6 +27,4 @@ void hsv_converter_convert_hsv_to_rgb(hsv_ctx_t *hsv, rgb_value_t *rgb);
 
 void hsv_converter_convert_rgb_to_hsv(rgb_value_t *rgb, hsv_ctx_t *hsv);
 
-uint16_t hsv_converter_float_to_uint16(float value, uint16_t max_value);
-
 #endif
