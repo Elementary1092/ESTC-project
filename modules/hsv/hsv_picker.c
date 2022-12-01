@@ -396,6 +396,7 @@ void hsv_picker_set_hsv(float hue, float satur, float bright)
 {
 	hsv_picker_init_hsv_ctx(hue, satur, bright);
 	hsv_picker_update_rgb();
+	hsv_picker_update_saved_value();
 	hsv_picker_flush_pwm_values();
 }
 
@@ -404,5 +405,6 @@ void hsv_picker_set_rgb(uint32_t red, uint32_t green, uint32_t blue)
 	hsv_picker_update_rgb_ctx((uint16_t)red, (uint16_t)green, (uint16_t)blue);
 	hsv_helper_convert_rgb_to_hsv(&rgb_ctx, &hsv_ctx);
 	hsv_picker_update_rgb();
+	hsv_picker_update_saved_value();
 	hsv_picker_flush_pwm_values();
 }
