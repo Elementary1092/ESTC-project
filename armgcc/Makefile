@@ -75,7 +75,7 @@ SRC_FILES += \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm_cli.c \
   $(PROJ_DIR)/modules/timer/rtc.c \
   $(PROJ_DIR)/modules/flash/flash_memory.c \
-  $(PROJ_DIR)/modules/hsv/hsv_helper.c \
+  $(PROJ_DIR)/modules/hsv/hsv_converter.c \
   $(PROJ_DIR)/modules/hsv/hsv_picker.c \
   $(PROJ_DIR)/modules/gpio/led/led.c \
   $(PROJ_DIR)/modules/hsv/cli.c \

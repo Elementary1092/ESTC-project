@@ -5,11 +5,11 @@
 #include "../flash/flash_memory.h"
 #include "../../utils/numeric/ops.h"
 #include "hsv_picker.h"
-#include "hsv_helper.h"
+#include "hsv_converter.h"
 #include <math.h>
 
 #define RGB_CTX_VALUE_FACTOR 100U
-#define PWM_CFG_TOP_VALUE HSV_HELPER_MAX_RGB *RGB_CTX_VALUE_FACTOR
+#define PWM_CFG_TOP_VALUE HSV_CONVERTER_MAX_RGB *RGB_CTX_VALUE_FACTOR
 
 #define PWM_INDICATOR_HUE_MODE_FACTOR 2.0F
 #define PWM_INDICATOR_SATURATION_MODE_FACTOR 8.0F
@@ -51,8 +51,7 @@ static nrf_pwm_values_individual_t leds_values =
 		.channel_0 = 0,
 		.channel_1 = 0,
 		.channel_2 = 0,
-		.channel_3 = 0
-	};
+		.channel_3 = 0};
 
 static nrf_pwm_sequence_t const leds_seq =
 	{
@@ -80,7 +79,7 @@ static nrfx_pwm_config_t const leds_pwm_cfg =
 // This variable stores current value of hue, saturation & value (brightness)
 static hsv_ctx_t hsv_ctx;
 
-// This variable stores current value of rgb (which is calculated using hsv_ctx & hsv_helper_convert_hsv_to_rgb)
+// This variable stores current value of rgb (which is calculated using hsv_ctx & hsv_converter_convert_hsv_to_rgb)
 static rgb_value_t rgb_ctx;
 
 // Current mode of hsv picker is stored (HSV_PICKER_(VIEW_MODE, EDIT_HUE_MODE, EDIT_SATURATION_MODE, EDIT_BRIGHTNESS_MODE))
@@ -150,7 +149,7 @@ static void hsv_picker_update_rgb_channels(void)
 // Converts hsv to rgb & sets up values of channels which are used to display values of rgb leds
 static void hsv_picker_update_rgb(void)
 {
-	hsv_helper_convert_hsv_to_rgb(&hsv_ctx, &rgb_ctx);
+	hsv_converter_convert_hsv_to_rgb(&hsv_ctx, &rgb_ctx);
 
 	hsv_picker_update_rgb_channels();
 }
@@ -186,7 +185,7 @@ static void hsv_picker_generate_indicator_playback(void)
 		indicator_function_angle = 0.0F;
 	}
 
-	leds_values.channel_3 = hsv_helper_float_to_uint16(new_value_f, PWM_CFG_TOP_VALUE);
+	leds_values.channel_3 = hsv_converter_float_to_uint16(new_value_f, PWM_CFG_TOP_VALUE);
 }
 
 /*
@@ -405,7 +404,7 @@ void hsv_picker_set_hsv(float hue, float satur, float bright)
 void hsv_picker_set_rgb(uint32_t red, uint32_t green, uint32_t blue)
 {
 	hsv_picker_update_rgb_ctx((uint16_t)red, (uint16_t)green, (uint16_t)blue);
-	hsv_helper_convert_rgb_to_hsv(&rgb_ctx, &hsv_ctx);
+	hsv_converter_convert_rgb_to_hsv(&rgb_ctx, &hsv_ctx);
 	hsv_picker_update_rgb();
 	hsv_picker_update_saved_value();
 	hsv_picker_flush_pwm_values();
