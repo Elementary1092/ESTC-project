@@ -70,6 +70,7 @@ SRC_FILES += \
   $(SDK_ROOT)/external/utf_converter/utf.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm_read_buf.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm.c \
+  $(PROJ_DIR)/modules/cdc_acm/cdc_acm_cli.c \
   $(PROJ_DIR)/modules/timer/rtc.c \
   $(PROJ_DIR)/modules/flash/flash_memory.c \
   $(PROJ_DIR)/modules/hsv/hsv_helper.c \
