@@ -1,6 +1,5 @@
 #include <stdbool.h>
 #include <nrfx_nvmc.h>
-#include <nrf_bootloader_info.h>
 #include <nrf_log.h>
 #include "app_config.h"
 #include "flash_memory.h"
@@ -9,7 +8,7 @@
 #error NRF_DFU_APP_DATA_AREA_SIZE is not defined
 #endif
 
-#define FLASH_MEMORY_DATA_STARTING_ADDRESS BOOTLOADER_START_ADDR - NRF_DFU_APP_DATA_AREA_SIZE
+#define FLASH_MEMORY_DATA_STARTING_ADDRESS 0xE0000 - NRF_DFU_APP_DATA_AREA_SIZE
 #define FLASH_MEMORY_DEFAULT_VALUE         0xFFFFFFFF
 #define FLASH_MEMORY_PAGE_SIZE             4096
 
