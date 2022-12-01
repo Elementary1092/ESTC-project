@@ -40,13 +40,6 @@ typedef enum
 	HSV_CLI_COMMAND_UPDATE_RGB
 } hsv_cli_command_t;
 
-typedef struct
-{
-	hsv_cli_command_t cmd;
-	char              **args;
-	uint8_t           args_count;
-} hsv_cli_command_desc_t;
-
 void hsv_cli_init(void);
 
 #endif // HSV_CLI_H
