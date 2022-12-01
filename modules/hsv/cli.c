@@ -5,59 +5,20 @@
 
 #include "cli.h"
 #include "hsv_picker.h"
-
+#include "../../utils/strings/strings.h"
 #include "../cdc_acm/cdc_acm.h"
+#include "app_config.h"
 
 #define HSV_CLI_MAX_ARGS      5
-#define HSV_CLI_MAX_WORD_SIZE 64
+#define HSV_CLI_MAX_WORD_SIZE ESTC_MAX_LINE_SIZE
 
 #define HSV_CLI_UNKNOWN_COMMAND_PROMPT "Unknown command. Try again.\r\n"
 
 static hsv_cli_command_t hsv_cli_resolve_command(char const *str);
 static void hsv_cli_exec_help(app_usbd_cdc_acm_t const *cdc_acm, char args[][HSV_CLI_MAX_WORD_SIZE], uint8_t nargs);
 static void hsv_cli_exec_update_hsv(char args[][HSV_CLI_MAX_WORD_SIZE], uint8_t nargs);
-/* Invalid numbers are treated as 0 */
-static uint32_t hsv_cli_convert_str_to_uint(char *str);
 static void hsv_cli_convert_nstrs_to_nuints(uint32_t *converted_args, char args[][HSV_CLI_MAX_WORD_SIZE], uint8_t nargs);
 static void hsv_cli_exec_update_rgb(char args[][HSV_CLI_MAX_WORD_SIZE], uint8_t nargs);
-
-static inline bool hsv_cli_is_char_is_delim(char ch, const char *delims)
-{
-	for (size_t i = 0; i < strlen(delims); i++)
-	{
-		if (ch == delims[i])
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
-static size_t hsv_cli_tokenize_string(char buf[][HSV_CLI_MAX_WORD_SIZE], const char *str, const char *delims)
-{
-	size_t buf_str_idx = 0;
-	size_t buf_str_char_idx = 0;
-
-	for (size_t i = 0; i < strlen(str); i++)
-	{
-		if (!hsv_cli_is_char_is_delim(str[i], delims))
-		{
-			buf[buf_str_idx][buf_str_char_idx] = str[i];
-			buf_str_char_idx++;
-		}
-		else
-		{
-			if (buf_str_char_idx != 0)
-			{
-				buf_str_idx++;
-			}
-			buf_str_char_idx = 0;
-		}
-	}
-
-	return buf_str_idx;
-}
 
 static hsv_cli_command_t hsv_cli_resolve_command(char const *str)
 {
@@ -118,34 +79,11 @@ static void hsv_cli_exec_update_rgb(char args[][HSV_CLI_MAX_WORD_SIZE], uint8_t 
 	NRF_LOG_INFO("hsv_cli_exec_update_rgb: Updated rgb");
 }
 
-static uint32_t hsv_cli_convert_str_to_uint(char *str)
-{
-	uint32_t res = 0;
-	if (strlen(str) > 10)
-	{
-		NRF_LOG_ERROR("hsv_cli_convert_str_to_uint: String is too long: %s", str);
-		return res;
-	}
-	for (size_t i = 0; i < strlen(str); i++)
-	{
-		if (str[i] >= '0' && str[i] <= '9')
-		{
-			res = res * 10U + (uint32_t)(str[i] - '0');
-		}
-		else
-		{
-			return 0;
-		}
-	}
-
-	return res;
-}
-
 static void hsv_cli_convert_nstrs_to_nuints(uint32_t *converted_args, char args[][HSV_CLI_MAX_WORD_SIZE], uint8_t args_count)
 {
 	for (uint8_t i = 0; i < args_count; i++)
 	{
-		converted_args[i] = hsv_cli_convert_str_to_uint(args[i]);
+		converted_args[i] = utils_strings_atou(args[i]);
 	}
 }
 
@@ -153,7 +91,7 @@ void hsv_cli_exec_command(app_usbd_cdc_acm_t const *cdc_acm,
 						  cdc_acm_read_buf_ctx_t *read_buf)
 {
 	char args[HSV_CLI_MAX_ARGS + 1][HSV_CLI_MAX_WORD_SIZE] = {0};
-	size_t nargs = hsv_cli_tokenize_string(args, read_buf->buf, " \r\n\t\0");
+	size_t nargs = utils_strings_tokenize(args, read_buf->buf, " \r\n\t\0");
 
 	if (nargs == 0)
 	{

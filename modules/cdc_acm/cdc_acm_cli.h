@@ -2,6 +2,7 @@
 #define CDC_ACM_CLI_H
 
 #include "cdc_acm.h"
+#include "app_config.h"
 
 #ifndef CDC_ACM_CLI_COMM_EPIN
 #define CDC_ACM_CLI_COMM_EPIN NRFX_USBD_EPIN3
@@ -24,7 +25,7 @@
 #endif
 
 #ifndef CDC_ACM_CLI_READ_BUF_SIZE
-#define CDC_ACM_CLI_READ_BUF_SIZE 64
+#define CDC_ACM_CLI_READ_BUF_SIZE ESTC_MAX_LINE_SIZE
 #endif
 
 typedef enum
