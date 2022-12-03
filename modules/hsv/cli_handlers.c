@@ -53,7 +53,9 @@ void hsv_cli_exec_help(app_usbd_cdc_acm_t const *cdc_acm, char args[][HSV_CLI_MA
 						"Available commands:\r\n"
 						"\t1. help - get list of available commands;\r\n"
 						"\t2. hsv <hue> <saturation> <brightness> - set hue, saturation, and brightness of RGB LEDs;\r\n"
-						"\t3. rgb <red> <green> <blue> - set values of RGB LEDs.\r\n";
+						"\t3. rgb <red> <green> <blue> - set values of RGB LEDs.\r\n"
+						"\t4. add_rgb_color <red> <green> <blue> <color_name> - save red, green, blue combination under color_name\r\n"
+						"\t5. apply_color <color_name> - try applying color saved as <color_name>\r\n";
 
 	cdc_acm_write(cdc_acm, help_prompt, strlen(help_prompt));
 }
