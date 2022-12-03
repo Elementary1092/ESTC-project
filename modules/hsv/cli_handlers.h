@@ -9,6 +9,10 @@
 #define HSV_CLI_MAX_WORD_SIZE ESTC_MAX_LINE_SIZE
 #endif
 
+#ifndef HSV_CLI_SAVED_COLORS_MAX_NUM
+#define HSV_CLI_SAVED_COLORS_MAX_NUM 10
+#endif
+
 #define HSV_CLI_HANDLERS_EXPAND_AS_ENUM(a, b, c) a,
 #define HSV_CLI_HANDLERS_EXPAND_AS_CMD_STR(a, b, c) b,
 #define HSV_CLI_HANDLERS_EXPAND_AS_FNS(a, b, c) c,
@@ -18,7 +22,8 @@
 		HANDLER(HSV_CLI_CMD_UNKNOWN, "", hsv_cli_exec_unknown) \
 		HANDLER(HSV_CLI_CMD_HELP, "help", hsv_cli_exec_help) \
 		HANDLER(HSV_CLI_CDM_UPDATE_HSV, "hsv", hsv_cli_exec_update_hsv) \
-		HANDLER(HSV_CLI_CDM_UPDATE_RGB, "rgb", hsv_cli_exec_update_rgb)
+		HANDLER(HSV_CLI_CDM_UPDATE_RGB, "rgb", hsv_cli_exec_update_rgb) \
+		HANDLER(HSV_CLI_CMD_ADD_RGB_COLOR, "add_rgb_color", hsv_cli_exec_add_rgb_color)
 
 typedef enum
 {
@@ -38,5 +43,6 @@ void hsv_cli_exec_unknown(app_usbd_cdc_acm_t const *cdc_acm, char args[][HSV_CLI
 void hsv_cli_exec_help(app_usbd_cdc_acm_t const *cdc_acm, char args[][HSV_CLI_MAX_WORD_SIZE], uint8_t nargs);
 void hsv_cli_exec_update_hsv(app_usbd_cdc_acm_t const *cdc_acm, char args[][HSV_CLI_MAX_WORD_SIZE], uint8_t nargs);
 void hsv_cli_exec_update_rgb(app_usbd_cdc_acm_t const *cdc_acm, char args[][HSV_CLI_MAX_WORD_SIZE], uint8_t nargs);
+void hsv_cli_exec_add_rgb_color(app_usbd_cdc_acm_t const *cdc_acm, char args[][HSV_CLI_MAX_WORD_SIZE], uint8_t nargs);
 
 #endif
