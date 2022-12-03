@@ -6,7 +6,6 @@
 #include "../../utils/numeric/ops.h"
 #include "../../utils/numeric/converter.h"
 #include "hsv_picker.h"
-#include "hsv_converter.h"
 #include <math.h>
 
 #define RGB_CTX_VALUE_FACTOR 100U
@@ -409,4 +408,18 @@ void hsv_picker_set_rgb(uint32_t red, uint32_t green, uint32_t blue)
 	hsv_picker_update_rgb_channels();
 	hsv_picker_update_saved_value();
 	hsv_picker_flush_pwm_values();
+}
+
+void hsv_picker_get_current_hsv(hsv_ctx_t *hsv)
+{
+	hsv->hue = hsv_ctx.hue;
+	hsv->saturation = hsv_ctx.saturation;
+	hsv->brightness = hsv_ctx.brightness;
+}
+
+void hsv_picker_get_current_rgb(rgb_value_t *rgb)
+{
+	rgb->red = rgb_ctx.red;
+	rgb->green = rgb_ctx.green;
+	rgb->blue = rgb_ctx.blue;
 }

@@ -4,6 +4,7 @@
 #include <nrfx_pwm.h>
 #include <nrf_drv_pwm.h>
 #include <app_util_platform.h>
+#include "hsv_converter.h"
 
 typedef enum
 {
@@ -35,5 +36,9 @@ void hsv_picker_edit_param(void);
 void hsv_picker_set_hsv(float hue, float satur, float bright);
 
 void hsv_picker_set_rgb(uint32_t red, uint32_t green, uint32_t blue);
+
+void hsv_picker_get_current_hsv(hsv_ctx_t *hsv_ctx);
+
+void hsv_picker_get_current_rgb(rgb_value_t *rgb_ctx);
 
 #endif
