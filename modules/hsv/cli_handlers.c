@@ -109,7 +109,7 @@ void hsv_cli_exec_add_rgb_color(app_usbd_cdc_acm_t const *cdc_acm,
 		return;
 	}
 
-	saved_color_name_hashes[saved_colors_idx] = utils_hash_str_jenkins(args[4]);
+	saved_color_name_hashes[saved_colors_idx] = utils_hash_str_jenkins(args[3]);
 	for (size_t i = 0UL; i < 3UL; i++)
 	{
 		saved_colors[saved_colors_idx][i] = utils_strings_atou(args[i]);
@@ -132,8 +132,7 @@ void hsv_cli_exec_apply_color(app_usbd_cdc_acm_t const *cdc_acm,
 	{
 		if (saved_color_name_hashes[i] == color_name_hash)
 		{
-			uint32_t rgb_clr[3] = saved_colors[i];
-			hsv_picker_set_rgb(rgb_clr[0], rgb_clr[1], rgb_clr[2]);
+			hsv_picker_set_rgb(saved_colors[i][0], saved_colors[i][1], saved_colors[i][2]);
 			return;
 		}
 	}
