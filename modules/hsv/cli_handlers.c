@@ -9,6 +9,8 @@
 #define HSV_CLI_UNKNOWN_COMMAND_PROMPT "Unknown command. Try again.\r\n"
 #define HSV_CLI_SAVED_COLORS_BUF_FULL_PROMPT "Cannot save color. Already saved maximum number of colors.\r\n"
 #define HSV_CLI_CANNOT_FIND_COLOR_PROMPT "Cannot find specified saved color.\r\n"
+#define HSV_CLI_SAVED_COLOR_PROMPT "Saved color successfully.\r\n"
+#define HSV_CLI_SAVED_COLOR_REWRITTEN_PROMPT "Saved color was rewritten.\r\n"
 
 static hsv_cli_command_handler_t handlers[] = 
 {
@@ -123,18 +125,34 @@ void hsv_cli_exec_add_rgb_color(app_usbd_cdc_acm_t const *cdc_acm,
 		return;
 	}
 
+	uint32_t color_name_hash = utils_hash_str_jenkins(args[3]);
+	for (size_t i = 0UL; i < saved_colors_idx; i++)
+	{
+		if (saved_color_name_hashes[i] == color_name_hash)
+		{
+			for (size_t i = 0UL; i < 3UL; i++)
+			{
+				saved_colors[saved_colors_idx][i] = utils_strings_atou(args[i]);
+			}
+			
+			cdc_acm_write(cdc_acm, HSV_CLI_SAVED_COLOR_REWRITTEN_PROMPT, strlen(HSV_CLI_SAVED_COLOR_REWRITTEN_PROMPT));
+			return;
+		}
+	}
+
 	if (saved_colors_idx >= HSV_CLI_SAVED_COLORS_MAX_NUM)
 	{
 		cdc_acm_write(cdc_acm, HSV_CLI_SAVED_COLORS_BUF_FULL_PROMPT, strlen(HSV_CLI_SAVED_COLORS_BUF_FULL_PROMPT));
 		return;
 	}
 
-	saved_color_name_hashes[saved_colors_idx] = utils_hash_str_jenkins(args[3]);
+	saved_color_name_hashes[saved_colors_idx] = color_name_hash;
 	for (size_t i = 0UL; i < 3UL; i++)
 	{
 		saved_colors[saved_colors_idx][i] = utils_strings_atou(args[i]);
 	}
 	saved_colors_idx++;
+	cdc_acm_write(cdc_acm, HSV_CLI_SAVED_COLOR_PROMPT, strlen(HSV_CLI_SAVED_COLOR_PROMPT));
 }
 
 void hsv_cli_exec_apply_color(app_usbd_cdc_acm_t const *cdc_acm, 
