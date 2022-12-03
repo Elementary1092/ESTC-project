@@ -71,6 +71,7 @@ SRC_FILES += \
   $(PROJ_DIR)/utils/strings/strings.c \
   $(PROJ_DIR)/utils/numeric/ops.c \
   $(PROJ_DIR)/utils/numeric/converter.c \
+  $(PROJ_DIR)/utils/hash/hash.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm_read_buf.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm_cli.c \
@@ -146,6 +147,7 @@ INC_FOLDERS += \
   $(PROJ_DIR) \
   $(PROJ_DIR)/utils/strings \
   $(PROJ_DIR)/utils/numeric \
+  $(PROJ_DIR)/utils/hash \
   $(PROJ_DIR)/modules/gpio/button \
   $(PROJ_DIR)/modules/gpio/led \
   $(PROJ_DIR)/modules/timer \
