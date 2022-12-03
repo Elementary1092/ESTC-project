@@ -6,7 +6,7 @@ static float const max_uint16_f = (float)UINT16_MAX;
 uint16_t utils_numeric_converter_f_to_u16(float value, uint16_t max_value)
 {
 	float max_value_f = (float)max_value;
-	if (value > max_value_f || max_uint16_f < value)
+	if (value > max_value_f || max_uint16_f < value || isnan(value))
 	{
 		return max_value;
 	}

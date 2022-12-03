@@ -1,4 +1,5 @@
 #include <nrfx.h>
+#include <nrf_log.h>
 #include <math.h>
 
 #include "../../utils/numeric/ops.h"
@@ -7,17 +8,17 @@
 
 static void hsv_converter_align_hsv(hsv_ctx_t *hsv)
 {
-	if (hsv->hue > HSV_MAX_HUE)
+	if (hsv->hue > HSV_MAX_HUE || isnan(hsv->hue))
 	{
 		hsv->hue = HSV_MAX_HUE;
 	}
 
-	if (hsv->saturation > HSV_MAX_SATURATION)
+	if (hsv->saturation > HSV_MAX_SATURATION || isnan(hsv->saturation))
 	{
 		hsv->saturation = HSV_MAX_SATURATION;
 	}
 
-	if (hsv->brightness > HSV_MAX_BRIGHTNESS)
+	if (hsv->brightness > HSV_MAX_BRIGHTNESS || isnan(hsv->brightness))
 	{
 		hsv->brightness = HSV_MAX_BRIGHTNESS;
 	}
@@ -99,7 +100,7 @@ void hsv_converter_convert_rgb_to_hsv(rgb_value_t *rgb, hsv_ctx_t *hsv)
 
 	float sqrt_acos_arg = R * (R - G) + G * (G - B) + B * (B - R);
 	float acos_arg = (rgb->red - 0.5F * rgb->green - 0.5F * rgb->blue) * sqrtf(sqrt_acos_arg);
-	float degree = acosf(acos_arg);
+	float degree = utils_numeric_ops_absf(acosf(acos_arg));
 
 	if (rgb->blue > rgb->green)
 	{

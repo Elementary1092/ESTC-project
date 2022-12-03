@@ -369,7 +369,7 @@ void hsv_picker_edit_param(void)
 	case HSV_PICKER_MODE_EDIT_HUE:
 		// Maximum value of hue may be 360 and mod 360.1 will always generate values >= 360
 		// and does not generate big inaccuracy
-		hsv_ctx.hue = utils_numeric_ops_modf(hsv_ctx.hue + HSV_PICKER_HUE_STEP, 360.0F);
+		hsv_ctx.hue = utils_numeric_ops_absf(utils_numeric_ops_modf(hsv_ctx.hue + HSV_PICKER_HUE_STEP, 360.1F));
 		break;
 
 	case HSV_PICKER_MODE_EDIT_SATURATION:
@@ -406,7 +406,7 @@ void hsv_picker_set_rgb(uint32_t red, uint32_t green, uint32_t blue)
 {
 	hsv_picker_update_rgb_ctx((uint16_t)red, (uint16_t)green, (uint16_t)blue);
 	hsv_converter_convert_rgb_to_hsv(&rgb_ctx, &hsv_ctx);
-	hsv_picker_update_rgb();
+	hsv_picker_update_rgb_channels();
 	hsv_picker_update_saved_value();
 	hsv_picker_flush_pwm_values();
 }
