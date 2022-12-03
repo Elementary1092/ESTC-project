@@ -52,6 +52,36 @@ static void hsv_cli_delete_saved_color(uint32_t color_idx)
 	}
 }
 
+static void hsv_cli_save_color(app_usbd_cdc_acm_t const *cdc_acm, uint32_t red, uint32_t green, uint32_t blue, char *color_name)
+{
+	uint32_t color_name_hash = utils_hash_str_jenkins(color_name);
+	for (size_t i = 0UL; i < saved_colors_idx; i++)
+	{
+		if (saved_color_name_hashes[i] == color_name_hash)
+		{
+			saved_colors[saved_colors_idx][0] = red;
+			saved_colors[saved_colors_idx][1] = green;
+			saved_colors[saved_colors_idx][2] = blue;
+			
+			cdc_acm_write(cdc_acm, HSV_CLI_SAVED_COLOR_REWRITTEN_PROMPT, strlen(HSV_CLI_SAVED_COLOR_REWRITTEN_PROMPT));
+			return;
+		}
+	}
+
+	if (saved_colors_idx >= HSV_CLI_SAVED_COLORS_MAX_NUM)
+	{
+		cdc_acm_write(cdc_acm, HSV_CLI_SAVED_COLORS_BUF_FULL_PROMPT, strlen(HSV_CLI_SAVED_COLORS_BUF_FULL_PROMPT));
+		return;
+	}
+
+	saved_color_name_hashes[saved_colors_idx] = color_name_hash;
+	saved_colors[saved_colors_idx][0] = red;
+	saved_colors[saved_colors_idx][1] = green;
+	saved_colors[saved_colors_idx][2] = blue;
+	saved_colors_idx++;
+	cdc_acm_write(cdc_acm, HSV_CLI_SAVED_COLOR_PROMPT, strlen(HSV_CLI_SAVED_COLOR_PROMPT));
+}
+
 char *hsv_cli_get_cmd_str(hsv_cli_command_t h)
 {
 	return cmd_strs[h];
@@ -76,7 +106,8 @@ void hsv_cli_exec_help(app_usbd_cdc_acm_t const *cdc_acm, char args[][HSV_CLI_MA
 						"\t3. rgb <red> <green> <blue> - set values of RGB LEDs.\r\n"
 						"\t4. add_rgb_color <red> <green> <blue> <color_name> - save red, green, blue combination under color_name.\r\n"
 						"\t5. apply_color <color_name> - try applying color saved as <color_name>.\r\n"
-						"\t6. del_color <color_name> - delete already saved color.\r\n";
+						"\t6. del_color <color_name> - delete already saved color.\r\n"
+						"\t7. add_current_color <color_name> - save currently displayed color.\r\n";
 
 	cdc_acm_write(cdc_acm, help_prompt, strlen(help_prompt));
 }
@@ -126,34 +157,11 @@ void hsv_cli_exec_add_rgb_color(app_usbd_cdc_acm_t const *cdc_acm,
 		return;
 	}
 
-	uint32_t color_name_hash = utils_hash_str_jenkins(args[3]);
-	for (size_t i = 0UL; i < saved_colors_idx; i++)
-	{
-		if (saved_color_name_hashes[i] == color_name_hash)
-		{
-			for (size_t i = 0UL; i < 3UL; i++)
-			{
-				saved_colors[saved_colors_idx][i] = utils_strings_atou(args[i]);
-			}
-			
-			cdc_acm_write(cdc_acm, HSV_CLI_SAVED_COLOR_REWRITTEN_PROMPT, strlen(HSV_CLI_SAVED_COLOR_REWRITTEN_PROMPT));
-			return;
-		}
-	}
+	uint32_t red = utils_strings_atou(args[0]);
+	uint32_t green = utils_strings_atou(args[1]);
+	uint32_t blue = utils_strings_atou(args[2]);
 
-	if (saved_colors_idx >= HSV_CLI_SAVED_COLORS_MAX_NUM)
-	{
-		cdc_acm_write(cdc_acm, HSV_CLI_SAVED_COLORS_BUF_FULL_PROMPT, strlen(HSV_CLI_SAVED_COLORS_BUF_FULL_PROMPT));
-		return;
-	}
-
-	saved_color_name_hashes[saved_colors_idx] = color_name_hash;
-	for (size_t i = 0UL; i < 3UL; i++)
-	{
-		saved_colors[saved_colors_idx][i] = utils_strings_atou(args[i]);
-	}
-	saved_colors_idx++;
-	cdc_acm_write(cdc_acm, HSV_CLI_SAVED_COLOR_PROMPT, strlen(HSV_CLI_SAVED_COLOR_PROMPT));
+	hsv_cli_save_color(cdc_acm, red, green, blue, args[3]);
 }
 
 void hsv_cli_exec_apply_color(app_usbd_cdc_acm_t const *cdc_acm, 
@@ -200,4 +208,24 @@ void hsv_cli_exec_del_color(app_usbd_cdc_acm_t const *cdc_acm,
 	}
 
 	cdc_acm_write(cdc_acm, HSV_CLI_CANNOT_FIND_COLOR_PROMPT, strlen(HSV_CLI_CANNOT_FIND_COLOR_PROMPT));
+}
+
+void hsv_cli_exec_add_curr_color(app_usbd_cdc_acm_t const *cdc_acm, 
+								char args[][HSV_CLI_MAX_WORD_SIZE], 
+								uint8_t nargs)
+{
+	if (nargs != 1)
+	{
+		NRFX_LOG_ERROR("hsv_cli_exec_del: Invalid number of args: %u", nargs);
+		return;
+	}
+
+	rgb_value_t curr_rgb;
+	hsv_picker_get_current_rgb(&curr_rgb);
+
+	uint32_t red = (uint32_t)(curr_rgb.red);
+	uint32_t green = (uint32_t)(curr_rgb.green);
+	uint32_t blue = (uint32_t)(curr_rgb.blue);
+
+	hsv_cli_save_color(cdc_acm, red, green, blue, args[0]);
 }
