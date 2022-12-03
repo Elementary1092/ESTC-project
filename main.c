@@ -10,11 +10,14 @@
 #include <nrf_log_backend_usb.h>
 #include <app_usbd.h>
 #include <app_usbd_serial_num.h>
+#include <app_usbd_cdc_acm.h>
 
 #include "modules/gpio/button/board_button.h"
 #include "modules/gpio/led/led.h"
 #include "modules/timer/rtc.h"
 #include "modules/hsv/hsv_picker.h"
+#include "modules/hsv/cli.h"
+#include "modules/cdc_acm/cdc_acm_cli.h"
 
 // Board ID: 7198, so, 7 - Red, 1 - Green, 9 - Blue, 8 - Green (led1) 
 #define BLINK_SEQUENCE  "RRRRRRRGBBBBBBBBBYYYYYYYY"
@@ -51,6 +54,11 @@ int main(void)
     /* Initializing hsv shade picker */
     hsv_picker_init(INITIAL_HSV_HUE, INITIAL_HSV_SATURATION, INITIAL_HSV_BRIGHTNESS);
 
+#if ESTC_USB_CLI_ENABLED
+    cdc_acm_cli_init();
+    cdc_acm_add_handler(CDC_ACM_CLI_USB_RX_NEW_LINE, hsv_cli_exec_command);
+#endif
+
     /* Making hsv_picker_next_mode function to be called on double click of a button */
     button_subscribe_to_SW1_state(BUTTON_PRESSED_TWICE_RECENTLY, hsv_picker_next_mode);
 
@@ -60,7 +68,15 @@ int main(void)
     /* Toggle LEDs. */
     while (true)
     {
+    #if ESTC_USB_CLI_ENABLED
+        while (app_usbd_event_queue_process())
+        {
+
+        }
+    #else
         __WFI();
+    #endif
+
         LOG_BACKEND_USB_PROCESS();
         NRF_LOG_PROCESS();
     }

@@ -32,4 +32,8 @@ void hsv_picker_next_mode(void);
 */
 void hsv_picker_edit_param(void);
 
+void hsv_picker_set_hsv(float hue, float satur, float bright);
+
+void hsv_picker_set_rgb(uint32_t red, uint32_t green, uint32_t blue);
+
 #endif

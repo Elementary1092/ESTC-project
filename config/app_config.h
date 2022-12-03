@@ -109,6 +109,8 @@
 #define NRFX_NVMC_ENABLED 1
 #endif
 
-// </e>
+#ifndef ESTC_MAX_LINE_SIZE
+#define ESTC_MAX_LINE_SIZE 64
+#endif
 
 #endif // APP_CONFIG_H

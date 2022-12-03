@@ -8,6 +8,8 @@ DFU_PORT         ?= /dev/ttyACM0
 SDK_ROOT ?= /usr/bin
 PROJ_DIR := ..
 
+ESTC_USB_CLI_ENABLED=1
+
 $(OUTPUT_DIRECTORY)/nrf52840_xxaa.out: \
   LINKER_SCRIPT  := blinky_gcc_nrf52.ld
 
@@ -66,11 +68,19 @@ SRC_FILES += \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf.c \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf_format.c \
   $(SDK_ROOT)/external/utf_converter/utf.c \
+  $(PROJ_DIR)/utils/strings/strings.c \
+  $(PROJ_DIR)/utils/numeric/ops.c \
+  $(PROJ_DIR)/utils/numeric/converter.c \
+  $(PROJ_DIR)/modules/cdc_acm/cdc_acm_read_buf.c \
+  $(PROJ_DIR)/modules/cdc_acm/cdc_acm.c \
+  $(PROJ_DIR)/modules/cdc_acm/cdc_acm_cli.c \
   $(PROJ_DIR)/modules/timer/rtc.c \
   $(PROJ_DIR)/modules/flash/flash_memory.c \
-  $(PROJ_DIR)/modules/hsv/hsv_helper.c \
+  $(PROJ_DIR)/modules/hsv/hsv_converter.c \
   $(PROJ_DIR)/modules/hsv/hsv_picker.c \
   $(PROJ_DIR)/modules/gpio/led/led.c \
+  $(PROJ_DIR)/modules/hsv/cli_handlers.c \
+  $(PROJ_DIR)/modules/hsv/cli.c \
   $(PROJ_DIR)/modules/gpio/button/board_button.c \
   $(PROJ_DIR)/modules/gpio/led/sequence_ctx.c \
   $(PROJ_DIR)/modules/timer/systick_ctx.c \
@@ -134,6 +144,8 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/log/src \
   $(SDK_ROOT)/components/softdevice/mbr/headers \
   $(PROJ_DIR) \
+  $(PROJ_DIR)/utils/strings \
+  $(PROJ_DIR)/utils/numeric \
   $(PROJ_DIR)/modules/gpio/button \
   $(PROJ_DIR)/modules/gpio/led \
   $(PROJ_DIR)/modules/timer \
@@ -156,13 +168,13 @@ CFLAGS += -DUSE_APP_CONFIG
 CFLAGS += -DAPP_TIMER_V2
 CFLAGS += -DAPP_TIMER_V2_RTC1_ENABLED
 CFLAGS += -DBOARD_PCA10059
-# CFLAGS += -DBSP_DEFINES_ONLY
 CFLAGS += -DCONFIG_GPIO_AS_PINRESET
 CFLAGS += -DFLOAT_ABI_HARD
 CFLAGS += -DMBR_PRESENT
 CFLAGS += -DMBEDTLS_CONFIG_FILE=\"nrf_crypto_mbedtls_config.h\"
 CFLAGS += -DNRF52840_XXAA
 CFLAGS += -DNRF_CRYPTO_MAX_INSTANCE_COUNT=1
+CFLAGS += -DESTC_USB_CLI_ENABLED=$(ESTC_USB_CLI_ENABLED)
 CFLAGS += -DuECC_ENABLE_VLI_API=0
 CFLAGS += -DuECC_OPTIMIZATION_LEVEL=3
 CFLAGS += -DuECC_SQUARE_FUNC=0
@@ -187,7 +199,6 @@ ASMFLAGS += -DUSE_APP_CONFIG
 ASMFLAGS += -DAPP_TIMER_V2
 ASMFLAGS += -DAPP_TIMER_V2_RTC1_ENABLED
 ASMFLAGS += -DBOARD_PCA10059
-# ASMFLAGS += -DBSP_DEFINES_ONLY
 ASMFLAGS += -DCONFIG_GPIO_AS_PINRESET
 ASMFLAGS += -DFLOAT_ABI_HARD
 ASMFLAGS += -DMBR_PRESENT
