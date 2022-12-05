@@ -5,12 +5,64 @@
 #include "modules/flash/flash_memory.h"
 #include "hsv_saved_colors.h"
 
+#define HSV_SAVED_COLOR_FLASH_BUF_SIZE     sizeof(hsv_saved_color_rgb_t) / sizeof(uint32_t) * HSV_SAVED_COLORS_MAX_SLOTS
+
+#define HSV_SAVED_COLOR_FLASH_BUF_HASH(x)  sizeof(uint32_t) * (x)
+#define HSV_SAVED_COLOR_FLASH_BUF_RED(x)   sizeof(uint32_t) * (x) + 1
+#define HSV_SAVED_COLOR_FLASH_BUF_GREEN(x) sizeof(uint32_t) * (x) + 2
+#define HSV_SAVED_COLOR_FLASH_BUF_BLUE(x)  sizeof(uint32_t) * (x) + 3
+
 static hsv_saved_color_rgb_t saved_colors[HSV_SAVED_COLORS_MAX_SLOTS] = {0U};
 static uint32_t saved_colors_size = 0U;
 
+static void hsv_saved_colors_flush(void)
+{
+	uint32_t colors_to_mem[HSV_SAVED_COLOR_FLASH_BUF_SIZE] = {0U};
+	for (uint32_t i = 0; i < saved_colors_size; i++)
+	{
+		colors_to_mem[HSV_SAVED_COLOR_FLASH_BUF_HASH(saved_colors_size)] = saved_colors[i].hash;
+		colors_to_mem[HSV_SAVED_COLOR_FLASH_BUF_RED(saved_colors_size)] = saved_colors[i].red;
+		colors_to_mem[HSV_SAVED_COLOR_FLASH_BUF_GREEN(saved_colors_size)] = saved_colors[i].green;
+		colors_to_mem[HSV_SAVED_COLOR_FLASH_BUF_BLUE(saved_colors_size)] = saved_colors[i].blue;
+	}
+
+	flash_memory_write(
+		FLASH_MEMORY_SECOND_PAGE,
+		colors_to_mem,
+		sizeof(hsv_saved_color_rgb_t) / sizeof(uint32_t) * saved_colors_size,
+		0U,
+		FLASH_MEMORY_IGNORE_CONTROL_W | FLASH_MEMORY_ERASE_PAGE_BEFORE_WRITE
+	);
+}
+
 void hsv_saved_colors_load(void)
 {
-	
+	uint32_t colors_from_mem[HSV_SAVED_COLOR_FLASH_BUF_SIZE] = {0U};
+	flash_memory_read(FLASH_MEMORY_SECOND_PAGE, 
+					colors_from_mem, 
+					sizeof(colors_from_mem), 
+					0U, 
+					FLASH_MEMORY_IGNORE_CONTROL_W);
+	for (saved_colors_size = 0U; saved_colors_size < HSV_SAVED_COLORS_MAX_SLOTS; saved_colors_size++)
+	{
+		uint32_t hash = colors_from_mem[HSV_SAVED_COLOR_FLASH_BUF_HASH(saved_colors_size)];
+		uint32_t red = colors_from_mem[HSV_SAVED_COLOR_FLASH_BUF_RED(saved_colors_size)];
+		uint32_t green = colors_from_mem[HSV_SAVED_COLOR_FLASH_BUF_GREEN(saved_colors_size)];
+		uint32_t blue = colors_from_mem[HSV_SAVED_COLOR_FLASH_BUF_BLUE(saved_colors_size)];
+
+		if (hash == 0U && red == 0U && green == 0U && blue == 0U)
+		{
+			break;
+		}
+
+		hsv_saved_color_rgb_t color = {
+			.hash = hash,
+			.red = red,
+			.green = green,
+			.blue = blue
+		};
+		saved_colors[saved_colors_size] = color;
+	}
 }
 
 hsv_saved_colors_err_t hsv_saved_colors_seek(hsv_saved_color_rgb_t *rgb, uint32_t seeking_hash)
@@ -40,6 +92,8 @@ hsv_saved_colors_err_t hsv_saved_colors_add_or_mod(hsv_saved_color_rgb_t *rgb)
 			saved_colors[saved_colors_size].green = rgb->green;
 			saved_colors[saved_colors_size].blue = rgb->blue;
 
+			hsv_saved_colors_flush();
+
 			return HSV_SAVED_COLORS_SUCCESS;
 		}
 	}
@@ -54,6 +108,8 @@ hsv_saved_colors_err_t hsv_saved_colors_add_or_mod(hsv_saved_color_rgb_t *rgb)
 	saved_colors[saved_colors_size].green = rgb->green;
 	saved_colors[saved_colors_size].blue = rgb->blue;
 	saved_colors_size++;
+
+	hsv_saved_colors_flush();
 
 	return HSV_SAVED_COLORS_SUCCESS;
 }
@@ -85,6 +141,8 @@ hsv_saved_colors_err_t hsv_saved_colors_delete(uint32_t color_name_hash)
 		saved_colors[i].blue = saved_colors[i + 1].blue;
 		saved_colors[i].hash = saved_colors[i + 1].hash;
 	}
+
+	hsv_saved_colors_flush();
 
 	return HSV_SAVED_COLORS_SUCCESS;
 }
