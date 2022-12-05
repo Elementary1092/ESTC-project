@@ -171,3 +171,72 @@ uint32_t flash_memory_seek_page_first_free_addr(uint32_t page_addr)
 		return 0U;
 	}
 }
+
+flash_memory_err_t flash_memory_page_append(uint32_t *buffer, 
+											uint32_t buf_size, 
+											uint32_t page_addr, 
+											uint32_t control_w,
+											flash_memory_flag_t flags)
+{
+	if (page_addr % FLASH_MEMORY_PAGE_SIZE != 0)
+	{
+		return FLASH_MEMORY_ERR_INVALID_PAGE_ADDR;
+	}
+
+	bool can_erase_page = (flags & FLASH_MEMORY_ERASE_PAGE_IF_NECESSARY) != 0;
+	bool ignore_control_w = (flags & FLASH_MEMORY_IGNORE_CONTROL_W) != 0;
+	bool no_flags = (flags & FLASH_MEMORY_NO_FLAGS) != 0;
+	if (no_flags)
+	{
+		ignore_control_w = false;
+		can_erase_page = false;
+	}
+
+	uint32_t s_addr = flash_memory_seek_page_first_free_addr(page_addr);
+	if (s_addr == 0U)
+	{
+		if (can_erase_page)
+		{
+			NRF_LOG_INFO("flash_memory_page_append: Erasing page");
+			nrf_nvmc_page_erase(page_addr);
+			s_addr = page_addr;
+		}
+		else
+		{
+			return FLASH_MEMORY_ERR_NOT_ENOUGH_SPACE;
+		}
+	}
+	
+	if (!ignore_control_w)
+	{
+		if (control_w == FLASH_MEMORY_DEFAULT_VALUE)
+		{
+			return FLASH_MEMORY_ERR_INVALID_CONTROL_W;
+		}
+
+		if (!nrfx_nvmc_word_writable_check(s_addr, control_w))
+		{
+			NRF_LOG_INFO("flash_memory_write: Could not write control word: %x. Current addr value: %x", control_w, *((uint32_t *)s_addr));
+			return FLASH_MEMORY_ERR_WORD_IS_NOT_WRITABLE;
+		}
+
+		nrfx_nvmc_word_write(s_addr, control_w);
+		flash_memory_wait_for_write_complition();
+		s_addr += sizeof(uint32_t);
+	}
+
+	for (uint32_t i = 0; i < buf_size; i++)
+	{
+		if (!nrfx_nvmc_word_writable_check(s_addr, buffer[i]))
+		{
+			return FLASH_MEMORY_ERR_WORD_IS_NOT_WRITABLE;
+		}
+
+		nrfx_nvmc_word_write(s_addr, buffer[i]);
+
+		flash_memory_wait_for_write_complition();
+
+		NRF_LOG_INFO("flash_memory_write: Written %x to %lu", buffer[i], s_addr);
+		s_addr += sizeof(uint32_t);
+	}
+}
