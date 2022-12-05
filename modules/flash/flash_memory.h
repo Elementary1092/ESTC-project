@@ -2,6 +2,7 @@
 #define FLASH_MEMORY_H
 
 #include <stdint.h>
+#include "app_config.h"
 
 #ifndef NRF_DFU_APP_DATA_AREA_SIZE
 #error NRF_DFU_APP_DATA_AREA_SIZE is not defined
@@ -16,6 +17,7 @@
 #endif
 
 #define FLASH_MEMORY_DATA_STARTING_ADDRESS 0xE0000 - NRF_DFU_APP_DATA_AREA_SIZE
+#define FLASH_MEMORY_DATA_END_ADDRESS      FLASH_MEMORY_DATA_STARTING_ADDRESS + NRF_DFU_APP_DATA_AREA_SIZE
 #define FLASH_MEMORY_PAGE_SIZE             4096
 #define FLASH_MEMORY_FIRST_PAGE            FLASH_MEMORY_DATA_STARTING_ADDRESS
 #define FLASH_MEMORY_SECOND_PAGE           FLASH_MEMORY_FIRST_PAGE + FLASH_MEMORY_PAGE_SIZE
@@ -36,7 +38,8 @@ typedef enum
 	FLASH_MEMORY_ERR_INVALID_CONTROL_W     = 2,
 	FLASH_MEMORY_ERR_POSSIBLY_INVALID_DATA = 3,
 	FLASH_MEMORY_ERR_INVALID_PAGE_ADDR     = 4,
-	FLASH_MEMORY_ERR_NOT_ENOUGH_SPACE      = 5
+	FLASH_MEMORY_ERR_NOT_ENOUGH_SPACE      = 5,
+	FLASH_MEMORY_ERR_ADDR_OUT_OF_BOUND     = 6
 } flash_memory_err_t;
 
 /*
@@ -55,9 +58,9 @@ typedef enum
 
 	Other flags are ignored by this function.
 */
-flash_memory_err_t flash_memory_read(uint32_t *buffer, 
-									uint32_t limit, 
-									uint32_t offset,
+flash_memory_err_t flash_memory_read(uint32_t addr,
+									uint32_t *buffer,
+									uint32_t limit,
 									uint32_t control_w, 
 									flash_memory_flag_t flags);
 
@@ -76,9 +79,9 @@ flash_memory_err_t flash_memory_read(uint32_t *buffer,
 
 	Returns FLASH_MEMORY_ERR_WORD_IS_NOT_WRITABLE error if this function could not write to the flash memory.
 */
-flash_memory_err_t flash_memory_write(uint32_t *buffer, 
-									uint32_t buf_size, 
-									uint32_t offset, 
+flash_memory_err_t flash_memory_write(uint32_t addr,
+									uint32_t *buffer, 
+									uint32_t buf_size,
 									uint32_t control_w, 
 									flash_memory_flag_t flags);
 

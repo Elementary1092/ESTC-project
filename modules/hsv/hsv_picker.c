@@ -262,7 +262,20 @@ static void hsv_picker_init_pwm_module(void)
 static bool hsv_picker_try_init_from_flash(void)
 {
 	uint32_t buffer[3] = {0UL};
-	flash_memory_err_t err = flash_memory_read(buffer, 3UL, HSV_SAVED_VALUE_OFFSET, HSV_SAVED_VALUE_CONTROL_WORD, FLASH_MEMORY_NO_FLAGS);
+	uint32_t addr = flash_memory_seek_page_first_free_addr(FLASH_MEMORY_FIRST_PAGE);
+	if (addr == 0U)
+	{
+		return false;
+	}
+
+	addr -= sizeof(uint32_t) * 4;
+	flash_memory_err_t err = flash_memory_read(
+		addr, 
+		buffer, 
+		3UL, 
+		HSV_SAVED_VALUE_CONTROL_WORD, 
+		FLASH_MEMORY_NO_FLAGS);
+
 	if (err != FLASH_MEMORY_NO_ERR)
 	{
 		NRF_LOG_INFO("hsv_picker_try_init_from_flash: Could not initialize from the flash. Error: %d", err);
@@ -295,7 +308,13 @@ static void hsv_picker_update_saved_value(void)
 	bright.fl = hsv_ctx.brightness;
 
 	uint32_t buffer[3] = {hue.ui, satur.ui, bright.ui};
-	flash_memory_err_t err = flash_memory_write(buffer, 3UL, HSV_SAVED_VALUE_OFFSET, HSV_SAVED_VALUE_CONTROL_WORD, FLASH_MEMORY_ERASE_PAGE_BEFORE_WRITE);
+	flash_memory_err_t err = flash_memory_page_append(
+		buffer, 
+		3UL, 
+		FLASH_MEMORY_FIRST_PAGE, 
+		HSV_SAVED_VALUE_CONTROL_WORD, 
+		FLASH_MEMORY_ERASE_PAGE_IF_NECESSARY);
+
 	if (err != FLASH_MEMORY_NO_ERR)
 	{
 		NRF_LOG_INFO("hsv_picker_update_saved_value: Could not update saved value. Error: %d", err);
