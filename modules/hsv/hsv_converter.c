@@ -2,9 +2,11 @@
 #include <nrf_log.h>
 #include <math.h>
 
-#include "../../utils/numeric/ops.h"
-#include "../../utils/numeric/converter.h"
+#include "utils/numeric/ops.h"
+#include "utils/numeric/converter.h"
 #include "hsv_converter.h"
+
+#define HSV_CONVERTER_RADIANS_TO_DEGREE_FACTOR 57.3F
 
 static void hsv_converter_align_hsv(hsv_ctx_t *hsv)
 {
@@ -79,35 +81,45 @@ void hsv_converter_convert_hsv_to_rgb(hsv_ctx_t *hsv, rgb_value_t *res)
 	}
 }
 
+// Used formula: https://mattlockyer.github.io/iat455/documents/rgb-hsv.pdf
 void hsv_converter_convert_rgb_to_hsv(rgb_value_t *rgb, hsv_ctx_t *hsv)
 {
-	float R = (float)rgb->red;
-	float G = (float)rgb->green;
-	float B = (float)rgb->blue;
+	float R = ((float)rgb->red)/((float)HSV_CONVERTER_MAX_RGB);
+	float G = ((float)rgb->green)/((float)HSV_CONVERTER_MAX_RGB);
+	float B = ((float)rgb->blue)/((float)HSV_CONVERTER_MAX_RGB);
 
-	float max = MAX(MAX(R, G), B);
-	float min = MIN(MIN(R, G), B);
+	float Cmax = MAX(MAX(R, G), B);
+	float Cmin = MIN(MIN(R, G), B);
 
-	hsv->brightness = max / 255.0F * 100.0F;
-	if (max == 0)
+	float delta = Cmax - Cmin;
+
+	hsv->brightness = Cmax * 100.0F;
+	
+	if (Cmax == 0)
 	{
 		hsv->saturation = 0;
 	}
 	else
 	{
-		hsv->saturation = (1.0F - min / max) * 100.0F;
+		hsv->saturation = delta / Cmax * 100.0F;
 	}
 
-	float sqrt_acos_arg = R * (R - G) + G * (G - B) + B * (B - R);
-	float acos_arg = (rgb->red - 0.5F * rgb->green - 0.5F * rgb->blue) * sqrtf(sqrt_acos_arg);
-	float degree = utils_numeric_ops_absf(acosf(acos_arg));
-
-	if (rgb->blue > rgb->green)
+	if (delta == 0)
 	{
-		hsv->hue = degree;
+		hsv->hue = 0.0F;
+	}
+	else if (Cmax == R)
+	{
+		hsv->hue = 60.0F * utils_numeric_ops_modf((G - B) / delta, 6.0F);
+	}
+	else if (Cmax == G)
+	{
+		hsv->hue = 60.0F * ((B - R) / delta + 2.0F);
 	}
 	else
 	{
-		hsv->hue = 360.0F - degree;
+		hsv->hue = 60.0F * ((R - G) / delta + 4.0F);
 	}
+
+	hsv_converter_align_hsv(hsv);
 }
