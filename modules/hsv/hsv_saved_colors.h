@@ -7,6 +7,7 @@
 
 typedef struct
 {
+	uint32_t hash;
 	uint32_t red;
 	uint32_t green;
 	uint32_t blue;
@@ -22,10 +23,10 @@ typedef enum
 
 void hsv_saved_colors_load(void);
 
-hsv_saved_colors_err_t hsv_saved_colors_seek(hsv_saved_color_rgb_t *rgb, char *color_name);
+hsv_saved_colors_err_t hsv_saved_colors_seek(hsv_saved_color_rgb_t *rgb, uint32_t seeking_hash);
 
-hsv_saved_colors_err_t hsv_saved_colors_add_or_mod(hsv_saved_color_rgb_t *rgb, char *color_name);
+hsv_saved_colors_err_t hsv_saved_colors_add_or_mod(hsv_saved_color_rgb_t *rgb);
 
-hsv_saved_colors_err_t hsv_saved_colors_delete(char *color_name);
+hsv_saved_colors_err_t hsv_saved_colors_delete(uint32_t color_name_hash);
 
 #endif

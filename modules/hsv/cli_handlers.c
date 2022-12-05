@@ -12,19 +12,17 @@
 #define HSV_CLI_SAVED_COLOR_PROMPT "Saved color successfully.\r\n"
 #define HSV_CLI_SAVED_COLOR_REWRITTEN_PROMPT "Saved color was rewritten.\r\n"
 
-static hsv_cli_command_handler_t handlers[] = 
-{
-	HSV_CLI_HANDLERS(HSV_CLI_HANDLERS_EXPAND_AS_FNS)
-};
+static hsv_cli_command_handler_t handlers[] =
+	{
+		HSV_CLI_HANDLERS(HSV_CLI_HANDLERS_EXPAND_AS_FNS)};
 
 static char cmd_strs[][HSV_CLI_MAX_WORD_SIZE] =
-{
-	HSV_CLI_HANDLERS(HSV_CLI_HANDLERS_EXPAND_AS_CMD_STR)
-};
+	{
+		HSV_CLI_HANDLERS(HSV_CLI_HANDLERS_EXPAND_AS_CMD_STR)};
 
 static uint32_t saved_colors[HSV_CLI_SAVED_COLORS_MAX_NUM][3] = {0U};
 static uint32_t saved_color_name_hashes[HSV_CLI_SAVED_COLORS_MAX_NUM] = {0U};
-static uint32_t saved_colors_idx = 0U;
+static uint32_t saved_colors_size = 0U;
 
 static void hsv_cli_convert_nstrs_to_nuints(uint32_t *converted_args, char args[][HSV_CLI_MAX_WORD_SIZE], uint8_t nargs)
 {
@@ -36,49 +34,49 @@ static void hsv_cli_convert_nstrs_to_nuints(uint32_t *converted_args, char args[
 
 static void hsv_cli_delete_saved_color(uint32_t color_idx)
 {
-	if (saved_colors_idx == 0)
+	if (saved_colors_size == 0)
 	{
 		return;
 	}
 
-	saved_colors_idx--;
-	for (uint32_t i = color_idx; i < saved_colors_idx; i++)
+	saved_colors_size--;
+	for (uint32_t i = color_idx; i < saved_colors_size; i++)
 	{
 		for (uint32_t j = 0UL; j < 3UL; j++)
 		{
-			saved_colors[i][j] = saved_colors[i+1][j];
+			saved_colors[i][j] = saved_colors[i + 1][j];
 		}
-		saved_color_name_hashes[i] = saved_color_name_hashes[i+1];
+		saved_color_name_hashes[i] = saved_color_name_hashes[i + 1];
 	}
 }
 
 static void hsv_cli_save_color(app_usbd_cdc_acm_t const *cdc_acm, uint32_t red, uint32_t green, uint32_t blue, char *color_name)
 {
 	uint32_t color_name_hash = utils_hash_str_jenkins(color_name);
-	for (size_t i = 0UL; i < saved_colors_idx; i++)
+	for (size_t i = 0UL; i < saved_colors_size; i++)
 	{
 		if (saved_color_name_hashes[i] == color_name_hash)
 		{
-			saved_colors[saved_colors_idx][0] = red;
-			saved_colors[saved_colors_idx][1] = green;
-			saved_colors[saved_colors_idx][2] = blue;
-			
+			saved_colors[saved_colors_size][0] = red;
+			saved_colors[saved_colors_size][1] = green;
+			saved_colors[saved_colors_size][2] = blue;
+
 			cdc_acm_write(cdc_acm, HSV_CLI_SAVED_COLOR_REWRITTEN_PROMPT, strlen(HSV_CLI_SAVED_COLOR_REWRITTEN_PROMPT));
 			return;
 		}
 	}
 
-	if (saved_colors_idx >= HSV_CLI_SAVED_COLORS_MAX_NUM)
+	if (saved_colors_size >= HSV_CLI_SAVED_COLORS_MAX_NUM)
 	{
 		cdc_acm_write(cdc_acm, HSV_CLI_SAVED_COLORS_BUF_FULL_PROMPT, strlen(HSV_CLI_SAVED_COLORS_BUF_FULL_PROMPT));
 		return;
 	}
 
-	saved_color_name_hashes[saved_colors_idx] = color_name_hash;
-	saved_colors[saved_colors_idx][0] = red;
-	saved_colors[saved_colors_idx][1] = green;
-	saved_colors[saved_colors_idx][2] = blue;
-	saved_colors_idx++;
+	saved_color_name_hashes[saved_colors_size] = color_name_hash;
+	saved_colors[saved_colors_size][0] = red;
+	saved_colors[saved_colors_size][1] = green;
+	saved_colors[saved_colors_size][2] = blue;
+	saved_colors_size++;
 	cdc_acm_write(cdc_acm, HSV_CLI_SAVED_COLOR_PROMPT, strlen(HSV_CLI_SAVED_COLOR_PROMPT));
 }
 
@@ -99,22 +97,22 @@ void hsv_cli_exec_unknown(app_usbd_cdc_acm_t const *cdc_acm, char args[][HSV_CLI
 
 void hsv_cli_exec_help(app_usbd_cdc_acm_t const *cdc_acm, char args[][HSV_CLI_MAX_WORD_SIZE], uint8_t nargs)
 {
-	const char *help_prompt = 
-						"Available commands:\r\n"
-						"\t1. help - get list of available commands;\r\n"
-						"\t2. hsv <hue> <saturation> <brightness> - set hue, saturation, and brightness of RGB LEDs;\r\n"
-						"\t3. rgb <red> <green> <blue> - set values of RGB LEDs.\r\n"
-						"\t4. add_rgb_color <red> <green> <blue> <color_name> - save red, green, blue combination under color_name.\r\n"
-						"\t5. apply_color <color_name> - try applying color saved as <color_name>.\r\n"
-						"\t6. del_color <color_name> - delete already saved color.\r\n"
-						"\t7. add_current_color <color_name> - save currently displayed color.\r\n";
+	const char *help_prompt =
+		"Available commands:\r\n"
+		"\t1. help - get list of available commands;\r\n"
+		"\t2. hsv <hue> <saturation> <brightness> - set hue, saturation, and brightness of RGB LEDs;\r\n"
+		"\t3. rgb <red> <green> <blue> - set values of RGB LEDs.\r\n"
+		"\t4. add_rgb_color <red> <green> <blue> <color_name> - save red, green, blue combination under color_name.\r\n"
+		"\t5. apply_color <color_name> - try applying color saved as <color_name>.\r\n"
+		"\t6. del_color <color_name> - delete already saved color.\r\n"
+		"\t7. add_current_color <color_name> - save currently displayed color.\r\n";
 
 	cdc_acm_write(cdc_acm, help_prompt, strlen(help_prompt));
 }
 
-void hsv_cli_exec_update_hsv(app_usbd_cdc_acm_t const *cdc_acm, 
-							char args[][HSV_CLI_MAX_WORD_SIZE], 
-							uint8_t nargs)
+void hsv_cli_exec_update_hsv(app_usbd_cdc_acm_t const *cdc_acm,
+							 char args[][HSV_CLI_MAX_WORD_SIZE],
+							 uint8_t nargs)
 {
 	if (nargs != 3)
 	{
@@ -129,10 +127,9 @@ void hsv_cli_exec_update_hsv(app_usbd_cdc_acm_t const *cdc_acm,
 	NRFX_LOG_INFO("hsv_cli_exec_update_hsv: Updated hsv");
 }
 
-
-void hsv_cli_exec_update_rgb(app_usbd_cdc_acm_t const *cdc_acm, 
-							char args[][HSV_CLI_MAX_WORD_SIZE], 
-							uint8_t nargs)
+void hsv_cli_exec_update_rgb(app_usbd_cdc_acm_t const *cdc_acm,
+							 char args[][HSV_CLI_MAX_WORD_SIZE],
+							 uint8_t nargs)
 {
 	if (nargs != 3)
 	{
@@ -147,8 +144,8 @@ void hsv_cli_exec_update_rgb(app_usbd_cdc_acm_t const *cdc_acm,
 	NRFX_LOG_INFO("hsv_cli_exec_update_rgb: Updated rgb");
 }
 
-void hsv_cli_exec_add_rgb_color(app_usbd_cdc_acm_t const *cdc_acm, 
-								char args[][HSV_CLI_MAX_WORD_SIZE], 
+void hsv_cli_exec_add_rgb_color(app_usbd_cdc_acm_t const *cdc_acm,
+								char args[][HSV_CLI_MAX_WORD_SIZE],
 								uint8_t nargs)
 {
 	if (nargs != 4)
@@ -164,8 +161,8 @@ void hsv_cli_exec_add_rgb_color(app_usbd_cdc_acm_t const *cdc_acm,
 	hsv_cli_save_color(cdc_acm, red, green, blue, args[3]);
 }
 
-void hsv_cli_exec_apply_color(app_usbd_cdc_acm_t const *cdc_acm, 
-							  char args[][HSV_CLI_MAX_WORD_SIZE], 
+void hsv_cli_exec_apply_color(app_usbd_cdc_acm_t const *cdc_acm,
+							  char args[][HSV_CLI_MAX_WORD_SIZE],
 							  uint8_t nargs)
 {
 	if (nargs != 1)
@@ -175,7 +172,7 @@ void hsv_cli_exec_apply_color(app_usbd_cdc_acm_t const *cdc_acm,
 	}
 
 	uint32_t color_name_hash = utils_hash_str_jenkins(args[0]);
-	for (uint32_t i = 0; i < saved_colors_idx; i++)
+	for (uint32_t i = 0; i < saved_colors_size; i++)
 	{
 		if (saved_color_name_hashes[i] == color_name_hash)
 		{
@@ -187,8 +184,8 @@ void hsv_cli_exec_apply_color(app_usbd_cdc_acm_t const *cdc_acm,
 	cdc_acm_write(cdc_acm, HSV_CLI_CANNOT_FIND_COLOR_PROMPT, strlen(HSV_CLI_CANNOT_FIND_COLOR_PROMPT));
 }
 
-void hsv_cli_exec_del_color(app_usbd_cdc_acm_t const *cdc_acm, 
-							char args[][HSV_CLI_MAX_WORD_SIZE], 
+void hsv_cli_exec_del_color(app_usbd_cdc_acm_t const *cdc_acm,
+							char args[][HSV_CLI_MAX_WORD_SIZE],
 							uint8_t nargs)
 {
 	if (nargs != 1)
@@ -198,7 +195,7 @@ void hsv_cli_exec_del_color(app_usbd_cdc_acm_t const *cdc_acm,
 	}
 
 	uint32_t color_name_hash = utils_hash_str_jenkins(args[0]);
-	for (uint32_t i = 0; i < saved_colors_idx; i++)
+	for (uint32_t i = 0; i < saved_colors_size; i++)
 	{
 		if (saved_color_name_hashes[i] == color_name_hash)
 		{
@@ -210,9 +207,9 @@ void hsv_cli_exec_del_color(app_usbd_cdc_acm_t const *cdc_acm,
 	cdc_acm_write(cdc_acm, HSV_CLI_CANNOT_FIND_COLOR_PROMPT, strlen(HSV_CLI_CANNOT_FIND_COLOR_PROMPT));
 }
 
-void hsv_cli_exec_add_curr_color(app_usbd_cdc_acm_t const *cdc_acm, 
-								char args[][HSV_CLI_MAX_WORD_SIZE], 
-								uint8_t nargs)
+void hsv_cli_exec_add_curr_color(app_usbd_cdc_acm_t const *cdc_acm,
+								 char args[][HSV_CLI_MAX_WORD_SIZE],
+								 uint8_t nargs)
 {
 	if (nargs != 1)
 	{
