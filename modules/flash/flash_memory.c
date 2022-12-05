@@ -4,13 +4,7 @@
 #include "app_config.h"
 #include "flash_memory.h"
 
-#ifndef NRF_DFU_APP_DATA_AREA_SIZE
-#error NRF_DFU_APP_DATA_AREA_SIZE is not defined
-#endif
-
-#define FLASH_MEMORY_DATA_STARTING_ADDRESS 0xE0000 - NRF_DFU_APP_DATA_AREA_SIZE
 #define FLASH_MEMORY_DEFAULT_VALUE         0xFFFFFFFF
-#define FLASH_MEMORY_PAGE_SIZE             4096
 
 static const uint32_t addr = (uint32_t)FLASH_MEMORY_DATA_STARTING_ADDRESS;
 
@@ -132,4 +126,48 @@ flash_memory_err_t flash_memory_write(uint32_t *buffer, uint32_t buf_size, uint3
 	NRF_LOG_INFO("flash_memory_write: Successfully saved words");
 
 	return FLASH_MEMORY_NO_ERR;
+}
+
+uint32_t flash_memory_seek_page_first_free_addr(uint32_t page_addr)
+{
+	if (page_addr % FLASH_MEMORY_PAGE_SIZE != 0)
+	{
+		return 0U;
+	}
+
+	uint32_t const *paddr = (uint32_t *)page_addr;
+
+	uint32_t start_offset = 0U;
+	uint32_t end_offset = FLASH_MEMORY_PAGE_SIZE / sizeof(uint32_t) - 1;
+	
+	if (*(paddr+end_offset) != FLASH_MEMORY_DEFAULT_VALUE)
+	{
+		return (uint32_t)(paddr + end_offset + 1);
+	}
+
+	while (start_offset < end_offset)
+	{
+		uint32_t mid_offset = end_offset - (end_offset - start_offset) / 2;
+		if (*(paddr + mid_offset) != FLASH_MEMORY_DEFAULT_VALUE)
+		{
+			start_offset = mid_offset + 1;
+		}
+		else
+		{
+			end_offset = mid_offset - 1;
+		}
+	}
+
+	if (*(paddr + start_offset) != FLASH_MEMORY_DEFAULT_VALUE)
+	{
+		return (uint32_t)(paddr + start_offset + 1);
+	}
+	else if (*(paddr + end_offset) != FLASH_MEMORY_DEFAULT_VALUE)
+	{
+		return (uint32_t)(paddr + end_offset + 1);
+	}
+	else
+	{
+		return 0U;
+	}
 }
