@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <sys/types.h>
+#include <nrf_log.h>
 
 #include "utils/hash/hash.h"
 #include "modules/flash/flash_memory.h"
@@ -18,12 +19,12 @@ static uint32_t saved_colors_size = 0U;
 static void hsv_saved_colors_flush(void)
 {
 	uint32_t colors_to_mem[HSV_SAVED_COLOR_FLASH_BUF_SIZE] = {0U};
-	for (uint32_t i = 0; i < saved_colors_size; i++)
+	for (uint32_t i = 0U; i < saved_colors_size; i++)
 	{
-		colors_to_mem[HSV_SAVED_COLOR_FLASH_BUF_HASH(saved_colors_size)] = saved_colors[i].hash;
-		colors_to_mem[HSV_SAVED_COLOR_FLASH_BUF_RED(saved_colors_size)] = saved_colors[i].red;
-		colors_to_mem[HSV_SAVED_COLOR_FLASH_BUF_GREEN(saved_colors_size)] = saved_colors[i].green;
-		colors_to_mem[HSV_SAVED_COLOR_FLASH_BUF_BLUE(saved_colors_size)] = saved_colors[i].blue;
+		colors_to_mem[HSV_SAVED_COLOR_FLASH_BUF_HASH(i)] = saved_colors[i].hash;
+		colors_to_mem[HSV_SAVED_COLOR_FLASH_BUF_RED(i)] = saved_colors[i].red;
+		colors_to_mem[HSV_SAVED_COLOR_FLASH_BUF_GREEN(i)] = saved_colors[i].green;
+		colors_to_mem[HSV_SAVED_COLOR_FLASH_BUF_BLUE(i)] = saved_colors[i].blue;
 	}
 
 	flash_memory_write(
@@ -33,6 +34,9 @@ static void hsv_saved_colors_flush(void)
 		0U,
 		FLASH_MEMORY_IGNORE_CONTROL_W | FLASH_MEMORY_ERASE_PAGE_BEFORE_WRITE
 	);
+
+	uint32_t next_addr = flash_memory_seek_page_first_free_addr(FLASH_MEMORY_SECOND_PAGE);
+	NRF_LOG_INFO("hsv_saved_colors_flush: Next address: %u", next_addr);
 }
 
 void hsv_saved_colors_load(void)
@@ -67,7 +71,7 @@ void hsv_saved_colors_load(void)
 
 hsv_saved_colors_err_t hsv_saved_colors_seek(hsv_saved_color_rgb_t *rgb, uint32_t seeking_hash)
 {
-	for (uint32_t i = 0; i < saved_colors_size; i++)
+	for (uint32_t i = 0U; i < saved_colors_size; i++)
 	{
 		if (saved_colors[i].hash == seeking_hash)
 		{
@@ -88,9 +92,9 @@ hsv_saved_colors_err_t hsv_saved_colors_add_or_mod(hsv_saved_color_rgb_t *rgb)
 	{
 		if (saved_colors[i].hash == rgb->hash)
 		{
-			saved_colors[saved_colors_size].red = rgb->red;
-			saved_colors[saved_colors_size].green = rgb->green;
-			saved_colors[saved_colors_size].blue = rgb->blue;
+			saved_colors[i].red = rgb->red;
+			saved_colors[i].green = rgb->green;
+			saved_colors[i].blue = rgb->blue;
 
 			hsv_saved_colors_flush();
 
@@ -123,7 +127,7 @@ hsv_saved_colors_err_t hsv_saved_colors_delete(uint32_t color_name_hash)
 
 	uint32_t color_idx = 0U;
 	while (color_idx < saved_colors_size \
-			&& saved_colors[color_idx].hash == color_name_hash)
+			&& saved_colors[color_idx].hash != color_name_hash)
 	{
 		color_idx++;
 	}

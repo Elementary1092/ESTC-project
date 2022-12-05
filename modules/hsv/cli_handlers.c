@@ -5,24 +5,26 @@
 #include "modules/cdc_acm/cdc_acm.h"
 #include "cli_handlers.h"
 #include "hsv_picker.h"
+#include "hsv_saved_colors.h"
 
 #define HSV_CLI_UNKNOWN_COMMAND_PROMPT "Unknown command. Try again.\r\n"
 #define HSV_CLI_SAVED_COLORS_BUF_FULL_PROMPT "Cannot save color. Already saved maximum number of colors.\r\n"
 #define HSV_CLI_CANNOT_FIND_COLOR_PROMPT "Cannot find specified saved color.\r\n"
 #define HSV_CLI_SAVED_COLOR_PROMPT "Saved color successfully.\r\n"
-#define HSV_CLI_SAVED_COLOR_REWRITTEN_PROMPT "Saved color was rewritten.\r\n"
+#define HSV_CLI_FAILED_TO_SAVE_COLOR_PROMPT "Failed to save color.\r\n"
+#define HSV_CLI_INVALID_NUMBER_OF_ARGS_PROMPT "Invalid number of args. Type help for more info.\r\n"
 
-static hsv_cli_command_handler_t handlers[] =
-	{
-		HSV_CLI_HANDLERS(HSV_CLI_HANDLERS_EXPAND_AS_FNS)};
+static hsv_cli_command_handler_t handlers[] = 
+{
+	HSV_CLI_HANDLERS(HSV_CLI_HANDLERS_EXPAND_AS_FNS)
+};
 
-static char cmd_strs[][HSV_CLI_MAX_WORD_SIZE] =
-	{
-		HSV_CLI_HANDLERS(HSV_CLI_HANDLERS_EXPAND_AS_CMD_STR)};
+static char cmd_strs[][HSV_CLI_MAX_WORD_SIZE] = 
+{
+	HSV_CLI_HANDLERS(HSV_CLI_HANDLERS_EXPAND_AS_CMD_STR)
+};
 
-static uint32_t saved_colors[HSV_CLI_SAVED_COLORS_MAX_NUM][3] = {0U};
-static uint32_t saved_color_name_hashes[HSV_CLI_SAVED_COLORS_MAX_NUM] = {0U};
-static uint32_t saved_colors_size = 0U;
+static bool loaded_saved_colors = false;
 
 static void hsv_cli_convert_nstrs_to_nuints(uint32_t *converted_args, char args[][HSV_CLI_MAX_WORD_SIZE], uint8_t nargs)
 {
@@ -32,52 +34,29 @@ static void hsv_cli_convert_nstrs_to_nuints(uint32_t *converted_args, char args[
 	}
 }
 
-static void hsv_cli_delete_saved_color(uint32_t color_idx)
-{
-	if (saved_colors_size == 0)
-	{
-		return;
-	}
-
-	saved_colors_size--;
-	for (uint32_t i = color_idx; i < saved_colors_size; i++)
-	{
-		for (uint32_t j = 0UL; j < 3UL; j++)
-		{
-			saved_colors[i][j] = saved_colors[i + 1][j];
-		}
-		saved_color_name_hashes[i] = saved_color_name_hashes[i + 1];
-	}
-}
-
 static void hsv_cli_save_color(app_usbd_cdc_acm_t const *cdc_acm, uint32_t red, uint32_t green, uint32_t blue, char *color_name)
 {
 	uint32_t color_name_hash = utils_hash_str_jenkins(color_name);
-	for (size_t i = 0UL; i < saved_colors_size; i++)
+	hsv_saved_color_rgb_t rgb = {
+		.hash = color_name_hash,
+		.red = red,
+		.green = green,
+		.blue = blue,
+	};
+	hsv_saved_colors_err_t err = hsv_saved_colors_add_or_mod(&rgb);
+	
+	if (err == HSV_SAVED_COLORS_SUCCESS)
 	{
-		if (saved_color_name_hashes[i] == color_name_hash)
-		{
-			saved_colors[saved_colors_size][0] = red;
-			saved_colors[saved_colors_size][1] = green;
-			saved_colors[saved_colors_size][2] = blue;
-
-			cdc_acm_write(cdc_acm, HSV_CLI_SAVED_COLOR_REWRITTEN_PROMPT, strlen(HSV_CLI_SAVED_COLOR_REWRITTEN_PROMPT));
-			return;
-		}
+		cdc_acm_write(cdc_acm, HSV_CLI_SAVED_COLOR_PROMPT, strlen(HSV_CLI_SAVED_COLOR_PROMPT));
 	}
-
-	if (saved_colors_size >= HSV_CLI_SAVED_COLORS_MAX_NUM)
+	else if (err == HSV_SAVED_COLORS_NO_COLOR_SLOT)
 	{
 		cdc_acm_write(cdc_acm, HSV_CLI_SAVED_COLORS_BUF_FULL_PROMPT, strlen(HSV_CLI_SAVED_COLORS_BUF_FULL_PROMPT));
-		return;
 	}
-
-	saved_color_name_hashes[saved_colors_size] = color_name_hash;
-	saved_colors[saved_colors_size][0] = red;
-	saved_colors[saved_colors_size][1] = green;
-	saved_colors[saved_colors_size][2] = blue;
-	saved_colors_size++;
-	cdc_acm_write(cdc_acm, HSV_CLI_SAVED_COLOR_PROMPT, strlen(HSV_CLI_SAVED_COLOR_PROMPT));
+	else
+	{
+		cdc_acm_write(cdc_acm, HSV_CLI_FAILED_TO_SAVE_COLOR_PROMPT, strlen(HSV_CLI_FAILED_TO_SAVE_COLOR_PROMPT));
+	}
 }
 
 char *hsv_cli_get_cmd_str(hsv_cli_command_t h)
@@ -117,6 +96,7 @@ void hsv_cli_exec_update_hsv(app_usbd_cdc_acm_t const *cdc_acm,
 	if (nargs != 3)
 	{
 		NRFX_LOG_ERROR("hsv_cli_exec_update_hsv: Invalid number of args: %u", nargs);
+		cdc_acm_write(cdc_acm, HSV_CLI_INVALID_NUMBER_OF_ARGS_PROMPT, strlen(HSV_CLI_INVALID_NUMBER_OF_ARGS_PROMPT));
 		return;
 	}
 
@@ -134,6 +114,7 @@ void hsv_cli_exec_update_rgb(app_usbd_cdc_acm_t const *cdc_acm,
 	if (nargs != 3)
 	{
 		NRFX_LOG_ERROR("hsv_cli_exec_update_rgb: Invalid number of args: %u", nargs);
+		cdc_acm_write(cdc_acm, HSV_CLI_INVALID_NUMBER_OF_ARGS_PROMPT, strlen(HSV_CLI_INVALID_NUMBER_OF_ARGS_PROMPT));
 		return;
 	}
 
@@ -151,7 +132,14 @@ void hsv_cli_exec_add_rgb_color(app_usbd_cdc_acm_t const *cdc_acm,
 	if (nargs != 4)
 	{
 		NRFX_LOG_ERROR("hsv_cli_exec_add_rgb_color: Invalid number of args: %u", nargs);
+		cdc_acm_write(cdc_acm, HSV_CLI_INVALID_NUMBER_OF_ARGS_PROMPT, strlen(HSV_CLI_INVALID_NUMBER_OF_ARGS_PROMPT));
 		return;
+	}
+	
+	if (!loaded_saved_colors)
+	{
+		hsv_saved_colors_load();
+		loaded_saved_colors = true;
 	}
 
 	uint32_t red = utils_strings_atou(args[0]);
@@ -168,17 +156,23 @@ void hsv_cli_exec_apply_color(app_usbd_cdc_acm_t const *cdc_acm,
 	if (nargs != 1)
 	{
 		NRFX_LOG_ERROR("hsv_cli_exec_apply_color: Invalid number of args: %u", nargs);
+		cdc_acm_write(cdc_acm, HSV_CLI_INVALID_NUMBER_OF_ARGS_PROMPT, strlen(HSV_CLI_INVALID_NUMBER_OF_ARGS_PROMPT));
 		return;
 	}
 
-	uint32_t color_name_hash = utils_hash_str_jenkins(args[0]);
-	for (uint32_t i = 0; i < saved_colors_size; i++)
+	if (!loaded_saved_colors)
 	{
-		if (saved_color_name_hashes[i] == color_name_hash)
-		{
-			hsv_picker_set_rgb(saved_colors[i][0], saved_colors[i][1], saved_colors[i][2]);
-			return;
-		}
+		hsv_saved_colors_load();
+		loaded_saved_colors = true;
+	}
+
+	uint32_t color_name_hash = utils_hash_str_jenkins(args[0]);
+	hsv_saved_color_rgb_t rgb;
+	hsv_saved_colors_err_t err = hsv_saved_colors_seek(&rgb, color_name_hash);
+	if (err == HSV_SAVED_COLORS_SUCCESS)
+	{
+		hsv_picker_set_rgb(rgb.red, rgb.green, rgb.blue);
+		return;
 	}
 
 	cdc_acm_write(cdc_acm, HSV_CLI_CANNOT_FIND_COLOR_PROMPT, strlen(HSV_CLI_CANNOT_FIND_COLOR_PROMPT));
@@ -191,17 +185,21 @@ void hsv_cli_exec_del_color(app_usbd_cdc_acm_t const *cdc_acm,
 	if (nargs != 1)
 	{
 		NRFX_LOG_ERROR("hsv_cli_exec_del: Invalid number of args: %u", nargs);
+		cdc_acm_write(cdc_acm, HSV_CLI_INVALID_NUMBER_OF_ARGS_PROMPT, strlen(HSV_CLI_INVALID_NUMBER_OF_ARGS_PROMPT));
 		return;
+	}
+	
+	if (!loaded_saved_colors)
+	{
+		hsv_saved_colors_load();
+		loaded_saved_colors = true;
 	}
 
 	uint32_t color_name_hash = utils_hash_str_jenkins(args[0]);
-	for (uint32_t i = 0; i < saved_colors_size; i++)
+	hsv_saved_colors_err_t err = hsv_saved_colors_delete(color_name_hash);
+	if (err == HSV_SAVED_COLORS_SUCCESS)
 	{
-		if (saved_color_name_hashes[i] == color_name_hash)
-		{
-			hsv_cli_delete_saved_color(i);
-			return;
-		}
+		return;
 	}
 
 	cdc_acm_write(cdc_acm, HSV_CLI_CANNOT_FIND_COLOR_PROMPT, strlen(HSV_CLI_CANNOT_FIND_COLOR_PROMPT));
@@ -214,7 +212,14 @@ void hsv_cli_exec_add_curr_color(app_usbd_cdc_acm_t const *cdc_acm,
 	if (nargs != 1)
 	{
 		NRFX_LOG_ERROR("hsv_cli_exec_del: Invalid number of args: %u", nargs);
+		cdc_acm_write(cdc_acm, HSV_CLI_INVALID_NUMBER_OF_ARGS_PROMPT, strlen(HSV_CLI_INVALID_NUMBER_OF_ARGS_PROMPT));
 		return;
+	}
+
+	if (!loaded_saved_colors)
+	{
+		hsv_saved_colors_load();
+		loaded_saved_colors = true;
 	}
 
 	rgb_value_t curr_rgb;
