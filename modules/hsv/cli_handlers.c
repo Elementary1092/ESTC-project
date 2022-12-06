@@ -59,6 +59,15 @@ static void hsv_cli_save_color(app_usbd_cdc_acm_t const *cdc_acm, uint32_t red, 
 	}
 }
 
+static void hsv_cli_load_colors(void)
+{
+	if (!loaded_saved_colors)
+	{
+		hsv_saved_colors_load();
+		loaded_saved_colors = true;
+	}
+}
+
 char *hsv_cli_get_cmd_str(hsv_cli_command_t h)
 {
 	return cmd_strs[h];
@@ -136,11 +145,7 @@ void hsv_cli_exec_add_rgb_color(app_usbd_cdc_acm_t const *cdc_acm,
 		return;
 	}
 	
-	if (!loaded_saved_colors)
-	{
-		hsv_saved_colors_load();
-		loaded_saved_colors = true;
-	}
+	hsv_cli_load_colors();
 
 	uint32_t red = utils_strings_atou(args[0]);
 	uint32_t green = utils_strings_atou(args[1]);
@@ -160,11 +165,7 @@ void hsv_cli_exec_apply_color(app_usbd_cdc_acm_t const *cdc_acm,
 		return;
 	}
 
-	if (!loaded_saved_colors)
-	{
-		hsv_saved_colors_load();
-		loaded_saved_colors = true;
-	}
+	hsv_cli_load_colors();
 
 	uint32_t color_name_hash = utils_hash_str_jenkins(args[0]);
 	hsv_saved_color_rgb_t rgb;
@@ -189,11 +190,7 @@ void hsv_cli_exec_del_color(app_usbd_cdc_acm_t const *cdc_acm,
 		return;
 	}
 	
-	if (!loaded_saved_colors)
-	{
-		hsv_saved_colors_load();
-		loaded_saved_colors = true;
-	}
+	hsv_cli_load_colors();
 
 	uint32_t color_name_hash = utils_hash_str_jenkins(args[0]);
 	hsv_saved_colors_err_t err = hsv_saved_colors_delete(color_name_hash);
@@ -216,11 +213,7 @@ void hsv_cli_exec_add_curr_color(app_usbd_cdc_acm_t const *cdc_acm,
 		return;
 	}
 
-	if (!loaded_saved_colors)
-	{
-		hsv_saved_colors_load();
-		loaded_saved_colors = true;
-	}
+	hsv_cli_load_colors();
 
 	rgb_value_t curr_rgb;
 	hsv_picker_get_current_rgb(&curr_rgb);
