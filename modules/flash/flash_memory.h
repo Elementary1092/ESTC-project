@@ -85,8 +85,24 @@ flash_memory_err_t flash_memory_write(uint32_t addr,
 									uint32_t control_w, 
 									flash_memory_flag_t flags);
 
+/*
+	flash_memor_seek_page_first_free_addr searches for first slot in the page where data != DEFAULT_VALUE.
+	Requires all data to be written to the page sequentially.
+	Returns:
+		- 0 - if page is page number is specified incorrectly, or page is full, or such slot was not found.
+		- address - if such slot was found.
+*/
 uint32_t flash_memory_seek_page_first_free_addr(uint32_t page_addr);
 
+/*
+	flash_memory_page_append - tries to append record to the page.
+	Returns:
+		- FLASH_MEMORY_ERR_NOT_ENOUGH_SPACE - if FLASH_MEMORY_ERASE_PAGE_IF_NECCESSARY is not specified and page is full.
+		- FLASH_MEMORY_ERR_ADDRESS_OUT_OF_BOUND - if address specified is not in the DATA_AREA
+		- FLASH_MEMORY_INVALID_CONTROL_W - if { control_w } == DEFAULT_VALUE
+		- FLASH_MEMORY_WORD_IS_NOT_WRITABLE - if data cannot be written.
+		- FLASH_MEMORY_NO_ERR - on success.
+*/
 flash_memory_err_t flash_memory_page_append(uint32_t *buffer, 
 											uint32_t buf_size, 
 											uint32_t page_addr, 

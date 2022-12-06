@@ -122,7 +122,7 @@ hsv_saved_colors_err_t hsv_saved_colors_delete(uint32_t color_name_hash)
 {
 	if (saved_colors_size == 0)
 	{
-		return HSV_SAVED_COLORS_SAVED_COLORS_EMPTY;
+		return HSV_SAVED_COLORS_EMPTY;
 	}
 
 	uint32_t color_idx = 0U;

@@ -150,7 +150,7 @@ uint32_t flash_memory_seek_page_first_free_addr(uint32_t page_addr)
 	
 	if (*(paddr+end_offset) != FLASH_MEMORY_DEFAULT_VALUE)
 	{
-		return (uint32_t)(paddr + end_offset + 1);
+		return 0U;
 	}
 
 	while (start_offset < end_offset)

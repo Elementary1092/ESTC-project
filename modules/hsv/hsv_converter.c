@@ -6,8 +6,6 @@
 #include "utils/numeric/converter.h"
 #include "hsv_converter.h"
 
-#define HSV_CONVERTER_RADIANS_TO_DEGREE_FACTOR 57.3F
-
 static void hsv_converter_align_hsv(hsv_ctx_t *hsv)
 {
 	if (hsv->hue > HSV_MAX_HUE || isnan(hsv->hue))
