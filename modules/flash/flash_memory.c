@@ -199,7 +199,7 @@ flash_memory_err_t flash_memory_page_append(uint32_t *buffer,
 	}
 
 	uint32_t s_addr = flash_memory_seek_page_first_free_addr(page_addr);
-	if (s_addr == 0U)
+	if (s_addr == 0U || (s_addr + buf_size * sizeof(uint32_t)) > (page_addr + FLASH_MEMORY_PAGE_SIZE))
 	{
 		if (can_erase_page)
 		{
