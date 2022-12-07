@@ -6,7 +6,6 @@
 #include "../../utils/numeric/ops.h"
 #include "../../utils/numeric/converter.h"
 #include "hsv_picker.h"
-#include "hsv_converter.h"
 #include <math.h>
 
 #define RGB_CTX_VALUE_FACTOR 100U
@@ -263,7 +262,20 @@ static void hsv_picker_init_pwm_module(void)
 static bool hsv_picker_try_init_from_flash(void)
 {
 	uint32_t buffer[3] = {0UL};
-	flash_memory_err_t err = flash_memory_read(buffer, 3UL, HSV_SAVED_VALUE_OFFSET, HSV_SAVED_VALUE_CONTROL_WORD, FLASH_MEMORY_NO_FLAGS);
+	uint32_t addr = flash_memory_seek_page_first_free_addr(FLASH_MEMORY_FIRST_PAGE);
+	if (addr == 0U)
+	{
+		return false;
+	}
+
+	addr -= sizeof(uint32_t) * 4;
+	flash_memory_err_t err = flash_memory_read(
+		addr, 
+		buffer, 
+		3UL, 
+		HSV_SAVED_VALUE_CONTROL_WORD, 
+		FLASH_MEMORY_NO_FLAGS);
+
 	if (err != FLASH_MEMORY_NO_ERR)
 	{
 		NRF_LOG_INFO("hsv_picker_try_init_from_flash: Could not initialize from the flash. Error: %d", err);
@@ -296,7 +308,13 @@ static void hsv_picker_update_saved_value(void)
 	bright.fl = hsv_ctx.brightness;
 
 	uint32_t buffer[3] = {hue.ui, satur.ui, bright.ui};
-	flash_memory_err_t err = flash_memory_write(buffer, 3UL, HSV_SAVED_VALUE_OFFSET, HSV_SAVED_VALUE_CONTROL_WORD, FLASH_MEMORY_ERASE_PAGE_BEFORE_WRITE);
+	flash_memory_err_t err = flash_memory_page_append(
+		buffer, 
+		3UL, 
+		FLASH_MEMORY_FIRST_PAGE, 
+		HSV_SAVED_VALUE_CONTROL_WORD, 
+		FLASH_MEMORY_ERASE_PAGE_IF_NECESSARY);
+
 	if (err != FLASH_MEMORY_NO_ERR)
 	{
 		NRF_LOG_INFO("hsv_picker_update_saved_value: Could not update saved value. Error: %d", err);
@@ -409,4 +427,18 @@ void hsv_picker_set_rgb(uint32_t red, uint32_t green, uint32_t blue)
 	hsv_picker_update_rgb_channels();
 	hsv_picker_update_saved_value();
 	hsv_picker_flush_pwm_values();
+}
+
+void hsv_picker_get_current_hsv(hsv_ctx_t *hsv)
+{
+	hsv->hue = hsv_ctx.hue;
+	hsv->saturation = hsv_ctx.saturation;
+	hsv->brightness = hsv_ctx.brightness;
+}
+
+void hsv_picker_get_current_rgb(rgb_value_t *rgb)
+{
+	rgb->red = rgb_ctx.red;
+	rgb->green = rgb_ctx.green;
+	rgb->blue = rgb_ctx.blue;
 }

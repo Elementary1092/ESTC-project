@@ -43,6 +43,9 @@ typedef void (*cdc_acm_cli_event_handler_t)(app_usbd_cdc_acm_t const *cdc_acm, c
 
 void cdc_acm_cli_init(void);
 
+/*
+	ccd_acm_add_handler is used to add handler which should be triggered on cdc_acm_cli_event_t occurence;
+*/
 void cdc_acm_add_handler(cdc_acm_cli_event_t evt, cdc_acm_cli_event_handler_t handler);
 
 #endif

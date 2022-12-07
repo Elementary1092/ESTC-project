@@ -71,6 +71,7 @@ SRC_FILES += \
   $(PROJ_DIR)/utils/strings/strings.c \
   $(PROJ_DIR)/utils/numeric/ops.c \
   $(PROJ_DIR)/utils/numeric/converter.c \
+  $(PROJ_DIR)/utils/hash/hash.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm_read_buf.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm_cli.c \
@@ -79,6 +80,7 @@ SRC_FILES += \
   $(PROJ_DIR)/modules/hsv/hsv_converter.c \
   $(PROJ_DIR)/modules/hsv/hsv_picker.c \
   $(PROJ_DIR)/modules/gpio/led/led.c \
+  $(PROJ_DIR)/modules/hsv/hsv_saved_colors.c \
   $(PROJ_DIR)/modules/hsv/cli_handlers.c \
   $(PROJ_DIR)/modules/hsv/cli.c \
   $(PROJ_DIR)/modules/gpio/button/board_button.c \
@@ -146,6 +148,7 @@ INC_FOLDERS += \
   $(PROJ_DIR) \
   $(PROJ_DIR)/utils/strings \
   $(PROJ_DIR)/utils/numeric \
+  $(PROJ_DIR)/utils/hash \
   $(PROJ_DIR)/modules/gpio/button \
   $(PROJ_DIR)/modules/gpio/led \
   $(PROJ_DIR)/modules/timer \
