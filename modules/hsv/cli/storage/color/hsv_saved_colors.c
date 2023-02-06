@@ -71,6 +71,11 @@ void hsv_saved_colors_load(void)
 
 hsv_saved_colors_err_t hsv_saved_colors_seek(hsv_saved_color_rgb_t *rgb, uint32_t seeking_hash)
 {
+	if (rgb == NULL)
+	{
+		return HSV_SAVED_COLORS_EMPTY;
+	}
+
 	for (uint32_t i = 0U; i < saved_colors_size; i++)
 	{
 		if (saved_colors[i].hash == seeking_hash)
@@ -86,8 +91,13 @@ hsv_saved_colors_err_t hsv_saved_colors_seek(hsv_saved_color_rgb_t *rgb, uint32_
 	return HSV_SAVED_COLORS_NO_SUCH_COLOR;
 }
 
-hsv_saved_colors_err_t hsv_saved_colors_add_or_mod(hsv_saved_color_rgb_t *rgb)
+hsv_saved_colors_err_t hsv_saved_colors_add_or_mod(hsv_saved_color_rgb_t const * rgb)
 {
+	if (rgb == NULL)
+	{
+		return HSV_SAVED_COLORS_EMPTY;
+	}
+	
 	for (size_t i = 0UL; i < saved_colors_size; i++)
 	{
 		if (saved_colors[i].hash == rgb->hash)
@@ -138,14 +148,14 @@ hsv_saved_colors_err_t hsv_saved_colors_delete(uint32_t color_name_hash)
 	}
 
 	saved_colors_size--;
-	for (uint32_t i = color_idx; i < saved_colors_size; i++)
+	if (color_idx != saved_colors_size)
 	{
-		saved_colors[i].red = saved_colors[i + 1].red;
-		saved_colors[i].green = saved_colors[i + 1].green;
-		saved_colors[i].blue = saved_colors[i + 1].blue;
-		saved_colors[i].hash = saved_colors[i + 1].hash;
+		saved_colors[color_idx].hash = saved_colors[saved_colors_size].hash;
+		saved_colors[color_idx].red = saved_colors[saved_colors_size].red;
+		saved_colors[color_idx].green = saved_colors[saved_colors_size].green;
+		saved_colors[color_idx].blue = saved_colors[saved_colors_size].blue;
 	}
-
+	
 	hsv_saved_colors_flush();
 
 	return HSV_SAVED_COLORS_SUCCESS;
