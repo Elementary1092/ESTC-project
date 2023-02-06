@@ -1,24 +1,13 @@
 #include <string.h>
 #include "strings.h"
 
-uint32_t utils_strings_atou(char *str)
+uint32_t utils_strings_atou(const char *str)
 {
-	uint32_t res = 0;
-	if (strlen(str) > 10)
+	char *str_end;
+	uint32_t res = (uint32_t)(strtoul(str, &str_end, 10));
+	if (str_end != str + strlen(str))
 	{
-		return res;
-	}
-
-	for (size_t i = 0; i < strlen(str); i++)
-	{
-		if (str[i] >= '0' && str[i] <= '9')
-		{
-			res = res * 10U + (uint32_t)(str[i] - '0');
-		}
-		else
-		{
-			return 0;
-		}
+		return 0U;
 	}
 
 	return res;
