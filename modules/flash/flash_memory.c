@@ -22,7 +22,7 @@ flash_memory_err_t flash_memory_read(uint32_t addr,
 
 	if (no_flags)
 	{
-		NRF_LOG_INFO("flash_memory_read: Ignoring all flags.");
+		NRF_LOG_INFO("%s:%s:%d: Ignoring all flags.", NRF_LOG_PUSH(__FILE__), __func__, __LINE__);
 
 		ignore_control_w = false;
 		ignore_default_values = false;
@@ -30,16 +30,16 @@ flash_memory_err_t flash_memory_read(uint32_t addr,
 
 	uint32_t *s_addr = (uint32_t *)(addr);
 
-	NRF_LOG_INFO("flash_memory_read: Reading from %ld", s_addr);
+	NRF_LOG_INFO("%s:%s:%d: Reading from %ld", NRF_LOG_PUSH(__FILE__), __func__, __LINE__, addr);
 
 	if (!ignore_control_w)
 	{
-		NRF_LOG_INFO("flash_memory_read: Checking control word.");
+		NRF_LOG_INFO("%s:%s:%d: Checking control word.", NRF_LOG_PUSH(__FILE__), __func__, __LINE__);
 
 		uint32_t word = *s_addr;
 		if (word != control_w)
 		{
-			NRF_LOG_ERROR("flash_memory_read: Control word expected: %ld, got: %ld", control_w, word);
+			NRF_LOG_ERROR("%s:%s:%d: Control word expected: %ld, got: %ld", NRF_LOG_PUSH(__FILE__), __func__, __LINE__, control_w, word);
 			return FLASH_MEMORY_ERR_INVALID_CONTROL_W;
 		}
 		s_addr += 1;
@@ -49,7 +49,7 @@ flash_memory_err_t flash_memory_read(uint32_t addr,
 	{
 		uint32_t word = s_addr[i];
 
-		NRF_LOG_INFO("flash_memory_read: Read %x from %lu.", word, s_addr + i);
+		NRF_LOG_INFO("%s:%s:%d: Read %x from %lu.", NRF_LOG_PUSH(__FILE__), __func__, __LINE__, word, s_addr + i);
 		if (!ignore_default_values && word == FLASH_MEMORY_DEFAULT_VALUE)
 		{
 			return FLASH_MEMORY_ERR_POSSIBLY_INVALID_DATA;
@@ -73,7 +73,7 @@ flash_memory_err_t flash_memory_write(uint32_t addr,
 
 	if (no_flags)
 	{
-		NRF_LOG_INFO("flash_memory_write: Ignoring all flags.");
+		NRF_LOG_INFO("%s:%s:%d: Ignoring all flags.", NRF_LOG_PUSH(__FILE__), __func__, __LINE__);
 
 		ignore_control_w = false;
 		should_erase_page = false;
@@ -82,7 +82,7 @@ flash_memory_err_t flash_memory_write(uint32_t addr,
 	if (should_erase_page)
 	{
 		uint32_t p_addr = (addr / FLASH_MEMORY_PAGE_SIZE) * FLASH_MEMORY_PAGE_SIZE;
-		NRF_LOG_INFO("flash_memory_write: Erasing page starting from address: %lu", p_addr);
+		NRF_LOG_INFO("%s:%s:%d: Erasing page starting from address: %lu", NRF_LOG_PUSH(__FILE__), __func__, __LINE__, p_addr);
 		nrf_nvmc_page_erase(p_addr);
 	}
 	
@@ -91,11 +91,11 @@ flash_memory_err_t flash_memory_write(uint32_t addr,
 		return FLASH_MEMORY_ERR_ADDR_OUT_OF_BOUND;
 	}
 
-	NRF_LOG_INFO("flash_memory_write: Start writing from %lu", addr);
+	NRF_LOG_INFO("%s:%s:%d: Start writing from %lu", NRF_LOG_PUSH(__FILE__), __func__, __LINE__, addr);
 
 	if (!ignore_control_w)
 	{
-		NRF_LOG_INFO("flash_memory_write: Writing control word: %lu", control_w);
+		NRF_LOG_INFO("%s:%s:%d: Writing control word: %lu", NRF_LOG_PUSH(__FILE__), __func__, __LINE__, control_w);
 
 		if (control_w == FLASH_MEMORY_DEFAULT_VALUE)
 		{
@@ -104,7 +104,7 @@ flash_memory_err_t flash_memory_write(uint32_t addr,
 
 		if (!nrfx_nvmc_word_writable_check(addr, control_w))
 		{
-			NRF_LOG_INFO("flash_memory_write: Could not write control word: %x. Current addr value: %x", control_w, *((uint32_t *)addr));
+			NRF_LOG_INFO("%s:%s:%d: Could not write control word: %x. Current addr value: %x", NRF_LOG_PUSH(__FILE__), __func__, __LINE__, control_w, *((uint32_t *)addr));
 
 			return FLASH_MEMORY_ERR_WORD_IS_NOT_WRITABLE;
 		}
@@ -127,11 +127,11 @@ flash_memory_err_t flash_memory_write(uint32_t addr,
 
 		flash_memory_wait_for_write_complition();
 
-		NRF_LOG_INFO("flash_memory_write: Written %x to %lu", buffer[i], addr);
+		NRF_LOG_INFO("%s:%s:%d: Written %x to %lu", NRF_LOG_PUSH(__FILE__), __func__, __LINE__, buffer[i], addr);
 		addr += sizeof(uint32_t);
 	}
 
-	NRF_LOG_INFO("flash_memory_write: Successfully saved words");
+	NRF_LOG_INFO("%s:%s:%d: Successfully saved words", NRF_LOG_PUSH(__FILE__), __func__, __LINE__);
 
 	return FLASH_MEMORY_NO_ERR;
 }
@@ -203,7 +203,7 @@ flash_memory_err_t flash_memory_page_append(uint32_t *buffer,
 	{
 		if (can_erase_page)
 		{
-			NRF_LOG_INFO("flash_memory_page_append: Erasing page");
+			NRF_LOG_INFO("%s:%s:%d: Erasing page", NRF_LOG_PUSH(__FILE__), __func__, __LINE__);
 			nrf_nvmc_page_erase(page_addr);
 			s_addr = page_addr;
 		}
