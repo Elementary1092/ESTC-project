@@ -12,14 +12,11 @@ void cdc_acm_init(app_usbd_cdc_acm_t const *acm)
 	APP_ERROR_CHECK(app_usbd_class_append(cdc_acm_class));
 }
 
-cdc_acm_ret_code_t cdc_acm_echo(app_usbd_cdc_acm_t const *acm, cdc_acm_read_buf_ctx_t *read_buf)
+cdc_acm_ret_code_t cdc_acm_echo(app_usbd_cdc_acm_t const *acm, cdc_acm_read_buf_t *read_buf)
 {
 	cdc_acm_ret_code_t acm_ret = CDC_ACM_SUCCESS;
 	
-	if ( read_buf->curr_idx < read_buf->buf_size )
-	{
-		read_buf->buf[read_buf->curr_idx++] = resp_buf[0];
-	}
+	cdc_acm_read_buf_append(read_buf, resp_buf[0]);
 
 	if (resp_buf[0] == '\r' \
 		|| resp_buf[0] == '\n')
@@ -55,8 +52,10 @@ void cdc_acm_only_read(app_usbd_cdc_acm_t const *acm)
 
 cdc_acm_ret_code_t cdc_acm_write(app_usbd_cdc_acm_t const *acm, const char *str, ssize_t str_len)
 {
-	if (app_usbd_cdc_acm_write(acm, str, str_len) != NRF_SUCCESS)
+	ret_code_t err_code = app_usbd_cdc_acm_write(acm, str, str_len);
+	if (err_code != NRF_SUCCESS)
 	{
+		NRF_LOG_ERROR("%s: %s", __func__, NRF_LOG_ERROR_STRING_GET(err_code));
 		return CDC_ACM_ACTION_ERROR;
 	}
 

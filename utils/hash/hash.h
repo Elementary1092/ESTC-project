@@ -3,7 +3,11 @@
 
 #include <stdint.h>
 
-/* Implementation of Jenkins one at time hashing function */
+/**
+ * @brief Implementation of Jenkins one at time hashing function.
+ * 
+ * @retval uint32_t The hash of the string.
+*/
 uint32_t utils_hash_str_jenkins(const char *str);
 
 #endif

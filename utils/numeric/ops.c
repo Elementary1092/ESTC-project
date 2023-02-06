@@ -3,31 +3,21 @@
 
 float utils_numeric_ops_modf(float value, float mod_base)
 {
-	if (isnan(value))
+	float mod = fmodf(value, mod_base);
+	if (isnan(mod) || isinf(mod))
 	{
 		return 0.0F;
 	}
 	
-	float res = value - (mod_base * floorf(value / mod_base));
-	if (isnan(res))
-	{
-		return value;
-	}
-
-	return res;
+	return mod;
 }
 
 float utils_numeric_ops_absf(float value)
 {
-	if (isnan(value))
+	if (isnan(value) || isinf(value))
 	{
 		return 0.0F;
 	}
 	
-	if (value < 0.0F)
-	{
-		return -value;
-	}
-
-	return value;
+	return fabsf(value);
 }

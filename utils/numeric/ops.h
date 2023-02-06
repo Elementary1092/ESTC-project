@@ -1,20 +1,29 @@
 #ifndef ESTC_UTILS_NUMERIC_H
 #define ESTC_UTILS_NUMERIC_H
 
-/*
-	utils_numeric_ops_modf tries to return absolute value of a { value }.
-	Returns:
-		- 0 - if { value } is NaN.
-		- absolute value - otherwise.
+/**
+ * @brief Tries to return absolute value of a value.
+ * 
+ * @param[in] value Floating point number which should be converted to positive or 0.
+ * 
+ * @retval 0 If the value is NaN or is Infinity.
+ * 
+ * @retval absolute_value If the value is correct floating point number.
 */
 float utils_numeric_ops_absf(float value);
 
-/*
-	utils_numeric_ops_modf performs modulo division operation on { value } where base = { mod_base }.
-	Returns:
-		- 0 - if { value } is NaN.
-		- value - if result of modulo division is NaN.
-		- modulo division result - otherwise.
+/**
+ * @brief Computes remainder of the operation value / mod_base.
+ * 
+ * @param[in] value Numerator in the division.
+ * 
+ * @param[in] mod_base Denominator in the division.
+ * 
+ * @retval 0 If the value is NaN or is Infinity.
+ * 
+ * @retval @ref value If the result of the division is NaN.
+ * 
+ * @retval correct_result otherwise.
 */
 float utils_numeric_ops_modf(float value, float mod_base);
 

@@ -11,6 +11,9 @@
 #define LED_PCA10059_BLUE   NRF_GPIO_PIN_MAP(0, 12)
 #define LED_PCA10059_YELLOW NRF_GPIO_PIN_MAP(0, 6)
 
+/**
+ * @brief Initializes all leds on the board.
+*/
 void led_init_all(void);
 
 #endif

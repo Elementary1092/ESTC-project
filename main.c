@@ -16,7 +16,7 @@
 #include "modules/gpio/led/led.h"
 #include "modules/timer/rtc.h"
 #include "modules/hsv/hsv_picker.h"
-#include "modules/hsv/cli.h"
+#include "modules/hsv/cli/cli.h"
 #include "modules/cdc_acm/cdc_acm_cli.h"
 
 // Board ID: 7198, so, 7 - Red, 1 - Green, 9 - Blue, 8 - Green (led1) 
