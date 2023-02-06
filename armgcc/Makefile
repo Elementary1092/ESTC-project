@@ -72,17 +72,31 @@ SRC_FILES += \
   $(PROJ_DIR)/utils/numeric/ops.c \
   $(PROJ_DIR)/utils/numeric/converter.c \
   $(PROJ_DIR)/utils/hash/hash.c \
+  $(PROJ_DIR)/utils/generator/sinusoid.c \
+  $(PROJ_DIR)/utils/generator/fcyclic_variable.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm_read_buf.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm_cli.c \
   $(PROJ_DIR)/modules/timer/rtc.c \
   $(PROJ_DIR)/modules/flash/flash_memory.c \
+  $(PROJ_DIR)/modules/pwm/pwm_individual.c \
   $(PROJ_DIR)/modules/hsv/hsv_converter.c \
+  $(PROJ_DIR)/modules/hsv/hsv_flash.c \
+  $(PROJ_DIR)/modules/hsv/hsv_pwm.c \
   $(PROJ_DIR)/modules/hsv/hsv_picker.c \
   $(PROJ_DIR)/modules/gpio/led/led.c \
-  $(PROJ_DIR)/modules/hsv/hsv_saved_colors.c \
-  $(PROJ_DIR)/modules/hsv/cli_handlers.c \
-  $(PROJ_DIR)/modules/hsv/cli.c \
+  $(PROJ_DIR)/modules/hsv/cli/cli.c \
+  $(PROJ_DIR)/modules/hsv/cli/cli_handlers.c \
+  $(PROJ_DIR)/modules/hsv/cli/storage/color/hsv_saved_colors.c \
+  $(PROJ_DIR)/modules/hsv/cli/handlers/cli_add_current_color.c \
+  $(PROJ_DIR)/modules/hsv/cli/handlers/cli_add_rgb_color.c \
+  $(PROJ_DIR)/modules/hsv/cli/handlers/cli_apply_color.c \
+  $(PROJ_DIR)/modules/hsv/cli/handlers/cli_delete_color.c \
+  $(PROJ_DIR)/modules/hsv/cli/handlers/cli_unknown_command.c \
+  $(PROJ_DIR)/modules/hsv/cli/handlers/cli_update_hsv.c \
+  $(PROJ_DIR)/modules/hsv/cli/handlers/cli_update_rgb.c \
+  $(PROJ_DIR)/modules/hsv/cli/handlers/utils/cli_colors_utils.c \
+  $(PROJ_DIR)/modules/hsv/cli/handlers/utils/cli_utils.c \
   $(PROJ_DIR)/modules/gpio/button/board_button.c \
   $(PROJ_DIR)/modules/gpio/led/sequence_ctx.c \
   $(PROJ_DIR)/modules/timer/systick_ctx.c \
@@ -149,10 +163,16 @@ INC_FOLDERS += \
   $(PROJ_DIR)/utils/strings \
   $(PROJ_DIR)/utils/numeric \
   $(PROJ_DIR)/utils/hash \
+  $(PROJ_DIR)/utils/generator \
   $(PROJ_DIR)/modules/gpio/button \
   $(PROJ_DIR)/modules/gpio/led \
   $(PROJ_DIR)/modules/timer \
+  $(PROJ_DIR)/modules/pwm \
   $(PROJ_DIR)/modules/hsv \
+  $(PROJ_DIR)/modules/hsv/cli \
+  $(PROJ_DIR)/modules/hsv/cli/storage/color \
+  $(PROJ_DIR)/modules/hsv/cli/handlers/include \
+  $(PROJ_DIR)/modules/hsv/cli/handlers/utils \
   $(PROJ_DIR)/modules/flash \
 
 # Libraries common to all targets
