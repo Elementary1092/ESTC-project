@@ -4,8 +4,6 @@
 #include "utils/hash/hash.h"
 #include "storage/color/hsv_saved_colors.h"
 
-static const char *HSV_CLI_CANNOT_FIND_COLOR_PROMPT = "Cannot find specified saved color.\r\n";
-
 hsv_cli_handler_i hsv_cli_delete_color_command(void)
 {
 	return (hsv_cli_handler_i) {

@@ -6,7 +6,6 @@
 #include "app_config.h"
 
 #include "modules/cli_errors/cli_errors.h"
-#include "cli/handlers/include/cli_unknown_command.h"
 #include "cli/handlers/include/cli_add_current_color.h"
 #include "cli/handlers/include/cli_add_rgb_color.h"
 #include "cli/handlers/include/cli_apply_color.h"
