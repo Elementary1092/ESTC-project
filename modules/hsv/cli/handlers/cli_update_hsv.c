@@ -13,21 +13,21 @@ hsv_cli_handler_i hsv_cli_update_hsv(void)
 	};
 }
 
-void hsv_cli_handler_update_hsv(app_usbd_cdc_acm_t const *cdc_acm,
-							 char args[][HSV_CLI_MAX_WORD_SIZE],
-							 uint8_t nargs)
+estc_cli_error_t hsv_cli_handler_update_hsv(app_usbd_cdc_acm_t const *cdc_acm,
+							                char args[][HSV_CLI_MAX_WORD_SIZE],
+							                uint8_t nargs)
 {
 	if (nargs != 3)
 	{
-		hsv_cli_utils_invalid_number_of_args_prompt(cdc_acm, __func__, 3U, nargs);
-		return;
+		return ESTC_CLI_ERROR_INVALID_NUMBER_OF_ARGS;
 	}
 
 	uint32_t hsv_args[3];
 	hsv_cli_utils_convert_strs_to_uints(hsv_args, args, nargs);
 
 	hsv_picker_set_hsv((float)hsv_args[0], (float)hsv_args[1], (float)hsv_args[2]);
-	NRF_LOG_INFO("hsv_cli_exec_update_hsv: Updated hsv");
+	
+	return ESTC_CLI_SUCCESS;
 }
 
 const char *hsv_cli_handler_update_hsv_help(void)

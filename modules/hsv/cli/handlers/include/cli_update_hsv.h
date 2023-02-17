@@ -24,9 +24,9 @@ hsv_cli_handler_i hsv_cli_update_hsv(void);
  *       - Saturation;
  *       - Brightness.
 */
-void hsv_cli_handler_update_hsv(app_usbd_cdc_acm_t const *cdc_acm, 
-                                char args[][HSV_CLI_MAX_WORD_SIZE], 
-							    uint8_t nargs);
+estc_cli_error_t hsv_cli_handler_update_hsv(app_usbd_cdc_acm_t const *cdc_acm, 
+                                            char args[][HSV_CLI_MAX_WORD_SIZE], 
+							                uint8_t nargs);
 
 /**
  * @brief Returns update_hsv command help prompt.
