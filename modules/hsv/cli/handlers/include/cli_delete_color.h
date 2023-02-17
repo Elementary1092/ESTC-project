@@ -21,9 +21,9 @@ hsv_cli_handler_i hsv_cli_delete_color_command(void);
  * 
  * @note Expects 1 argument: the name of the color to be deleted.
 */
-void hsv_cli_handler_delete_color(app_usbd_cdc_acm_t const *cdc_acm, 
-                                  char args[][HSV_CLI_MAX_WORD_SIZE], 
-							      uint8_t nargs);
+estc_cli_error_t hsv_cli_handler_delete_color(app_usbd_cdc_acm_t const *cdc_acm, 
+                                              char args[][HSV_CLI_MAX_WORD_SIZE], 
+							                  uint8_t nargs);
 
 /**
  * @brief Returns delete_color help prompt.

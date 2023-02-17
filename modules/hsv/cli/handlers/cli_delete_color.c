@@ -15,26 +15,25 @@ hsv_cli_handler_i hsv_cli_delete_color_command(void)
 	};
 }
 
-void hsv_cli_handler_delete_color(app_usbd_cdc_acm_t const *cdc_acm, 
-                                  char args[][HSV_CLI_MAX_WORD_SIZE], 
-							      uint8_t nargs)
+estc_cli_error_t hsv_cli_handler_delete_color(app_usbd_cdc_acm_t const *cdc_acm, 
+                                              char args[][HSV_CLI_MAX_WORD_SIZE], 
+							                  uint8_t nargs)
 {
 	if (nargs != 1)
 	{
-		hsv_cli_utils_invalid_number_of_args_prompt(cdc_acm, __func__, 1, nargs);
-		return;
+		return ESTC_CLI_ERROR_INVALID_NUMBER_OF_ARGS;
 	}
 	
 	hsv_cli_load_colors();
 
 	uint32_t color_name_hash = utils_hash_str_jenkins(args[0]);
 	hsv_saved_colors_err_t err = hsv_saved_colors_delete(color_name_hash);
-	if (err == HSV_SAVED_COLORS_SUCCESS)
+	if (err != HSV_SAVED_COLORS_SUCCESS)
 	{
-		return;
+		return ESTC_CLI_ERROR_NOT_FOUND;
 	}
 
-	cdc_acm_write(cdc_acm, HSV_CLI_CANNOT_FIND_COLOR_PROMPT, strlen(HSV_CLI_CANNOT_FIND_COLOR_PROMPT));
+	return ESTC_CLI_SUCCESS;
 }
 
 const char *hsv_cli_handler_delete_color_help(void)
