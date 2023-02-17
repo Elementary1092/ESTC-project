@@ -11,17 +11,14 @@ hsv_cli_handler_i hsv_cli_add_current_color(void);
 /**
  * @brief Handler of add_current_color command.
  * 
- * @param[in] cdc_acm Registered cdc_acm instance where output will be written.
- * 
  * @param[in] args Command arguments.
  * 
  * @param[in] nargs Number of arguments.
  * 
  * @note Immediatelly returns if the number of arguments is incorrect. Expects 1 argument (color name).
 */
-void hsv_cli_handler_add_current_color(app_usbd_cdc_acm_t const *cdc_acm, 
-                                       char args[][HSV_CLI_MAX_WORD_SIZE], 
-							           uint8_t nargs);
+estc_cli_error_t hsv_cli_handler_add_current_color(char args[][HSV_CLI_MAX_WORD_SIZE], 
+							                       uint8_t nargs);
 
 /**
  * @brief Returns help prompt of add_current_color command.

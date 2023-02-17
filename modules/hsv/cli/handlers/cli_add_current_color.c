@@ -13,14 +13,12 @@ hsv_cli_handler_i hsv_cli_add_current_color(void)
 	};
 }
 
-void hsv_cli_handler_add_current_color(app_usbd_cdc_acm_t const *cdc_acm, 
-                                       char args[][HSV_CLI_MAX_WORD_SIZE], 
-							           uint8_t nargs)
+estc_cli_error_t hsv_cli_handler_add_current_color(char args[][HSV_CLI_MAX_WORD_SIZE], 
+							                       uint8_t nargs)
 {
 	if (nargs != 1)
 	{
-		hsv_cli_utils_invalid_number_of_args_prompt(cdc_acm, __func__, 1, nargs);
-		return;
+		return ESTC_CLI_ERROR_INVALID_NUMBER_OF_ARGS;
 	}
 
 	hsv_cli_load_colors();
@@ -32,7 +30,7 @@ void hsv_cli_handler_add_current_color(app_usbd_cdc_acm_t const *cdc_acm,
 	uint32_t green = (uint32_t)(curr_rgb.green);
 	uint32_t blue = (uint32_t)(curr_rgb.blue);
 
-	hsv_cli_save_color(cdc_acm, red, green, blue, args[0]);
+	return hsv_cli_save_color(red, green, blue, args[0]);
 }
 
 const char *hsv_cli_handler_add_current_color_help(void)

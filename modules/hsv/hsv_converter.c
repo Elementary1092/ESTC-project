@@ -22,6 +22,8 @@ static void hsv_converter_align_hsv(hsv_ctx_t *hsv)
 	{
 		hsv->brightness = HSV_MAX_BRIGHTNESS;
 	}
+
+	hsv->is_valid = true;
 }
 
 rgb_value_t hsv_converter_convert_hsv_to_rgb(float hue, float saturation, float brightness)

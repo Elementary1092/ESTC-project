@@ -34,11 +34,6 @@ static void hsv_cli_exec_help(app_usbd_cdc_acm_t const *cdc_acm, char args[][HSV
 
 	for (int i = 0; i < HSV_CLI_COMMAND_HELP && max_len > 0; i++)
 	{
-		if (i == HSV_CLI_COMMAND_UNKNOWN)
-		{
-			continue;
-		}
-
 		hsv_cli_handler_i handler = (*command_handlers[i])();
 		const char *command_prompt = handler.help();
 
@@ -71,17 +66,23 @@ hsv_cli_command_t hsv_cli_resolve_command(const char *command)
 	return HSV_CLI_COMMAND_UNKNOWN;
 }
 
-void hsv_cli_exec_handler(hsv_cli_command_t h,
-						  app_usbd_cdc_acm_t const *cdc_acm,
-						  char args[][HSV_CLI_MAX_WORD_SIZE],
-						  uint8_t nargs)
+estc_cli_error_t hsv_cli_exec_handler(hsv_cli_command_t h,
+						              app_usbd_cdc_acm_t const *cdc_acm,
+						              char args[][HSV_CLI_MAX_WORD_SIZE],
+						              uint8_t nargs)
 {
 	if (h == HSV_CLI_COMMAND_HELP)
 	{
 		hsv_cli_exec_help(cdc_acm, args, nargs);
-		return;
+		return ESTC_CLI_SUCCESS;
+	}
+
+	if (h == HSV_CLI_COMMAND_UNKNOWN)
+	{
+		return ESTC_CLI_ERROR_UNKNOWN_COMMAND;
 	}
 
 	hsv_cli_handler_i handler = (*command_handlers[h])();
-	handler.command_handler(cdc_acm, args, nargs);
+
+	return handler.command_handler(args, nargs);
 }

@@ -1,9 +1,9 @@
 #ifndef HSV_CLI_HANDLER_INTERFACE_H
 #define HSV_CLI_HANDLER_INTERFACE_H
 
-#include <app_usbd_cdc_acm.h>
 #include <stdint.h>
 #include "app_config.h"
+#include "modules/cli_errors/cli_errors.h"
 
 #ifndef HSV_CLI_MAX_WORD_SIZE
 #define HSV_CLI_MAX_WORD_SIZE ESTC_MAX_LINE_SIZE
@@ -18,9 +18,8 @@
  * 
  * @param[in] nargs Number of arguments.
 */
-typedef void (* hsv_cli_command_handler_t)(app_usbd_cdc_acm_t const *cdc_acm, 
-                                           char args[][HSV_CLI_MAX_WORD_SIZE],
-										   uint8_t nargs);
+typedef estc_cli_error_t (* hsv_cli_command_handler_t)(char args[][HSV_CLI_MAX_WORD_SIZE],
+										               uint8_t nargs);
 
 /**
  * @brief Get help prompt of a command.
