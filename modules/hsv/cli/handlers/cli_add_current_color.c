@@ -31,9 +31,7 @@ estc_cli_error_t hsv_cli_handler_add_current_color(app_usbd_cdc_acm_t const *cdc
 	uint32_t green = (uint32_t)(curr_rgb.green);
 	uint32_t blue = (uint32_t)(curr_rgb.blue);
 
-	hsv_cli_save_color(cdc_acm, red, green, blue, args[0]);
-
-	return ESTC_CLI_SUCCESS;
+	return hsv_cli_save_color(cdc_acm, red, green, blue, args[0]);
 }
 
 const char *hsv_cli_handler_add_current_color_help(void)

@@ -10,11 +10,11 @@
 
 static bool loaded_saved_colors = false;
 
-void hsv_cli_save_color(app_usbd_cdc_acm_t const *cdc_acm, 
-                        uint32_t red, 
-						uint32_t green, 
-						uint32_t blue, 
-						const char *color_name)
+estc_cli_error_t hsv_cli_save_color(app_usbd_cdc_acm_t const *cdc_acm, 
+                                    uint32_t red, 
+						            uint32_t green, 
+						            uint32_t blue, 
+						            const char *color_name)
 {
 	uint32_t color_name_hash = utils_hash_str_jenkins(color_name);
 	hsv_saved_color_rgb_t rgb = {
@@ -27,15 +27,15 @@ void hsv_cli_save_color(app_usbd_cdc_acm_t const *cdc_acm,
 	
 	if (err == HSV_SAVED_COLORS_SUCCESS)
 	{
-		cdc_acm_write(cdc_acm, HSV_CLI_SAVED_COLOR_PROMPT, strlen(HSV_CLI_SAVED_COLOR_PROMPT));
+		return ESTC_CLI_SUCCESS;
 	}
 	else if (err == HSV_SAVED_COLORS_NO_COLOR_SLOT)
 	{
-		cdc_acm_write(cdc_acm, HSV_CLI_SAVED_COLORS_BUF_FULL_PROMPT, strlen(HSV_CLI_SAVED_COLORS_BUF_FULL_PROMPT));
+		return ESTC_CLI_ERROR_BUFFER_OVERFLOW;
 	}
 	else
 	{
-		cdc_acm_write(cdc_acm, HSV_CLI_FAILED_TO_SAVE_COLOR_PROMPT, strlen(HSV_CLI_FAILED_TO_SAVE_COLOR_PROMPT));
+		return ESTC_CLI_ERROR_FAILED_TO_SAVE;
 	}
 }
 

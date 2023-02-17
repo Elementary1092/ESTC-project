@@ -2,6 +2,7 @@
 #define HSV_CLI_COLORS_UTILS_H
 
 #include "modules/cdc_acm/cdc_acm.h"
+#include "modules/cli_errors/cli_errors.h"
 
 /**
  * @brief Triggers loading of saved colors if it was not triggered yet.
@@ -20,8 +21,14 @@ void hsv_cli_load_colors(void);
  * @param[in] green Green value of rgb (expected to be in a range 0 - 255)
  *
  * @param[in] blue Blue value of rgb (expected to be in a range 0 - 255)
+ * 
+ * @retval ESTC_CLI_SUCCESS when color is saved successfully
+ * 
+ * @retval ESTC_CLI_ERROR_BUFFER_OVERFLOW when maximum number of color is already saved
+ * 
+ * @retval ESTC_CLI_ERROR_FAILED_TO_SAVE on other error on saving new color
 */
-void hsv_cli_save_color(app_usbd_cdc_acm_t const *cdc_acm, 
+estc_cli_error_t hsv_cli_save_color(app_usbd_cdc_acm_t const *cdc_acm, 
                         uint32_t red, 
 						uint32_t green, 
 						uint32_t blue, 
