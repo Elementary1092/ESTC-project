@@ -11,20 +11,21 @@ hsv_cli_handler_i hsv_cli_update_rgb(void)
 	};
 }
 
-void hsv_cli_handler_update_rgb(app_usbd_cdc_acm_t const *cdc_acm, 
-                                char args[][HSV_CLI_MAX_WORD_SIZE], 
-							    uint8_t nargs)
+estc_cli_error_t hsv_cli_handler_update_rgb(app_usbd_cdc_acm_t const *cdc_acm, 
+                                            char args[][HSV_CLI_MAX_WORD_SIZE], 
+							                uint8_t nargs)
 {
 	if (nargs != 3)
 	{
-		hsv_cli_utils_invalid_number_of_args_prompt(cdc_acm, __func__, 3, nargs);
-		return;
+		return ESTC_CLI_ERROR_INVALID_NUMBER_OF_ARGS;
 	}
 
 	uint32_t rgb_args[3];
 	hsv_cli_utils_convert_strs_to_uints(rgb_args, args, nargs);
 
 	hsv_picker_set_rgb(rgb_args[0], rgb_args[1], rgb_args[2]);
+
+	return ESTC_CLI_SUCCESS;
 }
 
 const char *hsv_cli_handler_update_rgb_help(void)
