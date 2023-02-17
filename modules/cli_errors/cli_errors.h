@@ -12,6 +12,7 @@
 		EXPANDER(ESTC_CLI_ERROR_INTERNAL, "Internal error has occurred") \
 		EXPANDER(ESTC_CLI_ERROR_FAILED_TO_SAVE, "Failed to save") \
 		EXPANDER(ESTC_CLI_ERROR_FAILED_TO_READ_FROM_FLASH, "Failed to load from the flash memory") \
+		EXPANDER(ESTC_CLI_ERROR_UNKNOWN_COMMAND, "Unknown command") \
 
 /**
  * @brief Describe all possible errors which may be returned by CLI handlers.
