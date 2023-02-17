@@ -23,20 +23,4 @@ void hsv_cli_utils_convert_strs_to_uints(uint32_t *converted_args_buffer,
                                          char args[][HSV_CLI_UTILS_MAX_WORD_SIZE], 
 										 uint8_t nargs);
 
-/**
- * @brief A wrapper which prints an invalid number of arguments error message.
- * 
- * @param[in] cdc_acm Registered cdc acm instance where an output will be written.
- * 
- * @param[in] function_name Function name where this  error has occurred. Recomended to use __func__ predefined identifier.
- * 
- * @param[in] expected_args Number of arguments expected.
- * 
- * @param[in] got_args Number of arguments passed to the function.
-*/
-void hsv_cli_utils_invalid_number_of_args_prompt(app_usbd_cdc_acm_t const *cdc_acm,
-												 const char *function_name,
-                                                 uint8_t expected_args,
-												 uint8_t got_args);
-
 #endif
