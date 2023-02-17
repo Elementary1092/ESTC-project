@@ -35,6 +35,11 @@ static void cdc_acm_cli_handle_event_with_prompt(cdc_acm_cli_event_t event)
 
 		estc_cli_error_t err = handler(&cdc_acm_cli, &acm_read_buffer);
 
+		if (err == ESTC_CLI_ERROR_EMPTY_COMMAND)
+		{
+			return;
+		}
+
 		char *error_str = estc_cli_errors_stringify(err);
 		char prompt[100] = {'\0'};
 		size_t max_len = sizeof(prompt) - 1;
