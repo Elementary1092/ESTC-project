@@ -8,8 +8,6 @@
 #include "utils/hash/hash.h"
 #include "modules/hsv/hsv_picker.h"
 
-#define HSV_CLI_CANNOT_FIND_COLOR_PROMPT "Cannot find specified saved color.\r\n"
-
 hsv_cli_handler_i hsv_cli_apply_color(void)
 {
 	return (hsv_cli_handler_i) {
