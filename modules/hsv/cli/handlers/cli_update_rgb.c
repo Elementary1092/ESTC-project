@@ -11,8 +11,7 @@ hsv_cli_handler_i hsv_cli_update_rgb(void)
 	};
 }
 
-estc_cli_error_t hsv_cli_handler_update_rgb(app_usbd_cdc_acm_t const *cdc_acm, 
-                                            char args[][HSV_CLI_MAX_WORD_SIZE], 
+estc_cli_error_t hsv_cli_handler_update_rgb(char args[][HSV_CLI_MAX_WORD_SIZE], 
 							                uint8_t nargs)
 {
 	if (nargs != 3)

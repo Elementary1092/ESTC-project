@@ -84,5 +84,5 @@ estc_cli_error_t hsv_cli_exec_handler(hsv_cli_command_t h,
 
 	hsv_cli_handler_i handler = (*command_handlers[h])();
 
-	return handler.command_handler(cdc_acm, args, nargs);
+	return handler.command_handler(args, nargs);
 }

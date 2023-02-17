@@ -12,8 +12,7 @@ hsv_cli_handler_i hsv_cli_add_rgb_color(void)
 	};
 }
 
-estc_cli_error_t hsv_cli_handler_add_rgb_color(app_usbd_cdc_acm_t const *cdc_acm, 
-                                               char args[][HSV_CLI_MAX_WORD_SIZE], 
+estc_cli_error_t hsv_cli_handler_add_rgb_color(char args[][HSV_CLI_MAX_WORD_SIZE], 
     						                   uint8_t nargs)
 {
 	if (nargs != 4)
@@ -27,7 +26,7 @@ estc_cli_error_t hsv_cli_handler_add_rgb_color(app_usbd_cdc_acm_t const *cdc_acm
 	uint32_t green = utils_strings_atou(args[1]);
 	uint32_t blue = utils_strings_atou(args[2]);
 
-	return hsv_cli_save_color(cdc_acm, red, green, blue, args[3]);
+	return hsv_cli_save_color(red, green, blue, args[3]);
 }
 
 const char *hsv_cli_handler_add_rgb_color_help(void)

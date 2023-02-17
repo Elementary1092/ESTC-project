@@ -11,8 +11,6 @@ hsv_cli_handler_i hsv_cli_update_hsv(void);
 /**
  * @brief Handler of update_hsv command.
  * 
- * @param[in] cdc_acm Registered cdc_acm instance where output will be written.
- * 
  * @param[in] args Command arguments.
  * 
  * @param[in] nargs Number of arguments.
@@ -24,8 +22,7 @@ hsv_cli_handler_i hsv_cli_update_hsv(void);
  *       - Saturation;
  *       - Brightness.
 */
-estc_cli_error_t hsv_cli_handler_update_hsv(app_usbd_cdc_acm_t const *cdc_acm, 
-                                            char args[][HSV_CLI_MAX_WORD_SIZE], 
+estc_cli_error_t hsv_cli_handler_update_hsv(char args[][HSV_CLI_MAX_WORD_SIZE], 
 							                uint8_t nargs);
 
 /**

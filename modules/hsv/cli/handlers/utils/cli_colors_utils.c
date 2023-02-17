@@ -10,8 +10,7 @@
 
 static bool loaded_saved_colors = false;
 
-estc_cli_error_t hsv_cli_save_color(app_usbd_cdc_acm_t const *cdc_acm, 
-                                    uint32_t red, 
+estc_cli_error_t hsv_cli_save_color(uint32_t red, 
 						            uint32_t green, 
 						            uint32_t blue, 
 						            const char *color_name)

@@ -1,7 +1,6 @@
 #ifndef HSV_CLI_HANDLER_INTERFACE_H
 #define HSV_CLI_HANDLER_INTERFACE_H
 
-#include <app_usbd_cdc_acm.h>
 #include <stdint.h>
 #include "app_config.h"
 #include "modules/cli_errors/cli_errors.h"
@@ -19,8 +18,7 @@
  * 
  * @param[in] nargs Number of arguments.
 */
-typedef estc_cli_error_t (* hsv_cli_command_handler_t)(app_usbd_cdc_acm_t const *cdc_acm, 
-                                                       char args[][HSV_CLI_MAX_WORD_SIZE],
+typedef estc_cli_error_t (* hsv_cli_command_handler_t)(char args[][HSV_CLI_MAX_WORD_SIZE],
 										               uint8_t nargs);
 
 /**
