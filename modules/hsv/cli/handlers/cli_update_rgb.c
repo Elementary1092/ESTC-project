@@ -29,7 +29,7 @@ estc_cli_error_t hsv_cli_handler_update_rgb(char args[][HSV_CLI_MAX_WORD_SIZE],
 
 const char *hsv_cli_handler_update_rgb_help(void)
 {
-	return "rgb <red> <green> <blue> - set values of RGB LEDs";
+	return "rgb <R> <G> <B> - set red, green, blue, values";
 }
 
 const char *hsv_cli_handler_update_rgb_name(void)

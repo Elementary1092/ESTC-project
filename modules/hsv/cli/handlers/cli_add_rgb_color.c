@@ -31,8 +31,8 @@ estc_cli_error_t hsv_cli_handler_add_rgb_color(char args[][HSV_CLI_MAX_WORD_SIZE
 
 const char *hsv_cli_handler_add_rgb_color_help(void)
 {
-	return "add_rgb_color <red> <green> <blue> <color_name> - "
-	       "save red, green, blue combination under color_name";
+	return "add_rgb_color <R> <G> <B> <name> - "
+	       "save red, green, blue combination";
 }
 
 const char *hsv_cli_handler_add_rgb_color_name(void)
