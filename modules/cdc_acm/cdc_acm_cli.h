@@ -1,7 +1,7 @@
 #ifndef CDC_ACM_CLI_H
 #define CDC_ACM_CLI_H
 
-#include "modules/cli_errors/cli_errors.h"
+#include "modules/cli_errors/cli_described_result.h"
 #include "cdc_acm.h"
 #include "app_config.h"
 
@@ -50,7 +50,7 @@ typedef enum
  * 
  * @param[in] read_buf Input which may be processed by the handler.
 */
-typedef estc_cli_error_t (*cdc_acm_cli_event_handler_t)(app_usbd_cdc_acm_t const *cdc_acm, cdc_acm_read_buf_t *read_buf);
+typedef estc_cli_described_result_t (*cdc_acm_cli_event_handler_t)(cdc_acm_read_buf_t *read_buf);
 
 /**
  * @brief Register cdc acm instance.
