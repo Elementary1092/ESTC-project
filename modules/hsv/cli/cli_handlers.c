@@ -25,7 +25,7 @@ static const char *hsv_cli_get_cmd_str(hsv_cli_command_t h)
 	return handler.command_name();
 }
 
-static void hsv_cli_exec_help(app_usbd_cdc_acm_t const *cdc_acm, char args[][HSV_CLI_MAX_WORD_SIZE], uint8_t nargs)
+static void hsv_cli_exec_help(estc_cli_error_t error, char buffer[512])
 {
 	char help_prompt[512] = "List of available commands:\r\n"
 							"help - print information about available commands\r\n";		
@@ -44,7 +44,7 @@ static void hsv_cli_exec_help(app_usbd_cdc_acm_t const *cdc_acm, char args[][HSV
 	}
 	help_prompt[sizeof(help_prompt) - 1] = '\0';
 
-	cdc_acm_write(cdc_acm, help_prompt, strlen(help_prompt));
+	memcpy(buffer, help_prompt, 512);
 }
 
 hsv_cli_command_t hsv_cli_resolve_command(const char *command)
@@ -66,23 +66,32 @@ hsv_cli_command_t hsv_cli_resolve_command(const char *command)
 	return HSV_CLI_COMMAND_UNKNOWN;
 }
 
-estc_cli_error_t hsv_cli_exec_handler(hsv_cli_command_t h,
-						              app_usbd_cdc_acm_t const *cdc_acm,
-						              char args[][HSV_CLI_MAX_WORD_SIZE],
-						              uint8_t nargs)
+estc_cli_described_result_t hsv_cli_exec_handler(hsv_cli_command_t h,
+						                         char args[][HSV_CLI_MAX_WORD_SIZE],
+						                         uint8_t nargs)
 {
 	if (h == HSV_CLI_COMMAND_HELP)
 	{
-		hsv_cli_exec_help(cdc_acm, args, nargs);
-		return ESTC_CLI_SUCCESS;
+		return (estc_cli_described_result_t) {
+			.error = ESTC_CLI_SUCCESS,
+			.result_describer = hsv_cli_exec_help,
+		};
 	}
 
 	if (h == HSV_CLI_COMMAND_UNKNOWN)
 	{
-		return ESTC_CLI_ERROR_UNKNOWN_COMMAND;
+		return (estc_cli_described_result_t){
+			.error = ESTC_CLI_ERROR_UNKNOWN_COMMAND,
+			.result_describer = estc_cli_describe_error,
+		};
 	}
 
 	hsv_cli_handler_i handler = (*command_handlers[h])();
 
-	return handler.command_handler(args, nargs);
+	estc_cli_error_t error = handler.command_handler(args, nargs);
+
+	return (estc_cli_described_result_t) {
+		.error = error,
+		.result_describer = estc_cli_describe_error,
+	};
 }
