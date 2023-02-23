@@ -75,6 +75,7 @@ SRC_FILES += \
   $(PROJ_DIR)/utils/generator/sinusoid.c \
   $(PROJ_DIR)/utils/generator/fcyclic_variable.c \
   $(PROJ_DIR)/modules/cli_errors/cli_errors.c \
+  $(PROJ_DIR)/modules/cli_errors/cli_described_result.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm_read_buf.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm_cli.c \
