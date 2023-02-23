@@ -33,22 +33,25 @@ static void cdc_acm_cli_handle_event_with_prompt(cdc_acm_cli_event_t event)
 	{
 		cdc_acm_cli_event_handler_t handler = handlers[event];
 
-		estc_cli_error_t err = handler(&cdc_acm_cli, &acm_read_buffer);
+		estc_cli_described_result_t result = handler(&acm_read_buffer);
 
-		if (err == ESTC_CLI_ERROR_EMPTY_COMMAND)
+		if (result.error == ESTC_CLI_ERROR_EMPTY_COMMAND)
 		{
 			return;
 		}
 
-		char *error_str = estc_cli_errors_stringify(err);
-		char prompt[100] = {'\0'};
+		char prompt[560] = {0};
 		size_t max_len = sizeof(prompt) - 1;
 
-		strncat(prompt, error_str, max_len);
-		if (strlen(error_str) + 3 < max_len)
+		result.result_describer(result.error, prompt);
+		if (max_len - 3 < strlen(prompt)) 
 		{
-			max_len -= (strlen(error_str) + 1);
-			strncat(prompt, "\r\n", max_len);
+			prompt[max_len - 3] = '\r';
+			prompt[max_len - 2] = '\n';
+		}
+		else
+		{
+			strncat(prompt, "\r\n", 3);
 		}
 
 		cdc_acm_write(&cdc_acm_cli, prompt, strlen(prompt));

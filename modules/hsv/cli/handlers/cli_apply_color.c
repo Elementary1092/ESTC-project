@@ -41,7 +41,7 @@ estc_cli_error_t hsv_cli_handler_apply_color(char args[][HSV_CLI_MAX_WORD_SIZE],
 
 const char *hsv_cli_handler_apply_color_help(void)
 {
-	return "apply_color <color_name> - try applying color saved as <color_name>";
+	return "apply_color <name> - try applying saved color";
 }
 
 const char *hsv_cli_handler_apply_color_name(void)

@@ -35,7 +35,7 @@ estc_cli_error_t hsv_cli_handler_delete_color(char args[][HSV_CLI_MAX_WORD_SIZE]
 
 const char *hsv_cli_handler_delete_color_help(void)
 {
-	return "del_color <color_name> - delete already saved color";
+	return "del_color <name> - delete saved color";
 }
 
 const char *hsv_cli_handler_delete_color_name(void)

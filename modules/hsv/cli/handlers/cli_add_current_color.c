@@ -35,7 +35,7 @@ estc_cli_error_t hsv_cli_handler_add_current_color(char args[][HSV_CLI_MAX_WORD_
 
 const char *hsv_cli_handler_add_current_color_help(void)
 {
-	return "add_current_color <color_name> - save currently displayed color";
+	return "add_current_color <name> - save current color";
 }
 
 const char *hsv_cli_handler_add_current_color_name(void)

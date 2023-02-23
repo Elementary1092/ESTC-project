@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <app_usbd_cdc_acm.h>
-#include "modules/cli_errors/cli_errors.h"
+#include "modules/cli_errors/cli_described_result.h"
 #include "modules/cdc_acm/cdc_acm_read_buf.h"
 
 /**
@@ -14,10 +14,8 @@
  *          and executes this command (all words except the first word from the 
  *          { read_buf } are treated as arguments of the command).
  * 
- * @param[in] cdc_acm Registered cdc acm instance where output will be written.
- * 
  * @param[in] read_buf Buffer from where command and its arguments may be parsed. 
 */
-estc_cli_error_t hsv_cli_exec_command(app_usbd_cdc_acm_t const *cdc_acm, cdc_acm_read_buf_t *read_buf);
+estc_cli_described_result_t hsv_cli_exec_command(cdc_acm_read_buf_t *read_buf);
 
 #endif // HSV_CLI_H

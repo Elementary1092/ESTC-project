@@ -31,7 +31,7 @@ estc_cli_error_t hsv_cli_handler_update_hsv(char args[][HSV_CLI_MAX_WORD_SIZE],
 
 const char *hsv_cli_handler_update_hsv_help(void)
 {
-	return "hsv <hue> <saturation> <brightness> - set hue, saturation, and brightness of RGB LEDs";
+	return "hsv <H> <S> <B> - set hue, saturation, and brightness";
 }
 
 const char *hsv_cli_handler_update_hsv_name(void)

@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include "app_config.h"
 
-#include "modules/cli_errors/cli_errors.h"
+#include "modules/cli_errors/cli_described_result.h"
 #include "cli/handlers/include/cli_add_current_color.h"
 #include "cli/handlers/include/cli_add_rgb_color.h"
 #include "cli/handlers/include/cli_apply_color.h"
@@ -59,17 +59,14 @@ hsv_cli_command_t hsv_cli_resolve_command(const char *command);
 /**
  * @brief Executes handler of a command if it exists with passed arguments.
  * 
- * @param[in] h enumerator decribing command handler.
- * 
- * @param[in] cdc_acm Registered cdc acm instance where the output will be written.
+ * @param[in] h enumerator decribing command handler
  * 
  * @param[in] args Arguments of the command (without command name).
  * 
  * @param[in] nargs Number of arguments.
 */
-estc_cli_error_t hsv_cli_exec_handler(hsv_cli_command_t h,
-						             app_usbd_cdc_acm_t const *cdc_acm,
-						             char args[][HSV_CLI_MAX_WORD_SIZE],
-						             uint8_t nargs);
+estc_cli_described_result_t hsv_cli_exec_handler(hsv_cli_command_t h,
+						                         char args[][HSV_CLI_MAX_WORD_SIZE],
+						                         uint8_t nargs);
 
 #endif
