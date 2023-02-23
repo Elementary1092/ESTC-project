@@ -3,11 +3,11 @@
 
 #include "cli_errors.h"
 
-typedef void ( * estc_cli_result_describer_t(estc_cli_error_t error, char buffer[512]) );
+typedef void ( * estc_cli_result_describer_t )(estc_cli_error_t error, char buffer[512]);
 
 typedef struct
 {
-	estc_cli_described_result_t result_describer;
+	estc_cli_result_describer_t result_describer;
 	estc_cli_error_t            error;
 } estc_cli_described_result_t;
 
