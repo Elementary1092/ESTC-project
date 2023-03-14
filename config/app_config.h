@@ -107,10 +107,14 @@
 //==========================================================
 #ifndef NRFX_NVMC_ENABLED
 #define NRFX_NVMC_ENABLED 1
-#endif
+#endif // NRFX_NVMC_ENABLED
 
 #ifndef ESTC_MAX_LINE_SIZE
 #define ESTC_MAX_LINE_SIZE 64
-#endif
+#endif // ESTC_MAX_LINE_SIZE
+
+#ifndef DEVICE_NAME
+#define DEVICE_NAME "ESTC"
+#endif // DEVICE_NAME
 
 #endif // APP_CONFIG_H
