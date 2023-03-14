@@ -31,7 +31,8 @@
 #include "nrf_log_backend_usb.h"
 
 
-#define DEVICE_NAME                     "ESTC"                                  /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                     "7198"                                  /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME_SCAN_RESPONSE       "pca10059_7198"                         /**< Extended name of a device. */
 #define MANUFACTURER_NAME               "NordicSemiconductor"                   /**< Manufacturer. Will be passed to Device Information Service. */
 #define APP_ADV_INTERVAL                300                                     /**< The advertising interval (in units of 0.625 ms. This value corresponds to 187.5 ms). */
 
@@ -62,6 +63,25 @@ static ble_uuid_t m_adv_uuids[] =                                               
     {BLE_UUID_DEVICE_INFORMATION_SERVICE, BLE_UUID_TYPE_BLE}
 };
 
+static ble_advdata_manuf_data_t additional_data =
+{
+    .company_identifier = 0x0059, // Nordic Company ID
+    .data               = (uint8_array_t) 
+    {
+        .size   = (uint16_t)sizeof(DEVICE_NAME),
+        .p_data = (uint8_t *)DEVICE_NAME,
+    }, 
+};
+
+static ble_advdata_manuf_data_t scan_response_additional_data =
+{
+    .company_identifier = 0x0059, // Nordic Company ID
+    .data               = (uint8_array_t) 
+    {
+        .size   = (uint16_t)sizeof(DEVICE_NAME_SCAN_RESPONSE),
+        .p_data = (uint8_t *)DEVICE_NAME_SCAN_RESPONSE,
+    }, 
+};
 
 static void advertising_start(void);
 
@@ -160,7 +180,6 @@ static void services_init(void)
 
     err_code = nrf_ble_qwr_init(&m_qwr, &qwr_init);
     APP_ERROR_CHECK(err_code);
-
 }
 
 
@@ -223,10 +242,6 @@ static void conn_params_init(void)
  */
 static void application_timers_start(void)
 {
-    /* YOUR_JOB: Start your timers. below is an example of how to start a timer.
-       ret_code_t err_code;
-       err_code = app_timer_start(m_app_timer_id, TIMER_INTERVAL, NULL);
-       APP_ERROR_CHECK(err_code); */
 
 }
 
@@ -377,15 +392,15 @@ static void advertising_init(void)
     init.advdata.name_type               = BLE_ADVDATA_FULL_NAME;
     init.advdata.include_appearance      = true;
     init.advdata.flags                   = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
-    init.advdata.uuids_complete.uuid_cnt = sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]);
-    init.advdata.uuids_complete.p_uuids  = m_adv_uuids;
+    init.advdata.p_manuf_specific_data   = &additional_data;
+
+    init.srdata.p_manuf_specific_data   = &scan_response_additional_data;
+    init.srdata.uuids_complete.uuid_cnt = sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]);
+    init.srdata.uuids_complete.p_uuids  = m_adv_uuids;
 
     init.config.ble_adv_fast_enabled  = true;
     init.config.ble_adv_fast_interval = APP_ADV_INTERVAL;
     init.config.ble_adv_fast_timeout  = APP_ADV_DURATION;
-
-    // TODO: Add more data to the advertisement data
-    // TODO: Add more data to the scan response data
 
     init.evt_handler = on_adv_evt;
 

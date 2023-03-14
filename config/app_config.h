@@ -113,8 +113,4 @@
 #define ESTC_MAX_LINE_SIZE 64
 #endif // ESTC_MAX_LINE_SIZE
 
-#ifndef DEVICE_NAME
-#define DEVICE_NAME "ESTC"
-#endif // DEVICE_NAME
-
 #endif // APP_CONFIG_H
