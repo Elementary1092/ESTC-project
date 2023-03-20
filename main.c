@@ -30,9 +30,7 @@
 #include "nrf_log_default_backends.h"
 #include "nrf_log_backend_usb.h"
 
-
-#define DEVICE_NAME                     "7198"                                  /**< Name of device. Will be included in the advertising data. */
-#define DEVICE_NAME_SCAN_RESPONSE       "pca10059_7198"                         /**< Extended name of a device. */
+#define DEVICE_NAME                     "SomeLongNameThatDoesFitAdvert"         /**< Extended name of a device. */
 #define MANUFACTURER_NAME               "NordicSemiconductor"                   /**< Manufacturer. Will be passed to Device Information Service. */
 #define APP_ADV_INTERVAL                300                                     /**< The advertising interval (in units of 0.625 ms. This value corresponds to 187.5 ms). */
 
@@ -61,26 +59,6 @@ static uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID;                        
 static ble_uuid_t m_adv_uuids[] =                                               /**< Universally unique service identifiers. */
 {
     {BLE_UUID_DEVICE_INFORMATION_SERVICE, BLE_UUID_TYPE_BLE}
-};
-
-static ble_advdata_manuf_data_t additional_data =
-{
-    .company_identifier = 0x0059, // Nordic Company ID
-    .data               = (uint8_array_t) 
-    {
-        .size   = (uint16_t)sizeof(DEVICE_NAME),
-        .p_data = (uint8_t *)DEVICE_NAME,
-    }, 
-};
-
-static ble_advdata_manuf_data_t scan_response_additional_data =
-{
-    .company_identifier = 0x0059, // Nordic Company ID
-    .data               = (uint8_array_t) 
-    {
-        .size   = (uint16_t)sizeof(DEVICE_NAME_SCAN_RESPONSE),
-        .p_data = (uint8_t *)DEVICE_NAME_SCAN_RESPONSE,
-    }, 
 };
 
 static void advertising_start(void);
@@ -389,12 +367,11 @@ static void advertising_init(void)
 
     memset(&init, 0, sizeof(init));
 
-    init.advdata.name_type               = BLE_ADVDATA_FULL_NAME;
+    init.advdata.name_type               = BLE_ADVDATA_NO_NAME;
     init.advdata.include_appearance      = true;
     init.advdata.flags                   = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
-    init.advdata.p_manuf_specific_data   = &additional_data;
 
-    init.srdata.p_manuf_specific_data   = &scan_response_additional_data;
+    init.srdata.name_type               = BLE_ADVDATA_FULL_NAME;
     init.srdata.uuids_complete.uuid_cnt = sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]);
     init.srdata.uuids_complete.p_uuids  = m_adv_uuids;
 
