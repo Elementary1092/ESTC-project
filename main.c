@@ -61,6 +61,8 @@ static ble_uuid_t m_adv_uuids[] =                                               
     {BLE_UUID_DEVICE_INFORMATION_SERVICE, BLE_UUID_TYPE_BLE}
 };
 
+static int8_t tx_power_level = 63;
+
 static void advertising_start(void);
 
 
@@ -370,6 +372,8 @@ static void advertising_init(void)
     init.advdata.name_type               = BLE_ADVDATA_NO_NAME;
     init.advdata.include_appearance      = true;
     init.advdata.flags                   = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
+
+    init.advdata.p_tx_power_level       = &tx_power_level;
 
     init.srdata.name_type               = BLE_ADVDATA_FULL_NAME;
     init.srdata.uuids_complete.uuid_cnt = sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]);
