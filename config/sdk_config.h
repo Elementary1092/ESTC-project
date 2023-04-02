@@ -671,7 +671,7 @@
 // <i> The CC310 hardware-accelerated cryptography backend (only available on nRF52840).
 //==========================================================
 #ifndef NRF_CRYPTO_BACKEND_CC310_ENABLED
-#define NRF_CRYPTO_BACKEND_CC310_ENABLED 1
+#define NRF_CRYPTO_BACKEND_CC310_ENABLED 0
 #endif
 // <q> NRF_CRYPTO_BACKEND_CC310_AES_CBC_ENABLED  - Enable the AES CBC mode using CC310.
  
@@ -4540,7 +4540,7 @@
 // <4=> Debug 
 
 #ifndef NRFX_UART_CONFIG_LOG_LEVEL
-#define NRFX_UART_CONFIG_LOG_LEVEL 4
+#define NRFX_UART_CONFIG_LOG_LEVEL 3
 #endif
 
 // <o> NRFX_UART_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -7698,7 +7698,7 @@
 // <4=> Debug 
 
 #ifndef NRF_LOG_DEFAULT_LEVEL
-#define NRF_LOG_DEFAULT_LEVEL 4
+#define NRF_LOG_DEFAULT_LEVEL 3
 #endif
 
 // <q> NRF_LOG_DEFERRED  - Enable deffered logger.
