@@ -139,6 +139,7 @@ SRC_FILES += \
   $(PROJ_DIR)/modules/gpio/led/sequence_ctx.c \
   $(PROJ_DIR)/modules/timer/systick_ctx.c \
   $(PROJ_DIR)/modules/ble/service/service.c \
+  $(PROJ_DIR)/modules/ble/service/characteristic.c \
   $(PROJ_DIR)/main.c \
 
 # Include folders common to all targets
