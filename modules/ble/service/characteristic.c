@@ -140,6 +140,10 @@ ret_code_t estc_ble_service_register_characteristic(estc_ble_service_t *service,
 	ble_gatts_char_handles_t char_handles;
 
 	error_code = sd_ble_gatts_characteristic_add(service->service_handle, &metadata, &characteristic, &char_handles);
+	if (error_code != NRF_SUCCESS)
+	{
+		return error_code;
+	}
 
 	handles->value_handle.service_handle                            = char_handles.value_handle;
 	handles->user_description_handle.service_handle                 = char_handles.user_desc_handle;
@@ -147,4 +151,32 @@ ret_code_t estc_ble_service_register_characteristic(estc_ble_service_t *service,
 	handles->server_characteristic_descriptor_handle.service_handle = char_handles.sccd_handle;
 
 	return error_code;
+}
+
+void estc_ble_service_characteristic_send_notification(uint16_t conn_handle, uint16_t value_handle, uint8_t * data, uint16_t * data_len)
+{
+	ble_gatts_hvx_params_t hvx_params = 
+	{
+		.handle = value_handle,
+		.type = BLE_GATT_HVX_NOTIFICATION,
+		.offset = 0U,
+		.p_len = data_len,
+		.p_data = data,
+	};
+
+	sd_ble_gatts_hvx(conn_handle, &hvx_params);
+}
+
+void estc_ble_service_characteristic_send_indication(uint16_t conn_handle, uint16_t value_handle, uint8_t * data, uint16_t * data_len)
+{
+	ble_gatts_hvx_params_t hvx_params = 
+	{
+		.handle = value_handle,
+		.type = BLE_GATT_HVX_INDICATION,
+		.offset = 0U,
+		.p_len = data_len,
+		.p_data = data,
+	};
+
+	sd_ble_gatts_hvx(conn_handle, &hvx_params);
 }

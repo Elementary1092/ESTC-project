@@ -56,6 +56,11 @@ static void estc_conn_params_error_handler(uint32_t nrf_error)
 	APP_ERROR_HANDLER(nrf_error);
 }
 
+uint16_t estc_ble_get_conn_handle(void)
+{
+	return m_conn_handle;
+}
+
 void estc_ble_qwr_init(void)
 {
 	ret_code_t err_code = NRF_SUCCESS;

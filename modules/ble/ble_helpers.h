@@ -13,6 +13,8 @@
 */
 void estc_ble_qwr_init(void);
 
+uint16_t estc_ble_get_conn_handle(void);
+
 /**
  * @brief Function for handling BLE events.
  *
