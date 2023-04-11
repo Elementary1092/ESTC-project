@@ -2,6 +2,7 @@
 #include <nrf_ble_qwr.h>
 #include <bsp_btn_ble.h>
 #include <nrf_sdh_ble.h>
+#include <nrf_ble_gatt.h>
 #include <nrf_log.h>
 #include <app_timer.h>
 
@@ -10,6 +11,8 @@
 NRF_BLE_QWR_DEF(m_qwr); /**< Context for the Queued Write module.*/
 
 static uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID; /**< Handle of the current connection. */
+
+static uint32_t notifications_to_send = 0U;
 
 /**
  * @brief Function for handling Queued Write Module errors.
@@ -73,7 +76,7 @@ void estc_ble_qwr_init(void)
 	APP_ERROR_CHECK(err_code);
 }
 
-void estc_ble_default_event_handler(ble_evt_t const *p_ble_evt, void *p_context)
+void estc_ble_default_ble_event_handler(ble_evt_t const *p_ble_evt, void *p_context)
 {
 	ret_code_t err_code = NRF_SUCCESS;
 
@@ -122,8 +125,16 @@ void estc_ble_default_event_handler(ble_evt_t const *p_ble_evt, void *p_context)
 		APP_ERROR_CHECK(err_code);
 		break;
 
+	case BLE_GATTS_EVT_HVN_TX_COMPLETE:
+		notifications_to_send--;
+		NRF_LOG_INFO("Sent notification to %d successfully. Notifications left to send: %d",
+					  p_ble_evt->evt.gatts_evt.conn_handle,
+					  p_ble_evt->evt.gatts_evt.params.hvn_tx_complete.count - 1);
+		break;
+
 	case BLE_GATTS_EVT_WRITE:
-		NRF_LOG_DEBUG("GATT Server Write.");
+		NRF_LOG_INFO("Received write request.");
+		break;
 
 	default:
 		// No implementation needed.

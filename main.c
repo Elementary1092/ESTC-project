@@ -43,7 +43,7 @@
 
 #define MIN_CONN_INTERVAL 100U /**< Minimum acceptable connection interval (0.1 seconds). */
 #define MAX_CONN_INTERVAL 200U /**< Maximum acceptable connection interval (0.2 second). */
-#define SLAVE_LATENCY     0    /**< Slave latency. */
+#define SLAVE_LATENCY 0        /**< Slave latency. */
 #define CONN_SUP_TIMEOUT 4000U /**< Connection supervisory timeout (4 seconds). */
 
 #define ESTC_NOTIFIED_VALUE_DELAY APP_TIMER_TICKS(2500)
@@ -52,12 +52,12 @@
 #define DEAD_BEEF 0xDEADBEEF /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
 #define ESTC_SOME_CHARACTERISTIC_UUID16 0x05b9
-#define ESTC_NOTIFIED_CHAR_UUID16       0x06b9
-#define ESTC_INDICATED_CHAR_UUID16      0x06ba
+#define ESTC_NOTIFIED_CHAR_UUID16 0x06b9
+#define ESTC_INDICATED_CHAR_UUID16 0x06ba
 
 static uint8_t some_characteristic_desc[] = {0x73, 0x6f, 0x6d, 0x65, 0x20, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x20, 0x73, 0x74, 0x72, 0x69, 0x6e, 0x67};
 
-NRF_BLE_GATT_DEF(m_gatt);           /**< GATT module instance. */
+NRF_BLE_GATT_DEF(m_gatt); /**< GATT module instance. */
 APP_TIMER_DEF(m_notification_timer);
 APP_TIMER_DEF(m_indication_timer);
 
@@ -76,18 +76,18 @@ static estc_ble_service_t m_estc_service =
 
 static uint32_t some_characteristic_value = 32U;
 
-static utils_generator_fcyclic_variable_ctx_t notified_value = 
+static utils_generator_fcyclic_variable_ctx_t notified_value =
 {
-	.current_value = 0.0F,
-	.is_valid = true,
-	.max_value = 250.0F,
-	.min_value = -250.F,
-	.is_increasing = true,
-	.step = 5.0F,
+    .current_value = 0.0F,
+    .is_valid = true,
+    .max_value = 250.0F,
+    .min_value = -250.F,
+    .is_increasing = true,
+    .step = 5.0F,
 };
 static uint16_t notified_value_handle = 0U;
 
-static utils_generator_sinusoid_ctx_t indicated_value = 
+static utils_generator_sinusoid_ctx_t indicated_value =
 {
     .angle_factor = 2.0F,
     .angle_step = 1.0F,
@@ -113,20 +113,20 @@ void assert_nrf_callback(uint16_t line_num, const uint8_t *p_file_name)
     app_error_handler(DEAD_BEEF, line_num, p_file_name);
 }
 
-static void ble_notified_value_handler(void * p_ctx)
+static void ble_notified_value_handler(void *p_ctx)
 {
     utils_generator_fcyclic_variable_next(&notified_value);
     uint16_t conn_handle = estc_ble_get_conn_handle();
     uint16_t value_len = sizeof(notified_value.current_value);
-    estc_ble_service_characteristic_send_notification(conn_handle, notified_value_handle, (uint8_t * )(&(notified_value.current_value)), &value_len);
+    estc_ble_service_characteristic_send_notification(conn_handle, notified_value_handle, (uint8_t *)(&(notified_value.current_value)), &value_len);
 }
 
-static void ble_indicated_value_handler(void * p_ctx)
+static void ble_indicated_value_handler(void *p_ctx)
 {
     utils_generator_sinusoid_next(&indicated_value);
     uint16_t conn_handle = estc_ble_get_conn_handle();
     uint16_t value_len = sizeof(indicated_value.current_value);
-    estc_ble_service_characteristic_send_indication(conn_handle, indicated_value_handle, (uint8_t * )(&(indicated_value.current_value)), &value_len);
+    estc_ble_service_characteristic_send_indication(conn_handle, indicated_value_handle, (uint8_t *)(&(indicated_value.current_value)), &value_len);
 }
 
 /**@brief Function for the Timer initialization.
@@ -138,7 +138,7 @@ static void timers_init(void)
     // Initialize timer module.
     ret_code_t err_code = app_timer_init();
     APP_ERROR_CHECK(err_code);
-    
+
     app_timer_create(&m_notification_timer, APP_TIMER_MODE_REPEATED, ble_notified_value_handler);
     app_timer_create(&m_indication_timer, APP_TIMER_MODE_REPEATED, ble_indicated_value_handler);
 }
@@ -150,15 +150,15 @@ static void timers_init(void)
  */
 static void gap_params_init(void)
 {
-    estc_ble_gap_config_t config = 
-    {
-        .device_name = (const uint8_t *)DEVICE_NAME,
-        .device_name_len = strlen(DEVICE_NAME),
-        .min_conn_interval_ms = MIN_CONN_INTERVAL,
-        .max_conn_interval_ms = MAX_CONN_INTERVAL,
-        .slave_latency = SLAVE_LATENCY,
-        .conn_supplement_timeout_ms = CONN_SUP_TIMEOUT,
-    };
+    estc_ble_gap_config_t config =
+        {
+            .device_name = (const uint8_t *)DEVICE_NAME,
+            .device_name_len = strlen(DEVICE_NAME),
+            .min_conn_interval_ms = MIN_CONN_INTERVAL,
+            .max_conn_interval_ms = MAX_CONN_INTERVAL,
+            .slave_latency = SLAVE_LATENCY,
+            .conn_supplement_timeout_ms = CONN_SUP_TIMEOUT,
+        };
     ret_code_t err_code = estc_ble_gap_peripheral_init(config);
     APP_ERROR_CHECK(err_code);
 }
@@ -199,7 +199,7 @@ static void services_init(void)
 
     err_code = estc_ble_service_register_characteristic(&m_estc_service, &dummy_config, &dummy_handles);
     APP_ERROR_CHECK(err_code);
-    
+
     estc_ble_service_characteristic_config_t notified_config =
     {
         .characteristic_uuid = ESTC_NOTIFIED_CHAR_UUID16,
@@ -217,7 +217,7 @@ static void services_init(void)
     APP_ERROR_CHECK(err_code);
 
     notified_value_handle = notified_handles.value_handle.service_handle;
-    
+
     estc_ble_service_characteristic_config_t indicated_config =
     {
         .characteristic_uuid = ESTC_INDICATED_CHAR_UUID16,
@@ -267,7 +267,7 @@ static void ble_stack_init(void)
     APP_ERROR_CHECK(err_code);
 
     // Register a handler for BLE events.
-    NRF_SDH_BLE_OBSERVER(m_ble_observer, APP_BLE_OBSERVER_PRIO, estc_ble_default_event_handler, NULL);
+    NRF_SDH_BLE_OBSERVER(m_ble_observer, APP_BLE_OBSERVER_PRIO, estc_ble_default_ble_event_handler, NULL);
 }
 
 /**@brief Function for initializing buttons and leds.
