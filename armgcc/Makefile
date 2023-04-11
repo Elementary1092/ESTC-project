@@ -139,6 +139,7 @@ SRC_FILES += \
   $(PROJ_DIR)/modules/gpio/led/sequence_ctx.c \
   $(PROJ_DIR)/modules/timer/systick_ctx.c \
   $(PROJ_DIR)/modules/ble/service/service.c \
+  $(PROJ_DIR)/modules/ble/gap/estc_gap.c \
   $(PROJ_DIR)/modules/ble/gap/advertising.c \
   $(PROJ_DIR)/modules/ble/ble_helpers.c \
   $(PROJ_DIR)/modules/ble/service/characteristic.c \
