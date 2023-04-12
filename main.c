@@ -182,7 +182,7 @@ static void services_init(void)
     err_code = estc_ble_service_init(&m_estc_service);
     APP_ERROR_CHECK(err_code);
 
-    estc_ble_service_characteristic_config_t dummy_config =
+    estc_ble_service_characteristic_config_t basic_config =
     {
         .characteristic_uuid = ESTC_SOME_CHARACTERISTIC_UUID16,
         .description_string = some_characteristic_desc,
@@ -195,9 +195,9 @@ static void services_init(void)
         .characteristic_uuid_type = BLE_UUID_TYPE_BLE,
     };
 
-    estc_ble_characteristic_handles_t dummy_handles;
+    estc_ble_characteristic_handles_t basic_handles;
 
-    err_code = estc_ble_service_register_characteristic(&m_estc_service, &dummy_config, &dummy_handles);
+    err_code = estc_ble_service_register_characteristic(&m_estc_service, &basic_config, &basic_handles);
     APP_ERROR_CHECK(err_code);
 
     estc_ble_service_characteristic_config_t notified_config =
