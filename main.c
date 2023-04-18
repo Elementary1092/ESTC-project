@@ -62,38 +62,38 @@ APP_TIMER_DEF(m_notification_timer);
 APP_TIMER_DEF(m_indication_timer);
 
 static ble_uuid_t m_adv_uuids[] = /**< Universally unique service identifiers. */
-{
-    {BLE_UUID_DEVICE_INFORMATION_SERVICE, BLE_UUID_TYPE_BLE},
-    {ESTC_BLE_SERVICE_UUID, BLE_UUID_TYPE_BLE},
+    {
+        {BLE_UUID_DEVICE_INFORMATION_SERVICE, BLE_UUID_TYPE_BLE},
+        {ESTC_BLE_SERVICE_UUID, BLE_UUID_TYPE_BLE},
 };
 
 // static int8_t tx_power_level = 63;
 
 static estc_ble_service_t m_estc_service =
-{
-    .service_handle = 0U,
+    {
+        .service_handle = 0U,
 };
 
 static uint32_t some_characteristic_value = 32U;
 
 static utils_generator_fcyclic_variable_ctx_t notified_value =
-{
-    .current_value = 0.0F,
-    .is_valid = true,
-    .max_value = 250.0F,
-    .min_value = -250.F,
-    .is_increasing = true,
-    .step = 5.0F,
+    {
+        .current_value = 0.0F,
+        .is_valid = true,
+        .max_value = 250.0F,
+        .min_value = -250.F,
+        .is_increasing = true,
+        .step = 5.0F,
 };
 static uint16_t notified_value_handle = 0U;
 
 static utils_generator_sinusoid_ctx_t indicated_value =
-{
-    .angle_factor = 2.0F,
-    .angle_step = 1.0F,
-    .current_angle = 0.0F,
-    .max_angle_value = 250.0F,
-    .current_value = 0.0F,
+    {
+        .angle_factor = 2.0F,
+        .angle_step = 1.0F,
+        .current_angle = 0.0F,
+        .max_angle_value = 250.0F,
+        .current_value = 0.0F,
 };
 static uint16_t indicated_value_handle = 0U;
 
@@ -118,7 +118,7 @@ static void ble_notified_value_handler(void *p_ctx)
     utils_generator_fcyclic_variable_next(&notified_value);
     uint16_t conn_handle = estc_ble_get_conn_handle();
     uint16_t value_len = sizeof(notified_value.current_value);
-    estc_ble_service_characteristic_send_notification(conn_handle, notified_value_handle, (uint8_t *)(&(notified_value.current_value)), &value_len);
+    estc_ble_char_notify(conn_handle, notified_value_handle, (uint8_t *)(&(notified_value.current_value)), &value_len);
 }
 
 static void ble_indicated_value_handler(void *p_ctx)
@@ -126,7 +126,7 @@ static void ble_indicated_value_handler(void *p_ctx)
     utils_generator_sinusoid_next(&indicated_value);
     uint16_t conn_handle = estc_ble_get_conn_handle();
     uint16_t value_len = sizeof(indicated_value.current_value);
-    estc_ble_service_characteristic_send_indication(conn_handle, indicated_value_handle, (uint8_t *)(&(indicated_value.current_value)), &value_len);
+    estc_ble_char_indicate(conn_handle, indicated_value_handle, (uint8_t *)(&(indicated_value.current_value)), &value_len);
 }
 
 /**@brief Function for the Timer initialization.
@@ -182,54 +182,54 @@ static void services_init(void)
     err_code = estc_ble_service_init(&m_estc_service);
     APP_ERROR_CHECK(err_code);
 
-    estc_ble_service_characteristic_config_t basic_config =
-    {
-        .characteristic_uuid = ESTC_SOME_CHARACTERISTIC_UUID16,
-        .description_string = some_characteristic_desc,
-        .description_size = sizeof(some_characteristic_desc),
-        .permissions = ESTC_BLE_SERVICE_CHARACTERISTIC_ALLOW_READ | ESTC_BLE_SERVICE_CHARACTERISTIC_ALLOW_WRITE,
-        .value = (uint8_t *)(&some_characteristic_value),
-        .value_size = sizeof(some_characteristic_value),
-        .value_type = ESTC_BLE_SERVICE_CHARACTERISTIC_TYPE_UINT32,
-        .value_size_max = sizeof(some_characteristic_value),
-        .characteristic_uuid_type = BLE_UUID_TYPE_BLE,
-    };
+    estc_ble_char_cfg_t basic_config =
+        {
+            .characteristic_uuid = ESTC_SOME_CHARACTERISTIC_UUID16,
+            .description_string = some_characteristic_desc,
+            .description_size = sizeof(some_characteristic_desc),
+            .permissions = ESTC_BLE_CHAR_READ | ESTC_BLE_CHAR_WRITE,
+            .value = (uint8_t *)(&some_characteristic_value),
+            .value_size = sizeof(some_characteristic_value),
+            .value_type = ESTC_BLE_CHAR_TYPE_UINT32,
+            .value_size_max = sizeof(some_characteristic_value),
+            .characteristic_uuid_type = BLE_UUID_TYPE_BLE,
+        };
 
-    estc_ble_characteristic_handles_t basic_handles;
+    estc_ble_char_handles_t basic_handles;
 
     err_code = estc_ble_service_register_characteristic(&m_estc_service, &basic_config, &basic_handles);
     APP_ERROR_CHECK(err_code);
 
-    estc_ble_service_characteristic_config_t notified_config =
-    {
-        .characteristic_uuid = ESTC_NOTIFIED_CHAR_UUID16,
-        .permissions = ESTC_BLE_SERVICE_CHARACTERISTIC_ALLOW_READ | ESTC_BLE_SERVICE_CHARACTERISTIC_ALLOW_NOTIFICATION,
-        .value = (uint8_t *)(&notified_value.current_value),
-        .value_size = sizeof(notified_value.current_value),
-        .value_type = ESTC_BLE_SERVICE_CHARACTERISTIC_TYPE_FLOAT32,
-        .value_size_max = sizeof(notified_value.current_value),
-        .characteristic_uuid_type = BLE_UUID_TYPE_BLE,
-    };
+    estc_ble_char_cfg_t notified_config =
+        {
+            .characteristic_uuid = ESTC_NOTIFIED_CHAR_UUID16,
+            .permissions = ESTC_BLE_CHAR_READ | ESTC_BLE_CHAR_NOTIFICATION,
+            .value = (uint8_t *)(&notified_value.current_value),
+            .value_size = sizeof(notified_value.current_value),
+            .value_type = ESTC_BLE_CHAR_TYPE_FLOAT32,
+            .value_size_max = sizeof(notified_value.current_value),
+            .characteristic_uuid_type = BLE_UUID_TYPE_BLE,
+        };
 
-    estc_ble_characteristic_handles_t notified_handles;
+    estc_ble_char_handles_t notified_handles;
 
     err_code = estc_ble_service_register_characteristic(&m_estc_service, &notified_config, &notified_handles);
     APP_ERROR_CHECK(err_code);
 
     notified_value_handle = notified_handles.value_handle.service_handle;
 
-    estc_ble_service_characteristic_config_t indicated_config =
-    {
-        .characteristic_uuid = ESTC_INDICATED_CHAR_UUID16,
-        .permissions = ESTC_BLE_SERVICE_CHARACTERISTIC_ALLOW_READ | ESTC_BLE_SERVICE_CHARACTERISTIC_ALLOW_INDICATION,
-        .value = (uint8_t *)(&indicated_value.current_value),
-        .value_size = sizeof(indicated_value.current_value),
-        .value_type = ESTC_BLE_SERVICE_CHARACTERISTIC_TYPE_FLOAT32,
-        .value_size_max = sizeof(indicated_value.current_value),
-        .characteristic_uuid_type = BLE_UUID_TYPE_BLE,
-    };
+    estc_ble_char_cfg_t indicated_config =
+        {
+            .characteristic_uuid = ESTC_INDICATED_CHAR_UUID16,
+            .permissions = ESTC_BLE_CHAR_READ | ESTC_BLE_CHAR_INDICATION,
+            .value = (uint8_t *)(&indicated_value.current_value),
+            .value_size = sizeof(indicated_value.current_value),
+            .value_type = ESTC_BLE_CHAR_TYPE_FLOAT32,
+            .value_size_max = sizeof(indicated_value.current_value),
+            .characteristic_uuid_type = BLE_UUID_TYPE_BLE,
+        };
 
-    estc_ble_characteristic_handles_t indicated_handles;
+    estc_ble_char_handles_t indicated_handles;
 
     err_code = estc_ble_service_register_characteristic(&m_estc_service, &indicated_config, &indicated_handles);
     APP_ERROR_CHECK(err_code);
