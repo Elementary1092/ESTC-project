@@ -139,6 +139,10 @@ SRC_FILES += \
   $(PROJ_DIR)/modules/gpio/led/sequence_ctx.c \
   $(PROJ_DIR)/modules/timer/systick_ctx.c \
   $(PROJ_DIR)/modules/ble/service/service.c \
+  $(PROJ_DIR)/modules/ble/gap/estc_gap.c \
+  $(PROJ_DIR)/modules/ble/gap/advertising.c \
+  $(PROJ_DIR)/modules/ble/ble_helpers.c \
+  $(PROJ_DIR)/modules/ble/service/characteristic.c \
   $(PROJ_DIR)/main.c \
 
 # Include folders common to all targets
@@ -303,7 +307,9 @@ INC_FOLDERS += \
   $(PROJ_DIR)/modules/hsv/cli/handlers/include \
   $(PROJ_DIR)/modules/hsv/cli/handlers/utils \
   $(PROJ_DIR)/modules/flash \
+  $(PROJ_DIR)/modules/ble \
   $(PROJ_DIR)/modules/ble/service \
+  $(PROJ_DIR)/modules/ble/gap \
 
 # Libraries common to all targets
 LIB_FILES += \
