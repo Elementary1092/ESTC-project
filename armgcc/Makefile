@@ -138,6 +138,7 @@ SRC_FILES += \
   $(PROJ_DIR)/modules/gpio/button/board_button.c \
   $(PROJ_DIR)/modules/gpio/led/sequence_ctx.c \
   $(PROJ_DIR)/modules/timer/systick_ctx.c \
+  $(PROJ_DIR)/modules/ble/service/service.c \
   $(PROJ_DIR)/main.c \
 
 # Include folders common to all targets
@@ -147,8 +148,8 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/softdevice/mbr/headers \
   $(SDK_ROOT)/external/segger_rtt \
   $(SDK_ROOT)/components/toolchain/cmsis/include \
-  $(SDK_ROOT)/components/softdevice/s113/headers/nrf52 \
-  $(SDK_ROOT)/components/softdevice/s113/headers \
+  $(SDK_ROOT)/components/softdevice/s140/headers/nrf52 \
+  $(SDK_ROOT)/components/softdevice/s140/headers \
   $(SDK_ROOT)/components/softdevice/common \
   $(SDK_ROOT)/components/nfc/t4t_parser/tlv \
   $(SDK_ROOT)/components/nfc/t4t_parser/hl_detection_procedure \
@@ -302,6 +303,7 @@ INC_FOLDERS += \
   $(PROJ_DIR)/modules/hsv/cli/handlers/include \
   $(PROJ_DIR)/modules/hsv/cli/handlers/utils \
   $(PROJ_DIR)/modules/flash \
+  $(PROJ_DIR)/modules/ble/service \
 
 # Libraries common to all targets
 LIB_FILES += \
@@ -332,7 +334,7 @@ CFLAGS += -DuECC_SQUARE_FUNC=0
 CFLAGS += -DuECC_SUPPORT_COMPRESSED_POINT=0
 CFLAGS += -DuECC_VLI_NATIVE_LITTLE_ENDIAN=1
 CFLAGS += -DNRF_SD_BLE_API_VERSION=7
-CFLAGS += -DS113
+CFLAGS += -DS140
 CFLAGS += -DSOFTDEVICE_PRESENT
 CFLAGS += -mcpu=cortex-m4
 CFLAGS += -mthumb -mabi=aapcs
@@ -364,7 +366,7 @@ ASMFLAGS += -DuECC_SQUARE_FUNC=0
 ASMFLAGS += -DuECC_SUPPORT_COMPRESSED_POINT=0
 ASMFLAGS += -DuECC_VLI_NATIVE_LITTLE_ENDIAN=1
 ASMFLAGS += -DNRF_SD_BLE_API_VERSION=7
-ASMFLAGS += -DS113
+ASMFLAGS += -DS140
 ASMFLAGS += -DSOFTDEVICE_PRESENT
 
 # Linker flags
@@ -414,10 +416,10 @@ $(DFU_PACKAGE): $(OUTPUT_DIRECTORY)/nrf52840_xxaa.hex
 	nrfutil pkg generate \
 	   --hw-version 52 \
 	   --application-version 1 \
-	   --sd-req 0x0,0x102 \
-	   --sd-id 0x102 \
+	   --sd-req 0x0,0x100 \
+	   --sd-id 0x100 \
 	   --application $< \
-	   --softdevice $(SDK_ROOT)/components/softdevice/s113/hex/s113_nrf52_7.2.0_softdevice.hex $@
+	   --softdevice $(SDK_ROOT)/components/softdevice/s140/hex/s140_nrf52_7.2.0_softdevice.hex $@
 
 dfu: $(DFU_PACKAGE)
 	@echo Performing DFU with generated package
