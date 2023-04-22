@@ -150,6 +150,7 @@ void estc_ble_default_ble_event_handler(ble_evt_t const *p_ble_evt, void *p_cont
 
 			disconn_subscribers[i](m_conn_handle);
 		}
+		notifications_to_send = 0U;
 		break;
 
 	case BLE_GAP_EVT_CONNECTED:
