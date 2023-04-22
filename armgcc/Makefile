@@ -138,11 +138,15 @@ SRC_FILES += \
   $(PROJ_DIR)/modules/gpio/button/board_button.c \
   $(PROJ_DIR)/modules/gpio/led/sequence_ctx.c \
   $(PROJ_DIR)/modules/timer/systick_ctx.c \
-  $(PROJ_DIR)/modules/ble/service/service.c \
+  $(PROJ_DIR)/modules/ble/estc_ble.c \
+  $(PROJ_DIR)/modules/ble/gatt/estc_gatt.c \
+  $(PROJ_DIR)/modules/ble/gatt/estc_gatt_srv.c \
   $(PROJ_DIR)/modules/ble/gap/estc_gap.c \
   $(PROJ_DIR)/modules/ble/gap/advertising.c \
-  $(PROJ_DIR)/modules/ble/ble_helpers.c \
-  $(PROJ_DIR)/modules/ble/service/characteristic.c \
+  $(PROJ_DIR)/modules/ble/gatt/estc_gatt_srv_char.c \
+  $(PROJ_DIR)/modules/ble/estc_chars/char_with_desc.c \
+  $(PROJ_DIR)/modules/ble/estc_chars/char_indicated.c \
+  $(PROJ_DIR)/modules/ble/estc_chars/char_notified.c \
   $(PROJ_DIR)/main.c \
 
 # Include folders common to all targets
@@ -308,8 +312,9 @@ INC_FOLDERS += \
   $(PROJ_DIR)/modules/hsv/cli/handlers/utils \
   $(PROJ_DIR)/modules/flash \
   $(PROJ_DIR)/modules/ble \
-  $(PROJ_DIR)/modules/ble/service \
   $(PROJ_DIR)/modules/ble/gap \
+  $(PROJ_DIR)/modules/ble/gatt \
+  $(PROJ_DIR)/modules/ble/estc_chars \
 
 # Libraries common to all targets
 LIB_FILES += \
