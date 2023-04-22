@@ -1,4 +1,4 @@
-#include "modules/ble/service/service.h"
+#include "modules/ble/gatt/estc_gatt_srv.h"
 
 #include <string.h>
 
