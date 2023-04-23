@@ -143,9 +143,6 @@ SRC_FILES += \
   $(PROJ_DIR)/modules/ble/gap/estc_gap.c \
   $(PROJ_DIR)/modules/ble/gap/advertising.c \
   $(PROJ_DIR)/modules/ble/gatt/estc_gatt_srv_char.c \
-  $(PROJ_DIR)/modules/ble/estc_chars/char_with_desc.c \
-  $(PROJ_DIR)/modules/ble/estc_chars/char_indicated.c \
-  $(PROJ_DIR)/modules/ble/estc_chars/char_notified.c \
   $(PROJ_DIR)/modules/ble/estc_chars/char_rgb.c \
   $(PROJ_DIR)/main.c \
 

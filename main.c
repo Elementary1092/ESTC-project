@@ -45,9 +45,6 @@
 #include "modules/ble/gatt/estc_gatt_srv_char.h"
 #include "modules/ble/gap/advertising.h"
 #include "modules/ble/gap/estc_gap.h"
-#include "modules/ble/estc_chars/char_with_desc.h"
-#include "modules/ble/estc_chars/char_indicated.h"
-#include "modules/ble/estc_chars/char_notified.h"
 #include "modules/ble/estc_chars/char_rgb.h"
 #include "modules/hsv/hsv_converter.h"
 #include "utils/generator/fcyclic_variable.h"
@@ -201,11 +198,11 @@ int main(void)
     log_init();
     timers_init();
     buttons_leds_init();
-
-    hsv_picker_init(INITIAL_HSV_HUE, INITIAL_HSV_SATURATION, INITIAL_HSV_BRIGHTNESS);
-
     power_management_init();
     ble_stack_init();
+
+    hsv_picker_init(INITIAL_HSV_HUE, INITIAL_HSV_SATURATION, INITIAL_HSV_BRIGHTNESS);
+    
     gap_params_init();
     gatt_init();
     estc_ble_gap_advertising_init(m_adv_uuids, sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]));
