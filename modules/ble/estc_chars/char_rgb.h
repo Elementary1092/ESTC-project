@@ -6,7 +6,8 @@
 #include "modules/ble/gatt/estc_gatt_srv.h"
 #include "modules/hsv/hsv_converter.h"
 
-#define ESTC_CHAR_RGB_UUID16 0x069B
+#define ESTC_CHAR_READ_RGB_UUID16 0x069B
+#define ESTC_CHAR_WRITE_RGB_UUID16 0x069C
 
 ret_code_t estc_char_rgb_register(estc_ble_service_t * service, rgb_value_t * rgb);
 

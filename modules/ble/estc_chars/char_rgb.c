@@ -19,7 +19,9 @@ static uint8_t rgb_desc[] = { 0x4c, 0x45, 0x44, 0x20, 0x76, 0x61, 0x6c, 0x75, 0x
 
 static uint8_t rgb_value[3];
 
-static estc_ble_srv_char_handles_t rgb_ble_handles;
+static estc_ble_srv_char_handles_t rgb_read_ble_handles;
+
+static estc_ble_srv_char_handles_t rgb_write_ble_handles;
 
 // static rgb_value_t estc_char_rgb_convert_char(void)
 // {
@@ -44,7 +46,7 @@ static void estc_char_rgb_notif_handler(void * ctx)
     estc_char_convert_to_char(&rgb, rgb_value);
     uint16_t conn_handle = (uint16_t)((uintptr_t)ctx);
     uint16_t value_len = (uint16_t)(sizeof(rgb_value));
-    estc_ble_srv_char_notify(conn_handle, rgb_ble_handles.value_handle.service_handle, rgb_value, &value_len);
+    estc_ble_srv_char_notify(conn_handle, rgb_read_ble_handles.value_handle.service_handle, rgb_value, &value_len);
 }
 
 ret_code_t estc_char_rgb_register(estc_ble_service_t * service, rgb_value_t * rgb)
@@ -60,9 +62,9 @@ ret_code_t estc_char_rgb_register(estc_ble_service_t * service, rgb_value_t * rg
 
     estc_char_convert_to_char(rgb, rgb_value);
 
-    estc_ble_srv_char_cfg_t char_config = 
+    estc_ble_srv_char_cfg_t char_read_config = 
     {
-        .characteristic_uuid = ESTC_CHAR_RGB_UUID16,
+        .characteristic_uuid = ESTC_CHAR_READ_RGB_UUID16,
         .characteristic_uuid_type = BLE_UUID_TYPE_UNKNOWN,
         .description_string = rgb_desc,
         .description_size = sizeof(rgb_desc),
@@ -74,7 +76,27 @@ ret_code_t estc_char_rgb_register(estc_ble_service_t * service, rgb_value_t * rg
         .value_type = ESTC_BLE_CHAR_TYPE_INT64,
     };
 
-    err_code = estc_ble_srv_char_register(service, &char_config, &rgb_ble_handles);
+    err_code = estc_ble_srv_char_register(service, &char_read_config, &rgb_read_ble_handles);
+    if (err_code != NRF_SUCCESS)
+    {
+        return err_code;
+    }
+
+    estc_ble_srv_char_cfg_t char_write_config = 
+    {
+        .characteristic_uuid = ESTC_CHAR_WRITE_RGB_UUID16,
+        .characteristic_uuid_type = BLE_UUID_TYPE_UNKNOWN,
+        .description_string = rgb_desc,
+        .description_size = sizeof(rgb_desc),
+        .is_value_on_stack = false,
+        .permissions = ESTC_BLE_CHAR_WRITE,
+        .value = rgb_value,
+        .value_size = sizeof(rgb_value),
+        .value_size_max = sizeof(rgb_value),
+        .value_type = ESTC_BLE_CHAR_TYPE_UINT64,
+    };
+    
+    err_code = estc_ble_srv_char_register(service, &char_write_config, &rgb_write_ble_handles);
 
     return err_code;
 }
