@@ -155,7 +155,6 @@ void estc_ble_default_ble_event_handler(ble_evt_t const *p_ble_evt, void *p_cont
 
 	case BLE_GAP_EVT_CONNECTED:
 		NRF_LOG_INFO("Connected.");
-		err_code = bsp_indication_set(BSP_INDICATE_CONNECTED);
 		APP_ERROR_CHECK(err_code);
 		m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
 		err_code = nrf_ble_qwr_conn_handle_assign(&m_qwr, p_ble_evt->evt.gap_evt.conn_handle);
@@ -198,6 +197,7 @@ void estc_ble_default_ble_event_handler(ble_evt_t const *p_ble_evt, void *p_cont
 		err_code = sd_ble_gap_disconnect(p_ble_evt->evt.gatts_evt.conn_handle,
 										 BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
 		APP_ERROR_CHECK(err_code);
+		notifications_to_send--;
 		break;
 
 	case BLE_GATTS_EVT_HVN_TX_COMPLETE:
