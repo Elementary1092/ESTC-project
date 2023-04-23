@@ -22,6 +22,8 @@
 #define FLASH_MEMORY_FIRST_PAGE            FLASH_MEMORY_DATA_STARTING_ADDRESS
 #define FLASH_MEMORY_SECOND_PAGE           FLASH_MEMORY_FIRST_PAGE + FLASH_MEMORY_PAGE_SIZE
 
+#define FLASH_MEMORY_DEFAULT_VALUE 0xFFFFFFFF
+
 /**
  * @brief Flags to change behavour of functions in this module.
 */
@@ -39,14 +41,21 @@ typedef enum
 */
 typedef enum
 {
-	FLASH_MEMORY_NO_ERR                    = 0, /**< Execution is successful. */
-	FLASH_MEMORY_ERR_WORD_IS_NOT_WRITABLE  = 1, /**< Failed to write. */
-	FLASH_MEMORY_ERR_INVALID_CONTROL_W     = 2, /**< Failed to validate control word. */
-	FLASH_MEMORY_ERR_POSSIBLY_INVALID_DATA = 3, /**< Possibly got default values (0xFFFFFFFF). */
-	FLASH_MEMORY_ERR_INVALID_PAGE_ADDR     = 4, /**< Address of a page is invalid. */
-	FLASH_MEMORY_ERR_NOT_ENOUGH_SPACE      = 5, /**< Record cannot be written to the page. */
-	FLASH_MEMORY_ERR_ADDR_OUT_OF_BOUND     = 6  /**< Address is not accessible. */
+	FLASH_MEMORY_NO_ERR,                    /**< Execution is successful. */
+	FLASH_MEMORY_ERR_WORD_IS_NOT_WRITABLE,  /**< Failed to write. */
+	FLASH_MEMORY_ERR_INVALID_CONTROL_W,     /**< Failed to validate control word. */
+	FLASH_MEMORY_ERR_POSSIBLY_INVALID_DATA, /**< Possibly got default values (0xFFFFFFFF). */
+	FLASH_MEMORY_ERR_INVALID_PAGE_ADDR,     /**< Address of a page is invalid. */
+	FLASH_MEMORY_ERR_NOT_ENOUGH_SPACE,      /**< Record cannot be written to the page. */
+	FLASH_MEMORY_ERR_ADDR_OUT_OF_BOUND,     /**< Address is not accessible. */
+	FLASH_MEMORY_ERR_FAILED_TO_WRITE,       /**< Failed to write due to softdevice issues */
+	FLASH_MEMORY_ERR_FAILED_TO_ERASE,       /**< Failed to erase page due to softdevice issues */
 } flash_memory_err_t;
+
+/**
+ * @brief Initializes flash_memory_sd. Not used in flash_memory (nvmc).
+*/
+void flash_memory_init(void);
 
 /**
  * @brief Read certain amount of uint32_t type integers from the memory.

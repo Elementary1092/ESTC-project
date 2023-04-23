@@ -21,7 +21,7 @@ hsv_ctx_t hsv_picker_flash_try_init(void)
 {
 	uint32_t buffer[3] = {0UL};
 	uint32_t addr = flash_memory_seek_page_first_free_addr(FLASH_MEMORY_FIRST_PAGE);
-	if (addr == 0U)
+	if (addr == 0U || addr == FLASH_MEMORY_FIRST_PAGE)
 	{
 		return (hsv_ctx_t) {
 			.is_valid = false,
