@@ -116,7 +116,6 @@ SRC_FILES += \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm_read_buf.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm_cli.c \
-  $(PROJ_DIR)/modules/timer/rtc.c \
   $(PROJ_DIR)/modules/flash/flash_memory.c \
   $(PROJ_DIR)/modules/pwm/pwm_individual.c \
   $(PROJ_DIR)/modules/hsv/hsv_converter.c \
@@ -147,6 +146,7 @@ SRC_FILES += \
   $(PROJ_DIR)/modules/ble/estc_chars/char_with_desc.c \
   $(PROJ_DIR)/modules/ble/estc_chars/char_indicated.c \
   $(PROJ_DIR)/modules/ble/estc_chars/char_notified.c \
+  $(PROJ_DIR)/modules/ble/estc_chars/char_rgb.c \
   $(PROJ_DIR)/main.c \
 
 # Include folders common to all targets

@@ -24,12 +24,21 @@
 #include "nrf_ble_gatt.h"
 #include "nrf_ble_qwr.h"
 #include "nrf_pwr_mgmt.h"
+#include <nrfx_gpiote.h>
+#include <app_usbd.h>
+#include <app_usbd_serial_num.h>
+#include <app_usbd_cdc_acm.h>
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 #include "nrf_log_backend_usb.h"
 
+#include "modules/gpio/button/board_button.h"
+#include "modules/gpio/led/led.h"
+#include "modules/hsv/hsv_picker.h"
+#include "modules/hsv/cli/cli.h"
+#include "modules/cdc_acm/cdc_acm_cli.h"
 #include "modules/ble/estc_ble.h"
 #include "modules/ble/gatt/estc_gatt.h"
 #include "modules/ble/gatt/estc_gatt_srv.h"
@@ -39,8 +48,14 @@
 #include "modules/ble/estc_chars/char_with_desc.h"
 #include "modules/ble/estc_chars/char_indicated.h"
 #include "modules/ble/estc_chars/char_notified.h"
+#include "modules/ble/estc_chars/char_rgb.h"
+#include "modules/hsv/hsv_converter.h"
 #include "utils/generator/fcyclic_variable.h"
 #include "utils/generator/sinusoid.h"
+
+#define INITIAL_HSV_HUE        353.0F
+#define INITIAL_HSV_SATURATION 100.0F
+#define INITIAL_HSV_BRIGHTNESS 100.0F
 
 #define DEVICE_NAME "SomeLongName"
 
@@ -107,19 +122,13 @@ static void services_init(void)
 
     err_code = estc_ble_service_init(&m_estc_service);
     APP_ERROR_CHECK(err_code);
-    
-    err_code = estc_char_with_desc_register(&m_estc_service);
-    APP_ERROR_CHECK(err_code);
-    
-    err_code = estc_char_notified_register(&m_estc_service);
-    APP_ERROR_CHECK(err_code);
-    estc_ble_add_conn_subscriber(estc_char_notified_start);
-    estc_ble_add_disconn_subscriber(estc_char_notified_stop);
 
-    err_code = estc_char_indicated_register(&m_estc_service);
+    rgb_value_t rgb_val;
+    hsv_picker_get_current_rgb(&rgb_val);
+    err_code = estc_char_rgb_register(&m_estc_service, &rgb_val);
     APP_ERROR_CHECK(err_code);
-    estc_ble_add_conn_subscriber(estc_char_indicated_start);
-    estc_ble_add_disconn_subscriber(estc_char_indicated_stop);
+    estc_ble_add_conn_subscriber(estc_char_rgb_start_notifing);
+    estc_ble_add_disconn_subscriber(estc_char_rgb_stop_notifing);
 }
 
 static void ble_stack_init(void)
@@ -150,11 +159,10 @@ static void buttons_leds_init(void)
 {
     ret_code_t err_code;
 
-    err_code = bsp_init(BSP_INIT_LEDS | BSP_INIT_BUTTONS, estc_bsp_default_event_handler);
+    err_code = bsp_init(BSP_INIT_LEDS, estc_bsp_default_event_handler);
     APP_ERROR_CHECK(err_code);
 
-    err_code = bsp_btn_ble_init(NULL, NULL);
-    APP_ERROR_CHECK(err_code);
+    button_init(BOARD_BUTTON_SW1);
 }
 
 static void log_init(void)
@@ -178,15 +186,24 @@ static void idle_state_handle(void)
     {
         nrf_pwr_mgmt_run();
     }
+#if ESTC_USB_CLI_ENABLED
+    app_usbd_event_queue_process();
+#endif
     LOG_BACKEND_USB_PROCESS();
 }
 
 int main(void)
 {
     // Initialize.
+    nrfx_err_t err_code = nrfx_gpiote_init();
+    APP_ERROR_CHECK(err_code);
+
     log_init();
     timers_init();
     buttons_leds_init();
+
+    hsv_picker_init(INITIAL_HSV_HUE, INITIAL_HSV_SATURATION, INITIAL_HSV_BRIGHTNESS);
+
     power_management_init();
     ble_stack_init();
     gap_params_init();
@@ -194,6 +211,14 @@ int main(void)
     estc_ble_gap_advertising_init(m_adv_uuids, sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]));
     services_init();
     conn_params_init();
+
+#if ESTC_USB_CLI_ENABLED
+    cdc_acm_cli_init();
+    cdc_acm_add_handler(CDC_ACM_CLI_USB_RX_NEW_LINE, hsv_cli_exec_command);
+#endif
+
+    button_subscribe_to_SW1_state(BUTTON_PRESSED_TWICE_RECENTLY, hsv_picker_next_mode);
+    button_subscribe_to_SW1_hold(hsv_picker_edit_param);
 
     // Start execution.
     NRF_LOG_INFO("ESTC advertising example started.");
