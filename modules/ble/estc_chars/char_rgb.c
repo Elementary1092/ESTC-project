@@ -1,4 +1,5 @@
 #include <app_timer.h>
+#include <nrf_log.h>
 #include "char_rgb.h"
 #include "modules/ble/gatt/estc_gatt_srv_char.h"
 #include "modules/hsv/hsv_picker.h"
@@ -94,7 +95,7 @@ ret_code_t estc_char_rgb_register(estc_ble_service_t * service, rgb_value_t * rg
         .value = rgb_value,
         .value_size = sizeof(rgb_value),
         .value_size_max = sizeof(rgb_value),
-        .value_type = ESTC_BLE_CHAR_TYPE_UINT64,
+        .value_type = ESTC_BLE_CHAR_TYPE_STRING,
     };
     
     err_code = estc_ble_srv_char_register(service, &char_write_config, &rgb_write_ble_handles);
@@ -120,7 +121,7 @@ void estc_char_rgb_stop_notifing(uint16_t conn_handle)
 
 void estc_char_rgb_write_handler(uint16_t conn_handle, uint8_t * data, uint16_t offset, uint16_t len)
 {
-    if (len != sizeof(rgb_value))
+    if (len > sizeof(rgb_value))
     {
         return;
     }
