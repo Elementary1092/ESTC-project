@@ -17,6 +17,10 @@ union float_uint32_u
 	uint32_t ui;
 };
 
+static flash_memory_err_t err_on_init;
+
+static uint32_t control_word = HSV_SAVED_VALUE_CONTROL_WORD;
+
 hsv_ctx_t hsv_picker_flash_try_init(void)
 {
 	uint32_t buffer[3] = {0UL};
@@ -33,12 +37,13 @@ hsv_ctx_t hsv_picker_flash_try_init(void)
 		addr,
 		buffer,
 		3UL,
-		HSV_SAVED_VALUE_CONTROL_WORD,
+		&control_word,
 		FLASH_MEMORY_NO_FLAGS);
 
 	if (err != FLASH_MEMORY_NO_ERR)
 	{
 		NRF_LOG_INFO("%s: Could not initialize from the flash. Error: %s", __func__, NRF_LOG_ERROR_STRING_GET(err));
+		err_on_init = err;
 		return (hsv_ctx_t) {
 			.is_valid = false,
 		};
@@ -80,7 +85,7 @@ bool hsv_picker_flash_update_saved_value(hsv_ctx_t const *hsv)
 		buffer,
 		3UL,
 		FLASH_MEMORY_FIRST_PAGE,
-		HSV_SAVED_VALUE_CONTROL_WORD,
+		&control_word,
 		FLASH_MEMORY_ERASE_PAGE_IF_NECESSARY);
 
 	if (err != FLASH_MEMORY_NO_ERR)

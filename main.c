@@ -34,6 +34,7 @@
 #include "nrf_log_default_backends.h"
 #include "nrf_log_backend_usb.h"
 
+#include "modules/flash/flash_memory.h"
 #include "modules/gpio/button/board_button.h"
 #include "modules/gpio/led/led.h"
 #include "modules/hsv/hsv_picker.h"
@@ -201,6 +202,7 @@ int main(void)
     power_management_init();
     ble_stack_init();
 
+    flash_memory_init();
     hsv_picker_init(INITIAL_HSV_HUE, INITIAL_HSV_SATURATION, INITIAL_HSV_BRIGHTNESS);
     
     gap_params_init();

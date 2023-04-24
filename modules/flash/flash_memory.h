@@ -50,6 +50,7 @@ typedef enum
 	FLASH_MEMORY_ERR_ADDR_OUT_OF_BOUND,     /**< Address is not accessible. */
 	FLASH_MEMORY_ERR_FAILED_TO_WRITE,       /**< Failed to write due to softdevice issues */
 	FLASH_MEMORY_ERR_FAILED_TO_ERASE,       /**< Failed to erase page due to softdevice issues */
+	FLASH_MEMORY_ERR_FAILED_TO_READ,        /**< Failed to read data due to softdevice issues */
 } flash_memory_err_t;
 
 /**
@@ -89,7 +90,7 @@ void flash_memory_init(void);
 flash_memory_err_t flash_memory_read(uint32_t addr,
 									uint32_t *buffer,
 									uint32_t limit,
-									uint32_t control_w, 
+									uint32_t const *control_w, 
 									flash_memory_flag_t flags);
 
 /**
@@ -123,7 +124,7 @@ flash_memory_err_t flash_memory_read(uint32_t addr,
 flash_memory_err_t flash_memory_write(uint32_t addr,
 									uint32_t *buffer, 
 									uint32_t buf_size,
-									uint32_t control_w, 
+									uint32_t const *control_w, 
 									flash_memory_flag_t flags);
 
 /**
@@ -171,7 +172,7 @@ uint32_t flash_memory_seek_page_first_free_addr(uint32_t page_addr);
 flash_memory_err_t flash_memory_page_append(uint32_t *buffer, 
 											uint32_t buf_size, 
 											uint32_t page_addr, 
-											uint32_t control_w,
+											uint32_t const *control_w,
 											flash_memory_flag_t flags);
 
 #endif

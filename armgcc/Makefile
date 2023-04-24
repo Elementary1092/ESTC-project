@@ -116,7 +116,7 @@ SRC_FILES += \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm_read_buf.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm_cli.c \
-  $(PROJ_DIR)/modules/flash/flash_memory.c \
+  $(PROJ_DIR)/modules/flash/flash_memory_sd.c \
   $(PROJ_DIR)/modules/pwm/pwm_individual.c \
   $(PROJ_DIR)/modules/hsv/hsv_converter.c \
   $(PROJ_DIR)/modules/hsv/hsv_flash.c \
