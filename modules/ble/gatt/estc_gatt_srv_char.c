@@ -93,28 +93,23 @@ ret_code_t estc_ble_srv_char_register(estc_ble_service_t *service,
 
 	ret_code_t error_code = NRF_SUCCESS;
 
-	if (error_code != NRF_SUCCESS)
-	{
-		return error_code;
-	}
-
 	ble_gatts_char_pf_t presentation_format = estc_ble_get_fmt(config->value_type);
 
 	ble_gatts_char_md_t metadata =
-		{
-			.char_props = estc_ble_parse_char_props(config->permissions),
-			.char_ext_props = estc_ble_parse_ext_props(config->permissions),
-			.char_user_desc_size = config->description_size,
-			.char_user_desc_max_size = config->description_size,
-			.p_char_pf = &presentation_format,
-			.p_char_user_desc = config->description_string,
-		};
+	{
+		.char_props = estc_ble_parse_char_props(config->permissions),
+		.char_ext_props = estc_ble_parse_ext_props(config->permissions),
+		.char_user_desc_size = config->description_size,
+		.char_user_desc_max_size = config->description_size,
+		.p_char_pf = &presentation_format,
+		.p_char_user_desc = config->description_string,
+	};
 
 	ble_uuid_t characteristic_uuid =
-		{
-			.type = BLE_UUID_TYPE_BLE,
-			.uuid = config->characteristic_uuid,
-		};
+	{
+		.type = BLE_UUID_TYPE_BLE,
+		.uuid = config->characteristic_uuid,
+	};
 
 	ble_gatts_attr_md_t characteristic_metadata = {0};
 	characteristic_metadata.vloc = BLE_GATTS_VLOC_USER;
@@ -130,13 +125,13 @@ ret_code_t estc_ble_srv_char_register(estc_ble_service_t *service,
 	}
 
 	ble_gatts_attr_t characteristic =
-		{
-			.p_attr_md = &characteristic_metadata,
-			.p_value = config->value,
-			.max_len = config->value_size_max,
-			.init_len = config->value_size,
-			.p_uuid = &characteristic_uuid,
-		};
+	{
+		.p_attr_md = &characteristic_metadata,
+		.p_value = config->value,
+		.max_len = config->value_size_max,
+		.init_len = config->value_size,
+		.p_uuid = &characteristic_uuid,
+	};
 
 	ble_gatts_char_handles_t char_handles;
 

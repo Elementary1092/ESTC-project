@@ -6,22 +6,15 @@
 #include "nrf.h"
 #include "app_error.h"
 #include "ble.h"
-#include "ble_hci.h"
-#include "ble_srv_common.h"
-#include "ble_advdata.h"
-#include "ble_advertising.h"
 #include "ble_conn_params.h"
 #include "nrf_sdh.h"
 #include "nrf_sdh_soc.h"
 #include "nrf_sdh_ble.h"
 #include "app_timer.h"
 #include "fds.h"
-#include "peer_manager.h"
-#include "peer_manager_handler.h"
 #include "bsp_btn_ble.h"
 #include "sensorsim.h"
 #include "ble_conn_state.h"
-#include "nrf_ble_gatt.h"
 #include "nrf_ble_qwr.h"
 #include "nrf_pwr_mgmt.h"
 #include <nrfx_gpiote.h>
@@ -58,6 +51,8 @@
 
 #define DEVICE_NAME "SomeLongName"
 
+#define ESTC_BLE_SERVICE_UUID 0x2455 /**< 12th and 13th octet of ESTC_BLE_BASE_UUID */
+
 #define FIRST_CONN_PARAMS_UPDATE_DELAY APP_TIMER_TICKS(6000)
 #define NEXT_CONN_PARAMS_UPDATE_DELAY APP_TIMER_TICKS(40000)
 #define MAX_CONN_PARAMS_UPDATE_COUNT 3
@@ -69,10 +64,20 @@
 
 #define DEAD_BEEF 0xDEADBEEF /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
+// UUID: 0dc1xxxx-9959-436f-9bd4-dd1d358b958d
+/**
+ * BLE service base UUID without 12th and 13th octet
+ */
+static uint8_t estc_ble_service_base_uuid[16] = 
+{
+	0x8D, 0x95, 0x8B, 0x35, 0x1D, 0xDD, 0xD4, 0x9B, 0x6F, 0x43, 0x59, 0x99, 0x00, 0x00, 0xC1, 0x0D
+};
+
 static ble_uuid_t m_adv_uuids[] =
 {
     {BLE_UUID_DEVICE_INFORMATION_SERVICE, BLE_UUID_TYPE_BLE},
     {ESTC_BLE_SERVICE_UUID, BLE_UUID_TYPE_BLE},
+    {BLE_UUID_BMS_SERVICE, BLE_UUID_TYPE_BLE},
 };
 
 static estc_ble_service_t m_estc_service =
@@ -119,7 +124,7 @@ static void services_init(void)
 
     estc_ble_qwr_init();
 
-    err_code = estc_ble_service_init(&m_estc_service);
+    err_code = estc_ble_service_init(&m_estc_service, estc_ble_service_base_uuid, ESTC_BLE_SERVICE_UUID);
     APP_ERROR_CHECK(err_code);
 
     rgb_value_t rgb_val;

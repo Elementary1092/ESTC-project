@@ -7,26 +7,23 @@
 #include "ble.h"
 #include "sdk_errors.h"
 
-// UUID: 0dc1xxxx-9959-436f-9bd4-dd1d358b958d
-/**
- * BLE service base UUID without 12th and 13th octet
- */
-#define ESTC_BLE_BASE_UUID                                                                         \
-{                                                                                                  \
-	0x8D, 0x95, 0x8B, 0x35, 0x1D, 0xDD, 0xD4, 0x9B, 0x6F, 0x43, 0x59, 0x99, 0x00, 0x00, 0xC1, 0x0D \
-}
-
-#define ESTC_BLE_SERVICE_UUID 0x2455 /**< 12th and 13th octet of ESTC_BLE_BASE_UUID */
+#define ESTC_BLE_MAX_SERVICES 5
 
 typedef struct
 {
+	uint8_t * uuid128;
 	uint16_t service_handle;
+	uint8_t uuid_type;
 } estc_ble_service_t;
 
 /**
  * @brief Initializes ble gatt service
  *
  * @param [in] service - information about service which will be registered
+ * 
+ * @param [in] service_uuid128 - required 128-bit service UUID
+ * 
+ * @param [in] service_id - 16-bit service id
  *
  * @retval NRF_ERROR_NO_MEM - No free slots for service UUIDs
  *
@@ -34,6 +31,6 @@ typedef struct
  *
  * @retval NRF_SUCCESS - service was registered successfully
  */
-ret_code_t estc_ble_service_init(estc_ble_service_t *service);
+ret_code_t estc_ble_service_init(estc_ble_service_t *service, uint8_t service_uuid128[16], uint16_t service_id);
 
 #endif /* ESTC_SERVICE_H__ */
