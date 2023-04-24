@@ -138,6 +138,7 @@ SRC_FILES += \
   $(PROJ_DIR)/modules/gpio/led/sequence_ctx.c \
   $(PROJ_DIR)/modules/timer/systick_ctx.c \
   $(PROJ_DIR)/modules/ble/estc_ble.c \
+  $(PROJ_DIR)/modules/ble/estc_ble_write_mngr.c \
   $(PROJ_DIR)/modules/ble/gatt/estc_gatt.c \
   $(PROJ_DIR)/modules/ble/gatt/estc_gatt_srv.c \
   $(PROJ_DIR)/modules/ble/gap/estc_gap.c \

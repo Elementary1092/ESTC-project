@@ -2,6 +2,7 @@
 #include "char_rgb.h"
 #include "modules/ble/gatt/estc_gatt_srv_char.h"
 #include "modules/hsv/hsv_picker.h"
+#include "modules/ble/estc_ble_write_mngr.h"
 
 #define ESTC_CHAR_RGB_NOTIF_DELAY APP_TIMER_TICKS(2500)
 
@@ -23,14 +24,14 @@ static estc_ble_srv_char_handles_t rgb_read_ble_handles;
 
 static estc_ble_srv_char_handles_t rgb_write_ble_handles;
 
-// static rgb_value_t estc_char_rgb_convert_char(void)
-// {
-//     return (rgb_value_t) {
-//         .red = (uint16_t)rgb_value[0],
-//         .green = (uint16_t)rgb_value[1],
-//         .blue = (uint16_t)rgb_value[2],
-//     };
-// }
+static rgb_value_t estc_char_rgb_convert_char(void)
+{
+    return (rgb_value_t) {
+        .red = (uint16_t)rgb_value[0],
+        .green = (uint16_t)rgb_value[1],
+        .blue = (uint16_t)rgb_value[2],
+    };
+}
 
 static void estc_char_convert_to_char(rgb_value_t * rgb, uint8_t rgb_char[3])
 {
@@ -97,8 +98,14 @@ ret_code_t estc_char_rgb_register(estc_ble_service_t * service, rgb_value_t * rg
     };
     
     err_code = estc_ble_srv_char_register(service, &char_write_config, &rgb_write_ble_handles);
+    if (err_code != NRF_SUCCESS)
+    {
+        return err_code;
+    }
 
-    return err_code;
+    estc_ble_write_mngr_subscribe(rgb_write_ble_handles.value_handle.service_handle, estc_char_rgb_write_handler);
+
+    return NRF_SUCCESS;
 }
 
 void estc_char_rgb_start_notifing(uint16_t conn_handle)
@@ -109,4 +116,20 @@ void estc_char_rgb_start_notifing(uint16_t conn_handle)
 void estc_char_rgb_stop_notifing(uint16_t conn_handle)
 {
     app_timer_stop(m_char_rgb_notif);
+}
+
+void estc_char_rgb_write_handler(uint16_t conn_handle, uint8_t * data, uint16_t offset, uint16_t len)
+{
+    if (len != sizeof(rgb_value))
+    {
+        return;
+    }
+
+    for (uint8_t i = 0; i < len; i++)
+    {
+        rgb_value[i + offset] = data[i];
+    }
+
+    rgb_value_t new_rgb_value = estc_char_rgb_convert_char();
+    hsv_picker_set_rgb(new_rgb_value.red, new_rgb_value.green, new_rgb_value.blue);
 }

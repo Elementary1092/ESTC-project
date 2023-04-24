@@ -15,4 +15,6 @@ void estc_char_rgb_start_notifing(uint16_t conn_handle);
 
 void estc_char_rgb_stop_notifing(uint16_t conn_handle);
 
+void estc_char_rgb_write_handler(uint16_t conn_handle, uint8_t * data, uint16_t offset, uint16_t len);
+
 #endif // ESTC_CHAR_RGB_H_
