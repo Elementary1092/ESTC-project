@@ -9,6 +9,7 @@
 #include <app_timer.h>
 
 #include "estc_ble.h"
+#include "estc_ble_write_mngr.h"
 
 #define ESTC_MAX_CONN_SUBSCRIBERS 5
 
@@ -209,7 +210,16 @@ void estc_ble_default_ble_event_handler(ble_evt_t const *p_ble_evt, void *p_cont
 		break;
 
 	case BLE_GATTS_EVT_WRITE:
-		NRF_LOG_INFO("Received write request.");
+		{
+			NRF_LOG_INFO("Received write request.");
+			ble_gatts_evt_write_t write_evt = p_ble_evt->evt.gatts_evt.params.write;
+			estc_ble_write_mngr_handle(
+				p_ble_evt->evt.gatts_evt.conn_handle, 
+				write_evt.handle, 
+				write_evt.data, 
+				write_evt.offset, 
+				write_evt.len);
+		}
 		break;
 
 	default:
