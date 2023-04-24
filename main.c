@@ -46,6 +46,7 @@
 #include "modules/ble/gatt/estc_gatt_srv_char.h"
 #include "modules/ble/gap/advertising.h"
 #include "modules/ble/gap/estc_gap.h"
+// #include "modules/ble/gap/bond/estc_bond.h"
 #include "modules/ble/estc_chars/char_rgb.h"
 #include "modules/hsv/hsv_converter.h"
 #include "utils/generator/fcyclic_variable.h"
@@ -209,6 +210,8 @@ int main(void)
     gatt_init();
     estc_ble_gap_advertising_init(m_adv_uuids, sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]));
     services_init();
+    // Getting hardfault on bond_init
+    // estc_ble_gap_bond_init();
     conn_params_init();
 
 #if ESTC_USB_CLI_ENABLED
