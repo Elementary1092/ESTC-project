@@ -39,7 +39,7 @@
 #include "modules/ble/gatt/estc_gatt_srv_char.h"
 #include "modules/ble/gap/advertising.h"
 #include "modules/ble/gap/estc_gap.h"
-// #include "modules/ble/gap/bond/estc_bond.h"
+#include "modules/ble/gap/bond/estc_bond.h"
 #include "modules/ble/estc_chars/char_rgb.h"
 #include "modules/hsv/hsv_converter.h"
 #include "utils/generator/fcyclic_variable.h"
@@ -108,7 +108,7 @@ static void gap_params_init(void)
         .slave_latency = SLAVE_LATENCY,
         .conn_supplement_timeout_ms = CONN_SUP_TIMEOUT,
     };
-    ret_code_t err_code = estc_ble_gap_peripheral_init(config);
+    ret_code_t err_code = estc_ble_gap_peripheral_init(&config);
     APP_ERROR_CHECK(err_code);
 }
 

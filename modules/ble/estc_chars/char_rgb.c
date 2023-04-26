@@ -48,7 +48,7 @@ static void estc_char_rgb_notif_handler(void * ctx)
     estc_char_convert_to_char(&rgb, rgb_value);
     uint16_t conn_handle = (uint16_t)((uintptr_t)ctx);
     uint16_t value_len = (uint16_t)(sizeof(rgb_value));
-    estc_ble_srv_char_notify(conn_handle, rgb_read_ble_handles.value_handle.service_handle, rgb_value, &value_len);
+    estc_ble_srv_char_notify(conn_handle, rgb_read_ble_handles.value_handle, rgb_value, &value_len);
 }
 
 ret_code_t estc_char_rgb_register(estc_ble_service_t * service, rgb_value_t * rgb)
@@ -104,7 +104,7 @@ ret_code_t estc_char_rgb_register(estc_ble_service_t * service, rgb_value_t * rg
         return err_code;
     }
 
-    estc_ble_write_mngr_subscribe(rgb_write_ble_handles.value_handle.service_handle, estc_char_rgb_write_handler);
+    estc_ble_write_mngr_subscribe(rgb_write_ble_handles.value_handle, estc_char_rgb_write_handler);
 
     return NRF_SUCCESS;
 }
@@ -126,10 +126,7 @@ void estc_char_rgb_write_handler(uint16_t conn_handle, uint8_t * data, uint16_t 
         return;
     }
 
-    for (uint8_t i = 0; i < len; i++)
-    {
-        rgb_value[i + offset] = data[i];
-    }
+    memcpy(rgb_value + offset, data, len);
 
     rgb_value_t new_rgb_value = estc_char_rgb_convert_char();
     hsv_picker_set_rgb(new_rgb_value.red, new_rgb_value.green, new_rgb_value.blue);

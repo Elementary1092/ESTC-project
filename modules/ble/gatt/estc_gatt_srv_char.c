@@ -141,10 +141,10 @@ ret_code_t estc_ble_srv_char_register(estc_ble_service_t *service,
 		return error_code;
 	}
 
-	handles->value_handle.service_handle = char_handles.value_handle;
-	handles->user_description_handle.service_handle = char_handles.user_desc_handle;
-	handles->client_char_desc_handle.service_handle = char_handles.cccd_handle;
-	handles->server_char_desc_handle.service_handle = char_handles.sccd_handle;
+	handles->value_handle = char_handles.value_handle;
+	handles->user_description_handle = char_handles.user_desc_handle;
+	handles->client_char_desc_handle = char_handles.cccd_handle;
+	handles->server_char_desc_handle = char_handles.sccd_handle;
 
 	return error_code;
 }

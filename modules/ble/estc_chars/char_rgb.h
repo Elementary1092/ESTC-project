@@ -8,6 +8,8 @@
 
 #define ESTC_CHAR_READ_RGB_UUID16 0x069B
 #define ESTC_CHAR_WRITE_RGB_UUID16 0x069C
+#define ESTC_CHAR_WRITE_GREEN_UUID16 0x069D
+#define ESTC_CHAR_WRITE_BLUE_UUID16 0x069E
 
 ret_code_t estc_char_rgb_register(estc_ble_service_t * service, rgb_value_t * rgb);
 

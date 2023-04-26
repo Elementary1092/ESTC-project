@@ -14,6 +14,6 @@ typedef struct
 	uint16_t conn_supplement_timeout_ms;
 } estc_ble_gap_config_t;
 
-ret_code_t estc_ble_gap_peripheral_init(estc_ble_gap_config_t config);
+ret_code_t estc_ble_gap_peripheral_init(estc_ble_gap_config_t * config);
 
 #endif // ESTC_BLE_GAP_H_

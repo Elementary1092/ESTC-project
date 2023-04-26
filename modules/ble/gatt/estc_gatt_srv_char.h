@@ -50,10 +50,10 @@ typedef struct
 
 typedef struct
 {
-	estc_ble_service_t value_handle;
-	estc_ble_service_t user_description_handle;
-	estc_ble_service_t client_char_desc_handle;
-	estc_ble_service_t server_char_desc_handle;
+	uint16_t value_handle;
+	uint16_t user_description_handle;
+	uint16_t client_char_desc_handle;
+	uint16_t server_char_desc_handle;
 } estc_ble_srv_char_handles_t;
 
 /***
