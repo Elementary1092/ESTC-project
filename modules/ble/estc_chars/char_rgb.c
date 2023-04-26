@@ -9,7 +9,8 @@
 
 APP_TIMER_DEF(m_char_rgb_notif);
 
-// Description in UTF-8: "LED values in RGB format. The first octet-red LED, the subsequent octet-green LED, the last octet-blue LED."
+// Description in UTF-8: 
+// "LED values in RGB format. The first octet-red LED, the subsequent octet-green LED, the last octet-blue LED."
 static uint8_t rgb_desc[] = { 0x4c, 0x45, 0x44, 0x20, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x73, 0x20, 0x69, 0x6e, 0x20, 
                               0x52, 0x47, 0x42, 0x20, 0x66, 0x6f, 0x72, 0x6d, 0x61, 0x74, 0x2e, 0x20, 0x54, 0x68, 
                               0x65, 0x20, 0x66, 0x69, 0x72, 0x73, 0x74, 0x20, 0x6f, 0x63, 0x74, 0x65, 0x74, 0x2d, 
@@ -19,11 +20,25 @@ static uint8_t rgb_desc[] = { 0x4c, 0x45, 0x44, 0x20, 0x76, 0x61, 0x6c, 0x75, 0x
                               0x68, 0x65, 0x20, 0x6c, 0x61, 0x73, 0x74, 0x20, 0x6f, 0x63, 0x74, 0x65, 0x74, 0x2d, 
                               0x62, 0x6c, 0x75, 0x65, 0x20, 0x4c, 0x45, 0x44, 0x2e};
 
+// UTF-8: "Change RED led intensity"
+static uint8_t red_write_desc[] = {0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x20, 0x52, 0x45, 0x44, 0x20, 0x6c, 0x65, 
+                                   0x64, 0x20, 0x69, 0x6e ,0x74 ,0x65, 0x6e, 0x73, 0x69, 0x74, 0x79};
+
+// UTF-8: "Change GREEN led intensity"
+static uint8_t green_write_desc[] = {0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x20, 0x47, 0x52, 0x45, 0x45, 0x4e, 0x20, 
+                                     0x6c, 0x65, 0x64, 0x20, 0x69, 0x6e, 0x74, 0x65, 0x6e, 0x73, 0x69, 0x74, 0x79};
+
+// UTF-8: "Change BLUE led intensity"
+static uint8_t blue_write_desc[] = {0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x20, 0x42, 0x4c, 0x55, 0x45, 0x20, 0x6c, 
+                                    0x65, 0x64, 0x20, 0x69, 0x6e, 0x74, 0x65, 0x6e, 0x73, 0x69, 0x74, 0x79};
+
 static uint8_t rgb_value[3];
 
 static estc_ble_srv_char_handles_t rgb_read_ble_handles;
 
-static estc_ble_srv_char_handles_t rgb_write_ble_handles;
+static estc_ble_srv_char_handles_t rgb_write_red_ble_handles;
+static estc_ble_srv_char_handles_t rgb_write_green_ble_handles;
+static estc_ble_srv_char_handles_t rgb_write_blue_ble_handles;
 
 static rgb_value_t estc_char_rgb_convert_char(void)
 {
@@ -84,27 +99,71 @@ ret_code_t estc_char_rgb_register(estc_ble_service_t * service, rgb_value_t * rg
         return err_code;
     }
 
-    estc_ble_srv_char_cfg_t char_write_config = 
+    estc_ble_srv_char_cfg_t char_write_red_config = 
     {
-        .characteristic_uuid = ESTC_CHAR_WRITE_RGB_UUID16,
+        .characteristic_uuid = ESTC_CHAR_WRITE_RED_UUID16,
         .characteristic_uuid_type = BLE_UUID_TYPE_UNKNOWN,
-        .description_string = rgb_desc,
-        .description_size = sizeof(rgb_desc),
+        .description_string = red_write_desc,
+        .description_size = sizeof(red_write_desc),
         .is_value_on_stack = false,
         .permissions = ESTC_BLE_CHAR_WRITE,
-        .value = rgb_value,
-        .value_size = sizeof(rgb_value),
-        .value_size_max = sizeof(rgb_value),
-        .value_type = ESTC_BLE_CHAR_TYPE_STRING,
+        .value = &(rgb_value[0]),
+        .value_size = sizeof(rgb_value[0]),
+        .value_size_max = sizeof(rgb_value[0]),
+        .value_type = ESTC_BLE_CHAR_TYPE_UINT64,
     };
     
-    err_code = estc_ble_srv_char_register(service, &char_write_config, &rgb_write_ble_handles);
+    err_code = estc_ble_srv_char_register(service, &char_write_red_config, &rgb_write_red_ble_handles);
     if (err_code != NRF_SUCCESS)
     {
         return err_code;
     }
 
-    estc_ble_write_mngr_subscribe(rgb_write_ble_handles.value_handle, estc_char_rgb_write_handler);
+    estc_ble_write_mngr_subscribe(rgb_write_red_ble_handles.value_handle, estc_char_rgb_red_write_handler);
+    
+    estc_ble_srv_char_cfg_t char_write_green_config = 
+    {
+        .characteristic_uuid = ESTC_CHAR_WRITE_GREEN_UUID16,
+        .characteristic_uuid_type = BLE_UUID_TYPE_UNKNOWN,
+        .description_string = green_write_desc,
+        .description_size = sizeof(green_write_desc),
+        .is_value_on_stack = false,
+        .permissions = ESTC_BLE_CHAR_WRITE,
+        .value = &(rgb_value[1]),
+        .value_size = sizeof(rgb_value[1]),
+        .value_size_max = sizeof(rgb_value[1]),
+        .value_type = ESTC_BLE_CHAR_TYPE_UINT64,
+    };
+    
+    err_code = estc_ble_srv_char_register(service, &char_write_green_config, &rgb_write_green_ble_handles);
+    if (err_code != NRF_SUCCESS)
+    {
+        return err_code;
+    }
+
+    estc_ble_write_mngr_subscribe(rgb_write_green_ble_handles.value_handle, estc_char_rgb_green_write_handler);
+
+    estc_ble_srv_char_cfg_t char_write_blue_config = 
+    {
+        .characteristic_uuid = ESTC_CHAR_WRITE_BLUE_UUID16,
+        .characteristic_uuid_type = BLE_UUID_TYPE_UNKNOWN,
+        .description_string = blue_write_desc,
+        .description_size = sizeof(blue_write_desc),
+        .is_value_on_stack = false,
+        .permissions = ESTC_BLE_CHAR_WRITE,
+        .value = &(rgb_value[2]),
+        .value_size = sizeof(rgb_value[2]),
+        .value_size_max = sizeof(rgb_value[2]),
+        .value_type = ESTC_BLE_CHAR_TYPE_UINT64,
+    };
+    
+    err_code = estc_ble_srv_char_register(service, &char_write_blue_config, &rgb_write_blue_ble_handles);
+    if (err_code != NRF_SUCCESS)
+    {
+        return err_code;
+    }
+
+    estc_ble_write_mngr_subscribe(rgb_write_blue_ble_handles.value_handle, estc_char_rgb_blue_write_handler);
 
     return NRF_SUCCESS;
 }
@@ -119,15 +178,43 @@ void estc_char_rgb_stop_notifing(uint16_t conn_handle)
     app_timer_stop(m_char_rgb_notif);
 }
 
-void estc_char_rgb_write_handler(uint16_t conn_handle, uint8_t * data, uint16_t offset, uint16_t len)
+void estc_char_rgb_red_write_handler(uint16_t conn_handle, uint8_t * data, uint16_t offset, uint16_t len)
 {
-    if (len > sizeof(rgb_value))
+    if (len > sizeof(rgb_value[0]))
     {
         return;
     }
 
-    memcpy(rgb_value + offset, data, len);
-
+    rgb_value[0] = data[0];
+    
     rgb_value_t new_rgb_value = estc_char_rgb_convert_char();
     hsv_picker_set_rgb(new_rgb_value.red, new_rgb_value.green, new_rgb_value.blue);
+}
+
+void estc_char_rgb_green_write_handler(uint16_t conn_handle, uint8_t * data, uint16_t offset, uint16_t len)
+{
+    if (len > sizeof(rgb_value[1]))
+    {
+        return;
+    }
+
+    rgb_value[1] = data[0];
+    
+    rgb_value_t new_rgb_value = estc_char_rgb_convert_char();
+    hsv_picker_set_rgb(new_rgb_value.red, new_rgb_value.green, new_rgb_value.blue);
+
+}
+
+void estc_char_rgb_blue_write_handler(uint16_t conn_handle, uint8_t * data, uint16_t offset, uint16_t len)
+{
+    if (len > sizeof(rgb_value[2]))
+    {
+        return;
+    }
+
+    rgb_value[2] = data[0];
+    
+    rgb_value_t new_rgb_value = estc_char_rgb_convert_char();
+    hsv_picker_set_rgb(new_rgb_value.red, new_rgb_value.green, new_rgb_value.blue);
+
 }
