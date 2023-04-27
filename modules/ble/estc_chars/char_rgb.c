@@ -1,5 +1,6 @@
 #include <app_timer.h>
 #include <nrf_log.h>
+#include <peer_manager.h>
 #include "char_rgb.h"
 #include "modules/ble/gatt/estc_gatt_srv_char.h"
 #include "modules/hsv/hsv_picker.h"
@@ -180,6 +181,20 @@ void estc_char_rgb_stop_notifing(uint16_t conn_handle)
 
 void estc_char_rgb_red_write_handler(uint16_t conn_handle, uint8_t * data, uint16_t offset, uint16_t len)
 {
+    pm_conn_sec_status_t conn_sec_status;
+    memset(&conn_sec_status, 0, sizeof(pm_conn_sec_status_t));
+    ret_code_t err = pm_conn_sec_status_get(conn_handle, &conn_sec_status);
+    if (err != NRF_SUCCESS)
+    {
+        return;
+    }
+
+    if (!conn_sec_status.bonded)
+    {
+        NRF_LOG_INFO("%s:%d: Connection %d is not bonded. Exiting without changing characteristic values", __func__, __LINE__, conn_handle);
+        return;
+    }
+
     if (len > sizeof(rgb_value[0]))
     {
         return;
@@ -193,6 +208,20 @@ void estc_char_rgb_red_write_handler(uint16_t conn_handle, uint8_t * data, uint1
 
 void estc_char_rgb_green_write_handler(uint16_t conn_handle, uint8_t * data, uint16_t offset, uint16_t len)
 {
+    pm_conn_sec_status_t conn_sec_status;
+    memset(&conn_sec_status, 0, sizeof(pm_conn_sec_status_t));
+    ret_code_t err = pm_conn_sec_status_get(conn_handle, &conn_sec_status);
+    if (err != NRF_SUCCESS)
+    {
+        return;
+    }
+
+    if (!conn_sec_status.bonded)
+    {
+        NRF_LOG_INFO("%s:%d: Connection %d is not bonded. Exiting without changing characteristic values", __func__, __LINE__, conn_handle);
+        return;
+    }
+    
     if (len > sizeof(rgb_value[1]))
     {
         return;
@@ -207,6 +236,20 @@ void estc_char_rgb_green_write_handler(uint16_t conn_handle, uint8_t * data, uin
 
 void estc_char_rgb_blue_write_handler(uint16_t conn_handle, uint8_t * data, uint16_t offset, uint16_t len)
 {
+    pm_conn_sec_status_t conn_sec_status;
+    memset(&conn_sec_status, 0, sizeof(pm_conn_sec_status_t));
+    ret_code_t err = pm_conn_sec_status_get(conn_handle, &conn_sec_status);
+    if (err != NRF_SUCCESS)
+    {
+        return;
+    }
+
+    if (!conn_sec_status.bonded)
+    {
+        NRF_LOG_INFO("%s:%d: Connection %d is not bonded. Exiting without changing characteristic values", __func__, __LINE__, conn_handle);
+        return;
+    }
+
     if (len > sizeof(rgb_value[2]))
     {
         return;
