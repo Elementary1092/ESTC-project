@@ -216,7 +216,7 @@ int main(void)
     estc_ble_gap_advertising_init(m_adv_uuids, sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]));
     services_init();
     // Getting hardfault on bond_init
-    // estc_ble_gap_bond_init();
+    estc_ble_gap_bond_init();
     conn_params_init();
 
 #if ESTC_USB_CLI_ENABLED

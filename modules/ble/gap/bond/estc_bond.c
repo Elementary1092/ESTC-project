@@ -130,12 +130,18 @@ static uint16_t qwr_evt_handler(nrf_ble_qwr_t * p_qwr, nrf_ble_qwr_evt_t * p_evt
     return nrf_ble_bms_on_qwr_evt(&m_bms, p_qwr, p_evt);
 }
 
-// static void pm_evt_handler(pm_evt_t const * p_evt)
-// {
-//     pm_handler_on_pm_evt(p_evt);
-//     pm_handler_disconnect_on_sec_failure(p_evt);
-//     pm_handler_flash_clean(p_evt);
-// }
+static void pm_evt_handler(pm_evt_t const * p_evt)
+{
+    if (p_evt->evt_id == PM_EVT_CONN_SEC_CONFIG_REQ)
+    {
+        pm_conn_sec_config_t config = {.allow_repairing = true};
+        pm_conn_sec_config_reply(p_evt->conn_handle, &config);
+        return;
+    }
+    pm_handler_on_pm_evt(p_evt);
+    pm_handler_disconnect_on_sec_failure(p_evt);
+    pm_handler_flash_clean(p_evt);
+}
 
 void estc_ble_gap_bond_init(void)
 {
@@ -173,30 +179,30 @@ void estc_ble_gap_bond_init(void)
     err_code = nrf_ble_bms_init(&m_bms, &bms_init);
     APP_ERROR_CHECK(err_code);
 
-    // ble_gap_sec_params_t sec_param;
+    ble_gap_sec_params_t sec_param;
 
     err_code = pm_init();
     APP_ERROR_CHECK(err_code);
 
-//     memset(&sec_param, 0, sizeof(ble_gap_sec_params_t));
+    memset(&sec_param, 0, sizeof(ble_gap_sec_params_t));
 
-//     // Security parameters to be used for all security procedures.
-//     sec_param.bond           = SEC_PARAM_BOND;
-//     sec_param.mitm           = SEC_PARAM_MITM;
-//     sec_param.lesc           = SEC_PARAM_LESC;
-//     sec_param.keypress       = SEC_PARAM_KEYPRESS;
-//     sec_param.io_caps        = SEC_PARAM_IO_CAPABILITIES;
-//     sec_param.oob            = SEC_PARAM_OOB;
-//     sec_param.min_key_size   = SEC_PARAM_MIN_KEY_SIZE;
-//     sec_param.max_key_size   = SEC_PARAM_MAX_KEY_SIZE;
-//     sec_param.kdist_own.enc  = 1;
-//     sec_param.kdist_own.id   = 1;
-//     sec_param.kdist_peer.enc = 1;
-//     sec_param.kdist_peer.id  = 1;
+    // Security parameters to be used for all security procedures.
+    sec_param.bond           = SEC_PARAM_BOND;
+    sec_param.mitm           = SEC_PARAM_MITM;
+    sec_param.lesc           = SEC_PARAM_LESC;
+    sec_param.keypress       = SEC_PARAM_KEYPRESS;
+    sec_param.io_caps        = SEC_PARAM_IO_CAPABILITIES;
+    sec_param.oob            = SEC_PARAM_OOB;
+    sec_param.min_key_size   = SEC_PARAM_MIN_KEY_SIZE;
+    sec_param.max_key_size   = SEC_PARAM_MAX_KEY_SIZE;
+    sec_param.kdist_own.enc  = 1;
+    sec_param.kdist_own.id   = 1;
+    sec_param.kdist_peer.enc = 1;
+    sec_param.kdist_peer.id  = 1;
 
-//     err_code = pm_sec_params_set(&sec_param);
-//     APP_ERROR_CHECK(err_code);
+    err_code = pm_sec_params_set(&sec_param);
+    APP_ERROR_CHECK(err_code);
 
-//     err_code = pm_register(pm_evt_handler);
-//     APP_ERROR_CHECK(err_code);
+    err_code = pm_register(pm_evt_handler);
+    APP_ERROR_CHECK(err_code);
 }
