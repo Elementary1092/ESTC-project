@@ -5,6 +5,7 @@
 #include <bsp.h>
 #include <bsp_btn_ble.h>
 #include <ble_conn_params.h>
+#include <nrf_ble_qwr.h>
 
 typedef struct
 {
@@ -18,11 +19,6 @@ typedef struct
 typedef void (*estc_ble_connected_subscriber_t)(uint16_t conn_handle);
 
 typedef void (*estc_ble_disconnected_subscriber_t)(uint16_t conn_handle);
-
-/**
- * @brief Initializes nrf_ble_qwr instance
- */
-void estc_ble_qwr_init(void);
 
 ret_code_t estc_ble_stack_init(uint8_t conn_cfg_tag);
 

@@ -44,6 +44,7 @@
 #include "modules/hsv/hsv_converter.h"
 #include "utils/generator/fcyclic_variable.h"
 #include "utils/generator/sinusoid.h"
+#include "modules/ble/estc_ble_qwr.h"
 
 #define INITIAL_HSV_HUE        353.0F
 #define INITIAL_HSV_SATURATION 100.0F
@@ -122,7 +123,7 @@ static void services_init(void)
 {
     ret_code_t err_code;
 
-    estc_ble_qwr_init();
+    estc_ble_qwr_init(estc_ble_gap_bond_qwr_evt_handler);
 
     err_code = estc_ble_service_init(&m_estc_service, estc_ble_service_base_uuid, ESTC_BLE_SERVICE_UUID);
     APP_ERROR_CHECK(err_code);
@@ -133,6 +134,9 @@ static void services_init(void)
     APP_ERROR_CHECK(err_code);
     estc_ble_add_conn_subscriber(estc_char_rgb_start_notifing);
     estc_ble_add_disconn_subscriber(estc_char_rgb_stop_notifing);
+    
+    
+    estc_ble_gap_bond_init();
 }
 
 static void ble_stack_init(void)
@@ -215,8 +219,6 @@ int main(void)
     gatt_init();
     estc_ble_gap_advertising_init(m_adv_uuids, sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]));
     services_init();
-    // Getting hardfault on bond_init
-    estc_ble_gap_bond_init();
     conn_params_init();
 
 #if ESTC_USB_CLI_ENABLED
