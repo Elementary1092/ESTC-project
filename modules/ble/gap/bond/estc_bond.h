@@ -2,6 +2,7 @@
 #define ESTC_BLE_GAP_BOND_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <nrf_ble_qwr.h>
 
 #define ESTC_BLE_GAP_BOND_MEM_BUFF_SIZE 512
@@ -28,5 +29,7 @@ void estc_ble_gap_bond_delete_unused(void);
  * @brief Callback which may be called by ble write queue on some events.
 */
 uint16_t estc_ble_gap_bond_qwr_evt_handler(nrf_ble_qwr_t * p_qwr, nrf_ble_qwr_evt_t * evt);
+
+bool estc_ble_gap_is_conn_bonded(uint16_t conn_handle);
 
 #endif // ESTC_BLE_GAP_BOND_H_

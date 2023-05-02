@@ -1,10 +1,10 @@
 #include <app_timer.h>
 #include <nrf_log.h>
-#include <peer_manager.h>
 #include "char_rgb.h"
 #include "modules/ble/gatt/estc_gatt_srv_char.h"
 #include "modules/hsv/hsv_picker.h"
 #include "modules/ble/estc_ble_write_mngr.h"
+#include "modules/ble/gap/bond/estc_bond.h"
 
 #define ESTC_CHAR_RGB_NOTIF_DELAY APP_TIMER_TICKS(2500)
 
@@ -181,21 +181,7 @@ void estc_char_rgb_stop_notifing(uint16_t conn_handle)
 
 void estc_char_rgb_red_write_handler(uint16_t conn_handle, uint8_t * data, uint16_t offset, uint16_t len)
 {
-    pm_conn_sec_status_t conn_sec_status;
-    memset(&conn_sec_status, 0, sizeof(pm_conn_sec_status_t));
-    ret_code_t err = pm_conn_sec_status_get(conn_handle, &conn_sec_status);
-    if (err != NRF_SUCCESS)
-    {
-        return;
-    }
-
-    if (!conn_sec_status.bonded)
-    {
-        NRF_LOG_INFO("%s:%d: Connection %d is not bonded. Exiting without changing characteristic values", __func__, __LINE__, conn_handle);
-        return;
-    }
-
-    if (len > sizeof(rgb_value[0]))
+    if (!estc_ble_gap_is_conn_bonded(conn_handle))
     {
         return;
     }
@@ -208,17 +194,8 @@ void estc_char_rgb_red_write_handler(uint16_t conn_handle, uint8_t * data, uint1
 
 void estc_char_rgb_green_write_handler(uint16_t conn_handle, uint8_t * data, uint16_t offset, uint16_t len)
 {
-    pm_conn_sec_status_t conn_sec_status;
-    memset(&conn_sec_status, 0, sizeof(pm_conn_sec_status_t));
-    ret_code_t err = pm_conn_sec_status_get(conn_handle, &conn_sec_status);
-    if (err != NRF_SUCCESS)
+    if (!estc_ble_gap_is_conn_bonded(conn_handle))
     {
-        return;
-    }
-
-    if (!conn_sec_status.bonded)
-    {
-        NRF_LOG_INFO("%s:%d: Connection %d is not bonded. Exiting without changing characteristic values", __func__, __LINE__, conn_handle);
         return;
     }
     
@@ -231,22 +208,12 @@ void estc_char_rgb_green_write_handler(uint16_t conn_handle, uint8_t * data, uin
     
     rgb_value_t new_rgb_value = estc_char_rgb_convert_char();
     hsv_picker_set_rgb(new_rgb_value.red, new_rgb_value.green, new_rgb_value.blue);
-
 }
 
 void estc_char_rgb_blue_write_handler(uint16_t conn_handle, uint8_t * data, uint16_t offset, uint16_t len)
 {
-    pm_conn_sec_status_t conn_sec_status;
-    memset(&conn_sec_status, 0, sizeof(pm_conn_sec_status_t));
-    ret_code_t err = pm_conn_sec_status_get(conn_handle, &conn_sec_status);
-    if (err != NRF_SUCCESS)
+    if (!estc_ble_gap_is_conn_bonded(conn_handle))
     {
-        return;
-    }
-
-    if (!conn_sec_status.bonded)
-    {
-        NRF_LOG_INFO("%s:%d: Connection %d is not bonded. Exiting without changing characteristic values", __func__, __LINE__, conn_handle);
         return;
     }
 
@@ -259,5 +226,4 @@ void estc_char_rgb_blue_write_handler(uint16_t conn_handle, uint8_t * data, uint
     
     rgb_value_t new_rgb_value = estc_char_rgb_convert_char();
     hsv_picker_set_rgb(new_rgb_value.red, new_rgb_value.green, new_rgb_value.blue);
-
 }

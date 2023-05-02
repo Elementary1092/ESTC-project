@@ -195,3 +195,22 @@ uint16_t estc_ble_gap_bond_qwr_evt_handler(nrf_ble_qwr_t * p_qwr, nrf_ble_qwr_ev
 {
     return nrf_ble_bms_on_qwr_evt(&m_bms, p_qwr, p_evt);
 }
+
+bool estc_ble_gap_is_conn_bonded(uint16_t conn_handle)
+{
+    pm_conn_sec_status_t conn_sec_status;
+    memset(&conn_sec_status, 0, sizeof(pm_conn_sec_status_t));
+    ret_code_t err = pm_conn_sec_status_get(conn_handle, &conn_sec_status);
+    if (err != NRF_SUCCESS)
+    {
+        return false;
+    }
+
+    if (!conn_sec_status.bonded)
+    {
+        NRF_LOG_INFO("%s:%d: Connection %d is not bonded.", __func__, __LINE__, conn_handle);
+        return false;
+    }
+
+    return true;
+}
