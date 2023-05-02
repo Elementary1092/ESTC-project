@@ -14,10 +14,19 @@
 #define SEC_PARAM_MIN_KEY_SIZE          7                                       //!< Minimum encryption key size.
 #define SEC_PARAM_MAX_KEY_SIZE          16                                      //!< Maximum encryption key size.
 
+/**
+ * @brief Initialize bond managment ble service and peer manager.
+*/
 void estc_ble_gap_bond_init(void);
 
+/**
+ * @brief Delete unused bonds (currently deletes all saved bonds).
+*/
 void estc_ble_gap_bond_delete_unused(void);
 
+/**
+ * @brief Callback which may be called by ble write queue on some events.
+*/
 uint16_t estc_ble_gap_bond_qwr_evt_handler(nrf_ble_qwr_t * p_qwr, nrf_ble_qwr_evt_t * evt);
 
 #endif // ESTC_BLE_GAP_BOND_H_

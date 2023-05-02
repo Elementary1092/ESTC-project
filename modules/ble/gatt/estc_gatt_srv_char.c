@@ -86,6 +86,8 @@ ret_code_t estc_ble_srv_char_register(estc_ble_service_t *service,
 {
 	APP_ERROR_CHECK_BOOL(service != NULL);
 	APP_ERROR_CHECK_BOOL(config != NULL);
+	APP_ERROR_CHECK_BOOL(handles != NULL);
+
 	if (config->description_size != 0U)
 	{
 		APP_ERROR_CHECK_BOOL(config->description_string != NULL);
@@ -151,6 +153,9 @@ ret_code_t estc_ble_srv_char_register(estc_ble_service_t *service,
 
 void estc_ble_srv_char_notify(uint16_t conn_handle, uint16_t value_handle, uint8_t *data, uint16_t *data_len)
 {
+	APP_ERROR_CHECK_BOOL(data != NULL);
+	APP_ERROR_CHECK_BOOL(data_len != NULL);
+
 	ble_gatts_hvx_params_t hvx_params =
 	{
 		.handle = value_handle,
@@ -171,6 +176,9 @@ void estc_ble_srv_char_notify(uint16_t conn_handle, uint16_t value_handle, uint8
 
 void estc_ble_srv_char_indicate(uint16_t conn_handle, uint16_t value_handle, uint8_t *data, uint16_t *data_len)
 {
+	APP_ERROR_CHECK_BOOL(data != NULL);
+	APP_ERROR_CHECK_BOOL(data_len != NULL);
+	
 	ble_gatts_hvx_params_t hvx_params =
 	{
 		.handle = value_handle,

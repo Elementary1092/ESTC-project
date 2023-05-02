@@ -81,8 +81,30 @@ ret_code_t estc_ble_srv_char_register(estc_ble_service_t *service,
 									  estc_ble_srv_char_cfg_t *config,
 									  estc_ble_srv_char_handles_t *handles);
 
+/**
+ * @brief Send notification.
+ * 
+ * @param[in] conn_handle - connection handle which should recieve notification.
+ * 
+ * @param[in] value_handle - handle of the value which should is a subject of notification.
+ * 
+ * @param[in] data - pointer to a value which should be sent with notification.
+ * 
+ * @param[in] data_len - pointer to a variable representing length of the data.
+*/
 void estc_ble_srv_char_notify(uint16_t conn_handle, uint16_t value_handle, uint8_t *data, uint16_t *data_len);
 
+/**
+ * @brief Send indication.
+ * 
+ * @param[in] conn_handle - connection handle which should recieve indication.
+ * 
+ * @param[in] value_handle - handle of the value which should is a subject of indication.
+ * 
+ * @param[in] data - pointer to a value which should be sent with indication.
+ * 
+ * @param[in] data_len - pointer to a variable representing length of the data.
+*/
 void estc_ble_srv_char_indicate(uint16_t conn_handle, uint16_t value_handle, uint8_t *data, uint16_t *data_len);
 
 #endif // ESTC_BLE_SERVICE_CHARACTERISTIC_H_

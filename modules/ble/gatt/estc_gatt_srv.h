@@ -11,9 +11,9 @@
 
 typedef struct
 {
-	uint8_t * uuid128;
-	uint16_t service_handle;
-	uint8_t uuid_type;
+	uint8_t * uuid128;       /**< Filled by initialer. */
+	uint16_t service_handle; /**< Service handle assigned by softdevice. */
+	uint8_t uuid_type;       /**< Service UUID type which is set by softdevice. */
 } estc_ble_service_t;
 
 /**

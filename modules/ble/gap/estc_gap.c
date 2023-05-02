@@ -1,9 +1,12 @@
 #include <ble_conn_params.h>
 #include <string.h>
+#include <app_error.h>
 #include "estc_gap.h"
 
 ret_code_t estc_ble_gap_peripheral_init(estc_ble_gap_config_t *config)
 {
+    APP_ERROR_CHECK_BOOL(config != NULL);
+
     ret_code_t err_code;
     ble_gap_conn_params_t gap_conn_params;
     ble_gap_conn_sec_mode_t sec_mode;

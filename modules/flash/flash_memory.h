@@ -74,7 +74,7 @@ void flash_memory_init(void);
  * @param[in]  flags Possible flags: \n
  *                   - @ref FLASH_MEMORY_NO_FLAGS: ignore all other flags. \n 
  *                   - @ref FLASH_MEMORY_IGNORE_CONTROL_W: do not validate the record. \n 
- *                   - @ref FLASH_MEMORY_IGNORE_DEFAULT_VALUES: ignore 0xFFFFFFFF and read { limit } records. \n 
+ *                   - @ref FLASH_MEMORY_IGNORE_DEFAULT_VALUES: ignore 0xFFFFFFFF and read { limit } records. Is ignored when sd is enabled. \n 
  *                   - other flags: are ignored. \n 
  *                   To pass multiple flags use bitwise OR.
  * 
