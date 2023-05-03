@@ -84,7 +84,7 @@ static void fstorage_evt_handler(nrf_fstorage_evt_t * evt)
 
 	ret_code_t err_code = NRF_SUCCESS;
 
-	if (buf_curr_idx != buf_end_idx)
+	if (buf_curr_idx != buf_end_idx || is_buffer_full)
 	{
 		NRF_LOG_INFO("Writing to 0x%x (%u), data length: %u", write_addresses[buf_curr_idx], write_addresses[buf_curr_idx], write_lengths[buf_curr_idx]);
 		err_code = nrf_fstorage_write(
