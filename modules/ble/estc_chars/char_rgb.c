@@ -67,6 +67,17 @@ static void estc_char_rgb_notif_handler(void * ctx)
     estc_ble_srv_char_notify(conn_handle, rgb_read_ble_handles.value_handle, rgb_value, &value_len);
 }
 
+static void estc_char_rgb_update_read(uint16_t conn_handle)
+{
+    ble_gatts_value_t new_value = 
+    {
+        .p_value = rgb_value,
+        .len = sizeof(rgb_value),
+        .offset = 0U,
+    };
+    sd_ble_gatts_value_set(conn_handle, rgb_read_ble_handles.value_handle, &new_value);
+}
+
 ret_code_t estc_char_rgb_register(estc_ble_service_t * service, rgb_value_t * rgb)
 {
     if (service == NULL || rgb == NULL)
@@ -86,8 +97,8 @@ ret_code_t estc_char_rgb_register(estc_ble_service_t * service, rgb_value_t * rg
         .characteristic_uuid_type = BLE_UUID_TYPE_UNKNOWN,
         .description_string = rgb_desc,
         .description_size = sizeof(rgb_desc),
-        .is_value_on_stack = false,
         .permissions = ESTC_BLE_CHAR_READ | ESTC_BLE_CHAR_NOTIFICATION,
+        .available = ESTC_BLE_CHAR_AVAIL_ALWAYS,
         .value = rgb_value,
         .value_size = sizeof(rgb_value),
         .value_size_max = sizeof(rgb_value),
@@ -106,8 +117,8 @@ ret_code_t estc_char_rgb_register(estc_ble_service_t * service, rgb_value_t * rg
         .characteristic_uuid_type = BLE_UUID_TYPE_UNKNOWN,
         .description_string = red_write_desc,
         .description_size = sizeof(red_write_desc),
-        .is_value_on_stack = false,
         .permissions = ESTC_BLE_CHAR_WRITE,
+        .available = ESTC_BLE_CHAR_AVAIL_AFTER_PAIRING,
         .value = &(rgb_value[0]),
         .value_size = sizeof(rgb_value[0]),
         .value_size_max = sizeof(rgb_value[0]),
@@ -128,8 +139,8 @@ ret_code_t estc_char_rgb_register(estc_ble_service_t * service, rgb_value_t * rg
         .characteristic_uuid_type = BLE_UUID_TYPE_UNKNOWN,
         .description_string = green_write_desc,
         .description_size = sizeof(green_write_desc),
-        .is_value_on_stack = false,
         .permissions = ESTC_BLE_CHAR_WRITE,
+        .available = ESTC_BLE_CHAR_AVAIL_AFTER_PAIRING,
         .value = &(rgb_value[1]),
         .value_size = sizeof(rgb_value[1]),
         .value_size_max = sizeof(rgb_value[1]),
@@ -150,8 +161,8 @@ ret_code_t estc_char_rgb_register(estc_ble_service_t * service, rgb_value_t * rg
         .characteristic_uuid_type = BLE_UUID_TYPE_UNKNOWN,
         .description_string = blue_write_desc,
         .description_size = sizeof(blue_write_desc),
-        .is_value_on_stack = false,
         .permissions = ESTC_BLE_CHAR_WRITE,
+        .available = ESTC_BLE_CHAR_AVAIL_AFTER_PAIRING,
         .value = &(rgb_value[2]),
         .value_size = sizeof(rgb_value[2]),
         .value_size_max = sizeof(rgb_value[2]),
@@ -190,6 +201,8 @@ void estc_char_rgb_red_write_handler(uint16_t conn_handle, uint8_t * data, uint1
     
     rgb_value_t new_rgb_value = estc_char_rgb_convert_char();
     hsv_picker_set_rgb(new_rgb_value.red, new_rgb_value.green, new_rgb_value.blue);
+
+    estc_char_rgb_update_read(conn_handle);
 }
 
 void estc_char_rgb_green_write_handler(uint16_t conn_handle, uint8_t * data, uint16_t offset, uint16_t len)
@@ -208,6 +221,7 @@ void estc_char_rgb_green_write_handler(uint16_t conn_handle, uint8_t * data, uin
     
     rgb_value_t new_rgb_value = estc_char_rgb_convert_char();
     hsv_picker_set_rgb(new_rgb_value.red, new_rgb_value.green, new_rgb_value.blue);
+    estc_char_rgb_update_read(conn_handle);
 }
 
 void estc_char_rgb_blue_write_handler(uint16_t conn_handle, uint8_t * data, uint16_t offset, uint16_t len)
@@ -226,4 +240,5 @@ void estc_char_rgb_blue_write_handler(uint16_t conn_handle, uint8_t * data, uint
     
     rgb_value_t new_rgb_value = estc_char_rgb_convert_char();
     hsv_picker_set_rgb(new_rgb_value.red, new_rgb_value.green, new_rgb_value.blue);
+    estc_char_rgb_update_read(conn_handle);
 }

@@ -80,6 +80,45 @@ static inline ble_gatt_char_ext_props_t estc_ble_parse_ext_props(uint16_t permis
 	};
 }
 
+static inline void estc_ble_srv_char_set_avail(ble_gatts_attr_md_t *attr_md, 
+											   ble_gatt_char_props_t *char_props,
+											   estc_ble_srv_char_cfg_t *config)
+{
+	if (char_props->read)
+	{
+		switch (config->available)
+		{
+			case ESTC_BLE_CHAR_AVAIL_ALWAYS:
+				BLE_GAP_CONN_SEC_MODE_SET_OPEN(&(attr_md->read_perm));
+				break;
+			
+			case ESTC_BLE_CHAR_AVAIL_AFTER_PAIRING:
+				BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&(attr_md->read_perm));
+				break;
+			
+			default:
+				break;
+		}
+	}
+
+	if (char_props->write || char_props->write_wo_resp)
+	{
+		switch (config->available)
+		{
+			case ESTC_BLE_CHAR_AVAIL_ALWAYS:
+				BLE_GAP_CONN_SEC_MODE_SET_OPEN(&(attr_md->write_perm));
+				break;
+			
+			case ESTC_BLE_CHAR_AVAIL_AFTER_PAIRING:
+				BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&(attr_md->write_perm));
+				break;
+			
+			default:
+				break;
+		}
+	}
+}
+
 ret_code_t estc_ble_srv_char_register(estc_ble_service_t *service,
 									  estc_ble_srv_char_cfg_t *config,
 									  estc_ble_srv_char_handles_t *handles)
@@ -120,11 +159,7 @@ ret_code_t estc_ble_srv_char_register(estc_ble_service_t *service,
 		characteristic_metadata.vlen = 1U;
 	}
 
-	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&(characteristic_metadata.read_perm));
-	if (metadata.char_props.write || metadata.char_props.write_wo_resp)
-	{
-		BLE_GAP_CONN_SEC_MODE_SET_OPEN(&(characteristic_metadata.write_perm));
-	}
+	estc_ble_srv_char_set_avail(&characteristic_metadata, &(metadata.char_props), config);
 
 	ble_gatts_attr_t characteristic =
 	{

@@ -34,9 +34,16 @@ typedef enum
 	ESTC_BLE_CHAR_TYPE_STRING,
 } estc_ble_srv_char_value_type_t;
 
+typedef enum 
+{
+	ESTC_BLE_CHAR_AVAIL_ALWAYS,
+	ESTC_BLE_CHAR_AVAIL_AFTER_PAIRING,
+} estc_ble_char_avail_t;
+
 typedef struct
 {
 	estc_ble_srv_char_value_type_t value_type; /**< Type of the value of a characteristic. */
+	estc_ble_char_avail_t          available;  /**< Availability of the characteristic to the GATT client. */
 	uint16_t permissions;					   /**< Should be composed of @ref estc_ble_gatt_srv_char_allowed_ops_t. */
 	uint16_t description_size;				   /**< If description is present, should be != 0. */
 	uint16_t value_size;					   /**< Size of a value in Bytes. */
@@ -45,7 +52,6 @@ typedef struct
 	uint8_t characteristic_uuid_type;		   /**< Will be filled by @ref estc_ble_srv_char_register */
 	uint8_t *value;							   /**< Pointer to a characteristic value*/
 	uint8_t const *description_string;		   /**< UTF-8 string */
-	bool is_value_on_stack;					   /**< If value is on stack ble_stack will copy the value to its buffer. */
 } estc_ble_srv_char_cfg_t;
 
 typedef struct
