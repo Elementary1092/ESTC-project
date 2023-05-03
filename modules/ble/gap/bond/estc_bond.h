@@ -30,6 +30,11 @@ void estc_ble_gap_bond_delete_unused(void);
 */
 uint16_t estc_ble_gap_bond_qwr_evt_handler(nrf_ble_qwr_t * p_qwr, nrf_ble_qwr_evt_t * evt);
 
+/**
+ * @brief Check if connection is bonded or not.
+ * 
+ * @param[in] conn_handle handle of a connection which should be checked.
+*/
 bool estc_ble_gap_is_conn_bonded(uint16_t conn_handle);
 
 #endif // ESTC_BLE_GAP_BOND_H_
