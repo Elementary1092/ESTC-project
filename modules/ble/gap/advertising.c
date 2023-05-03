@@ -35,7 +35,7 @@ void estc_ble_gap_advertising_init(ble_uuid_t * adv_uuids, uint16_t adv_uuids_si
     // If adv_uuids == NULL adv_uuids_size should be equal to 0.
     if (adv_uuids == NULL)
     {
-        APP_ERROR_CHECK_BOOL(adv_uuids_size != 0);
+        APP_ERROR_CHECK_BOOL(adv_uuids_size == 0);
     }
 
     ret_code_t err_code;
