@@ -187,8 +187,8 @@ void estc_ble_gap_bond_init(void)
 }
 
 void estc_ble_gap_bond_delete_unused(void)
-{  
-    delete_all_bonds(&m_bms);
+{
+    ble_conn_state_for_each_set_user_flag(m_bms_bonds_to_delete, bond_delete, NULL);
 }
 
 uint16_t estc_ble_gap_bond_qwr_evt_handler(nrf_ble_qwr_t * p_qwr, nrf_ble_qwr_evt_t * p_evt)
