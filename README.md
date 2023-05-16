@@ -8,14 +8,14 @@
 # Prerequisites
 <ul>
 	<li> C compiler [arm-none-eabi-gcc]
-		(<a link="https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-win32-sha2.exe?revision=ba95cefa-1880-4932-94d4-ebf30ad3f619&rev=ba95cefa1880493294d4ebf30ad3f619&hash=B19DC5BA5F85FC88399DE2F78BB7FBFD">Windows</a>) 
-		(<a link="https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-x86_64-linux.tar.bz2?revision=108bd959-44bd-4619-9c19-26187abf5225&rev=108bd95944bd46199c1926187abf5225&hash=E367D388F6429B67D5D6BECF691B9521">Linux</a>)
-		(<a link="https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-mac.tar.bz2?revision=c2c4fe0e-c0b6-4162-97e6-7707e12f2b6e&rev=c2c4fe0ec0b6416297e67707e12f2b6e&hash=5129A9817C72711155CCB2EC11E049A2">Mac OS</a>)
+		(<a href="https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-win32-sha2.exe?revision=ba95cefa-1880-4932-94d4-ebf30ad3f619&rev=ba95cefa1880493294d4ebf30ad3f619&hash=B19DC5BA5F85FC88399DE2F78BB7FBFD">Windows</a>) 
+		(<a href="https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-x86_64-linux.tar.bz2?revision=108bd959-44bd-4619-9c19-26187abf5225&rev=108bd95944bd46199c1926187abf5225&hash=E367D388F6429B67D5D6BECF691B9521">Linux</a>)
+		(<a href="https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-mac.tar.bz2?revision=c2c4fe0e-c0b6-4162-97e6-7707e12f2b6e&rev=c2c4fe0ec0b6416297e67707e12f2b6e&hash=5129A9817C72711155CCB2EC11E049A2">Mac OS</a>)
 	</li>
 	<li> make </li>
 	<li> nRF52840 (pca10059 board) </li>
-	<li> nRF SDK 17 (<a link="https://github.com/DSRCorporation/esl-nsdk">download link</a>) </li>
-	<li> nRF Util - to flash the app (<a link="https://www.nordicsemi.com/Products/Development-tools/nrf-util">download link</a>) </li>
+	<li> <a href="https://github.com/DSRCorporation/esl-nsdk">nRF SDK 17</a> </li>
+	<li> nRF Util - to flash the app (<a href="https://www.nordicsemi.com/Products/Development-tools/nrf-util">download link</a>) </li>
 	<li> picocom or alternatives - to use CLI module or view logs </li>
 	<li> nRF Connect </li>
 </ul>
