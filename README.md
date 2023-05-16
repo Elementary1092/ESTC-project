@@ -30,7 +30,7 @@ make dfu
 To build and flash an application with CLI module enabled type:
 
 ```
-make dfu ESTC_CLI_ENABLED=1
+make dfu ESTC_USB_CLI_ENABLED=1
 ```
 
 # Usage
