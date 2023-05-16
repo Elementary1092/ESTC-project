@@ -66,3 +66,12 @@ The are several modes of editing the color of LEDs by using button. Modes:
 
 When the button is used to change color, the information about color is saved to the flash 
 only when application moves from "Edit brightness" mode to "No input" mode.
+
+### Logs
+To view logs using picocom it is needed to know the port to which the board is connected.
+For example, if the board is connected to ttyACM0, on Linux machine type the following command to view logs:
+```
+picocom /dev/ttyACM0
+```
+
+To exit picocom press Ctrl + A followed by Ctrl + X.
