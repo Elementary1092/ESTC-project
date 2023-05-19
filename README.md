@@ -77,3 +77,8 @@ picocom /dev/ttyACM0
 ```
 
 To exit picocom press Ctrl + A followed by Ctrl + X.
+
+cat utility also may be used to view logs:
+```
+cat /dev/ttyACM0
+```
