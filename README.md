@@ -24,12 +24,14 @@
 Unpack nRF SDK, go to armgcc directory, open Makefile and assign path to nRF SDK SDK_ROOT variable in the Makefile. Now you are ready to start building an applicaion. Type the following command to build and flash an application without CLI module enabled:
 
 ```
+make clean
 make dfu
 ```
 
 To build and flash an application with CLI module enabled type:
 
 ```
+make clean
 make dfu ESTC_USB_CLI_ENABLED=1
 ```
 
