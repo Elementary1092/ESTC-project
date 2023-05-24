@@ -31,12 +31,9 @@ static void hsv_saved_colors_flush(void)
 		FLASH_MEMORY_SECOND_PAGE,
 		colors_to_mem,
 		sizeof(hsv_saved_color_rgb_t) / sizeof(uint32_t) * saved_colors_size,
-		0U,
+		NULL,
 		FLASH_MEMORY_IGNORE_CONTROL_W | FLASH_MEMORY_ERASE_PAGE_BEFORE_WRITE
 	);
-
-	uint32_t next_addr = flash_memory_seek_page_first_free_addr(FLASH_MEMORY_SECOND_PAGE);
-	NRF_LOG_INFO("hsv_saved_colors_flush: Next address: %u", next_addr);
 }
 
 void hsv_saved_colors_load(void)

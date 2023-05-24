@@ -8,7 +8,7 @@
 #error NRF_DFU_APP_DATA_AREA_SIZE is not defined
 #endif
 
-#if NRF_DFU_APP_DATA_AREA_SIZE < 8192
+#if NRF_DFU_APP_DATA_AREA_SIZE < 20480
 #error NRF_DFU_APP_DATA_AREA_SIZE is too small
 #endif
 
@@ -16,11 +16,13 @@
 #define FLASH_MEMORY_DATA_LAST_ADDRESS     0xE0000
 #endif
 
-#define FLASH_MEMORY_DATA_STARTING_ADDRESS 0xE0000 - NRF_DFU_APP_DATA_AREA_SIZE
-#define FLASH_MEMORY_DATA_END_ADDRESS      FLASH_MEMORY_DATA_STARTING_ADDRESS + NRF_DFU_APP_DATA_AREA_SIZE
+#define FLASH_MEMORY_DATA_STARTING_ADDRESS FLASH_MEMORY_DATA_LAST_ADDRESS - NRF_DFU_APP_DATA_AREA_SIZE
+#define FLASH_MEMORY_DATA_END_ADDRESS      FLASH_MEMORY_DATA_STARTING_ADDRESS + 4096 * 2
 #define FLASH_MEMORY_PAGE_SIZE             4096
 #define FLASH_MEMORY_FIRST_PAGE            FLASH_MEMORY_DATA_STARTING_ADDRESS
 #define FLASH_MEMORY_SECOND_PAGE           FLASH_MEMORY_FIRST_PAGE + FLASH_MEMORY_PAGE_SIZE
+
+#define FLASH_MEMORY_DEFAULT_VALUE 0xFFFFFFFF
 
 /**
  * @brief Flags to change behavour of functions in this module.
@@ -39,14 +41,22 @@ typedef enum
 */
 typedef enum
 {
-	FLASH_MEMORY_NO_ERR                    = 0, /**< Execution is successful. */
-	FLASH_MEMORY_ERR_WORD_IS_NOT_WRITABLE  = 1, /**< Failed to write. */
-	FLASH_MEMORY_ERR_INVALID_CONTROL_W     = 2, /**< Failed to validate control word. */
-	FLASH_MEMORY_ERR_POSSIBLY_INVALID_DATA = 3, /**< Possibly got default values (0xFFFFFFFF). */
-	FLASH_MEMORY_ERR_INVALID_PAGE_ADDR     = 4, /**< Address of a page is invalid. */
-	FLASH_MEMORY_ERR_NOT_ENOUGH_SPACE      = 5, /**< Record cannot be written to the page. */
-	FLASH_MEMORY_ERR_ADDR_OUT_OF_BOUND     = 6  /**< Address is not accessible. */
+	FLASH_MEMORY_NO_ERR,                    /**< Execution is successful. */
+	FLASH_MEMORY_ERR_WORD_IS_NOT_WRITABLE,  /**< Failed to write. */
+	FLASH_MEMORY_ERR_INVALID_CONTROL_W,     /**< Failed to validate control word. */
+	FLASH_MEMORY_ERR_POSSIBLY_INVALID_DATA, /**< Possibly got default values (0xFFFFFFFF). */
+	FLASH_MEMORY_ERR_INVALID_PAGE_ADDR,     /**< Address of a page is invalid. */
+	FLASH_MEMORY_ERR_NOT_ENOUGH_SPACE,      /**< Record cannot be written to the page. */
+	FLASH_MEMORY_ERR_ADDR_OUT_OF_BOUND,     /**< Address is not accessible. */
+	FLASH_MEMORY_ERR_FAILED_TO_WRITE,       /**< Failed to write due to softdevice issues */
+	FLASH_MEMORY_ERR_FAILED_TO_ERASE,       /**< Failed to erase page due to softdevice issues */
+	FLASH_MEMORY_ERR_FAILED_TO_READ,        /**< Failed to read data due to softdevice issues */
 } flash_memory_err_t;
+
+/**
+ * @brief Initializes flash_memory_sd. Not used in flash_memory (nvmc).
+*/
+void flash_memory_init(void);
 
 /**
  * @brief Read certain amount of uint32_t type integers from the memory.
@@ -64,7 +74,7 @@ typedef enum
  * @param[in]  flags Possible flags: \n
  *                   - @ref FLASH_MEMORY_NO_FLAGS: ignore all other flags. \n 
  *                   - @ref FLASH_MEMORY_IGNORE_CONTROL_W: do not validate the record. \n 
- *                   - @ref FLASH_MEMORY_IGNORE_DEFAULT_VALUES: ignore 0xFFFFFFFF and read { limit } records. \n 
+ *                   - @ref FLASH_MEMORY_IGNORE_DEFAULT_VALUES: ignore 0xFFFFFFFF and read { limit } records. Is ignored when sd is enabled. \n 
  *                   - other flags: are ignored. \n 
  *                   To pass multiple flags use bitwise OR.
  * 
@@ -80,7 +90,7 @@ typedef enum
 flash_memory_err_t flash_memory_read(uint32_t addr,
 									uint32_t *buffer,
 									uint32_t limit,
-									uint32_t control_w, 
+									uint32_t const *control_w, 
 									flash_memory_flag_t flags);
 
 /**
@@ -114,7 +124,7 @@ flash_memory_err_t flash_memory_read(uint32_t addr,
 flash_memory_err_t flash_memory_write(uint32_t addr,
 									uint32_t *buffer, 
 									uint32_t buf_size,
-									uint32_t control_w, 
+									uint32_t const *control_w, 
 									flash_memory_flag_t flags);
 
 /**
@@ -162,7 +172,7 @@ uint32_t flash_memory_seek_page_first_free_addr(uint32_t page_addr);
 flash_memory_err_t flash_memory_page_append(uint32_t *buffer, 
 											uint32_t buf_size, 
 											uint32_t page_addr, 
-											uint32_t control_w,
+											uint32_t const *control_w,
 											flash_memory_flag_t flags);
 
 #endif

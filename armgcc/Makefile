@@ -86,6 +86,7 @@ SRC_FILES += \
   $(SDK_ROOT)/components/libraries/crc16/crc16.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp_btn_ble.c \
   $(SDK_ROOT)/components/libraries/atomic_flags/nrf_atflags.c \
+  $(SDK_ROOT)/components/ble/ble_services/nrf_ble_bms/nrf_ble_bms.c \
   $(SDK_ROOT)/components/ble/peer_manager/security_manager.c \
   $(SDK_ROOT)/components/ble/peer_manager/security_dispatcher.c \
   $(SDK_ROOT)/components/ble/peer_manager/pm_buffer.c \
@@ -116,8 +117,7 @@ SRC_FILES += \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm_read_buf.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm.c \
   $(PROJ_DIR)/modules/cdc_acm/cdc_acm_cli.c \
-  $(PROJ_DIR)/modules/timer/rtc.c \
-  $(PROJ_DIR)/modules/flash/flash_memory.c \
+  $(PROJ_DIR)/modules/flash/flash_memory_sd.c \
   $(PROJ_DIR)/modules/pwm/pwm_individual.c \
   $(PROJ_DIR)/modules/hsv/hsv_converter.c \
   $(PROJ_DIR)/modules/hsv/hsv_flash.c \
@@ -138,15 +138,16 @@ SRC_FILES += \
   $(PROJ_DIR)/modules/gpio/button/board_button.c \
   $(PROJ_DIR)/modules/gpio/led/sequence_ctx.c \
   $(PROJ_DIR)/modules/timer/systick_ctx.c \
+  $(PROJ_DIR)/modules/ble/estc_ble_qwr.c \
   $(PROJ_DIR)/modules/ble/estc_ble.c \
+  $(PROJ_DIR)/modules/ble/estc_ble_write_mngr.c \
   $(PROJ_DIR)/modules/ble/gatt/estc_gatt.c \
   $(PROJ_DIR)/modules/ble/gatt/estc_gatt_srv.c \
   $(PROJ_DIR)/modules/ble/gap/estc_gap.c \
+  $(PROJ_DIR)/modules/ble/gap/bond/estc_bond.c \
   $(PROJ_DIR)/modules/ble/gap/advertising.c \
   $(PROJ_DIR)/modules/ble/gatt/estc_gatt_srv_char.c \
-  $(PROJ_DIR)/modules/ble/estc_chars/char_with_desc.c \
-  $(PROJ_DIR)/modules/ble/estc_chars/char_indicated.c \
-  $(PROJ_DIR)/modules/ble/estc_chars/char_notified.c \
+  $(PROJ_DIR)/modules/ble/estc_chars/char_rgb.c \
   $(PROJ_DIR)/main.c \
 
 # Include folders common to all targets
@@ -227,6 +228,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/ble/nrf_ble_qwr \
   $(SDK_ROOT)/components/ble/nrf_ble_gatt \
   $(SDK_ROOT)/components/ble/common \
+  $(SDK_ROOT)/components/ble/ble_services/nrf_ble_bms \
   $(SDK_ROOT)/components/ble/ble_services/ble_tps \
   $(SDK_ROOT)/components/ble/ble_services/ble_rscs_c \
   $(SDK_ROOT)/components/ble/ble_services/ble_rscs \
@@ -313,6 +315,7 @@ INC_FOLDERS += \
   $(PROJ_DIR)/modules/flash \
   $(PROJ_DIR)/modules/ble \
   $(PROJ_DIR)/modules/ble/gap \
+  $(PROJ_DIR)/modules/ble/gap/bond \
   $(PROJ_DIR)/modules/ble/gatt \
   $(PROJ_DIR)/modules/ble/estc_chars \
 

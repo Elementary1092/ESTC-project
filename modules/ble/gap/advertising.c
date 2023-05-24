@@ -19,14 +19,10 @@ BLE_ADVERTISING_DEF(m_advertising); /**< Advertising module instance. */
  */
 static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
 {
-    ret_code_t err_code;
-
     switch (ble_adv_evt)
     {
     case BLE_ADV_EVT_FAST:
         NRF_LOG_INFO("Fast advertising.");
-        err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING);
-        APP_ERROR_CHECK(err_code);
         break;
 
     default:
@@ -36,6 +32,12 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
 
 void estc_ble_gap_advertising_init(ble_uuid_t * adv_uuids, uint16_t adv_uuids_size)
 {
+    // If adv_uuids == NULL adv_uuids_size should be equal to 0.
+    if (adv_uuids == NULL)
+    {
+        APP_ERROR_CHECK_BOOL(adv_uuids_size == 0);
+    }
+
     ret_code_t err_code;
     ble_advertising_init_t init;
 
@@ -43,8 +45,6 @@ void estc_ble_gap_advertising_init(ble_uuid_t * adv_uuids, uint16_t adv_uuids_si
 
     init.advdata.name_type = BLE_ADVDATA_NO_NAME;
     init.advdata.flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
-
-    // init.advdata.p_tx_power_level       = &tx_power_level;
 
     init.srdata.name_type = BLE_ADVDATA_FULL_NAME;
     init.srdata.uuids_complete.uuid_cnt = adv_uuids_size;

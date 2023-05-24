@@ -92,24 +92,24 @@ hsv_ctx_t hsv_converter_convert_rgb_to_hsv(int16_t red, int16_t green, int16_t b
 {
 	hsv_ctx_t hsv;
 
-	float R = ((float)red)/((float)HSV_CONVERTER_MAX_RGB);
-	float G = ((float)green)/((float)HSV_CONVERTER_MAX_RGB);
-	float B = ((float)blue)/((float)HSV_CONVERTER_MAX_RGB);
+	double R = ((double)red)/((double)HSV_CONVERTER_MAX_RGB);
+	double G = ((double)green)/((double)HSV_CONVERTER_MAX_RGB);
+	double B = ((double)blue)/((double)HSV_CONVERTER_MAX_RGB);
 
-	float Cmax = MAX(MAX(R, G), B);
-	float Cmin = MIN(MIN(R, G), B);
+	double Cmax = MAX(MAX(R, G), B);
+	double Cmin = MIN(MIN(R, G), B);
 
-	float delta = Cmax - Cmin;
+	double delta = Cmax - Cmin;
 
 	hsv.brightness = Cmax * 100.0F;
 	
 	if (Cmax == 0)
 	{
-		hsv.saturation = 0;
+		hsv.saturation = 0.0F;
 	}
 	else
 	{
-		hsv.saturation = delta / Cmax * 100.0F;
+		hsv.saturation = (float)(delta / Cmax * 100.0);
 	}
 
 	if (delta == 0)
@@ -118,15 +118,17 @@ hsv_ctx_t hsv_converter_convert_rgb_to_hsv(int16_t red, int16_t green, int16_t b
 	}
 	else if (Cmax == R)
 	{
-		hsv.hue = 60.0F * utils_numeric_ops_modf((G - B) / delta, 6.0F);
+		double int_part = 0.0;
+		double fract_part = modf((G-B) / delta, &int_part);
+		hsv.hue = (float)(60.0 * (fract_part + int_part));
 	}
 	else if (Cmax == G)
 	{
-		hsv.hue = 60.0F * ((B - R) / delta + 2.0F);
+		hsv.hue = (float)(60.0 * ((B - R) / delta + 2.0));
 	}
 	else
 	{
-		hsv.hue = 60.0F * ((R - G) / delta + 4.0F);
+		hsv.hue = (float)(60.0 * ((R - G) / delta + 4.0));
 	}
 
 	hsv_converter_align_hsv(&hsv);

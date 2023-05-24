@@ -9,10 +9,11 @@
 #include <app_timer.h>
 
 #include "estc_ble.h"
+#include "estc_ble_write_mngr.h"
+#include "modules/ble/gap/bond/estc_bond.h"
+#include "modules/ble/estc_ble_qwr.h"
 
 #define ESTC_MAX_CONN_SUBSCRIBERS 5
-
-NRF_BLE_QWR_DEF(m_qwr); /**< Context for the Queued Write module.*/
 
 static uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID; /**< Handle of the current connection. */
 
@@ -25,31 +26,6 @@ static uint8_t conn_sub_idx = 0U;
 static estc_ble_disconnected_subscriber_t disconn_subscribers[ESTC_MAX_CONN_SUBSCRIBERS];
 
 static uint8_t disconn_sub_idx = 0U;
-
-/**
- * @brief Function for handling Queued Write Module errors.
- *
- * @details A pointer to this function will be passed to each service which may need to inform the
- *          application about an error.
- *
- * @param[in]   nrf_error   Error code containing information about what went wrong.
- */
-static void nrf_qwr_error_handler(uint32_t nrf_error)
-{
-	APP_ERROR_HANDLER(nrf_error);
-}
-
-void estc_ble_qwr_init(void)
-{
-	ret_code_t err_code = NRF_SUCCESS;
-	nrf_ble_qwr_init_t qwr_init = {0};
-
-	// Initialize Queued Write Module.
-	qwr_init.error_handler = nrf_qwr_error_handler;
-
-	err_code = nrf_ble_qwr_init(&m_qwr, &qwr_init);
-	APP_ERROR_CHECK(err_code);
-}
 
 ret_code_t estc_ble_stack_init(uint8_t conn_cfg_tag)
 {
@@ -151,14 +127,15 @@ void estc_ble_default_ble_event_handler(ble_evt_t const *p_ble_evt, void *p_cont
 			disconn_subscribers[i](m_conn_handle);
 		}
 		notifications_to_send = 0U;
+		estc_ble_gap_bond_delete_unused();
+		m_conn_handle = BLE_CONN_HANDLE_INVALID;
 		break;
 
 	case BLE_GAP_EVT_CONNECTED:
 		NRF_LOG_INFO("Connected.");
-		err_code = bsp_indication_set(BSP_INDICATE_CONNECTED);
 		APP_ERROR_CHECK(err_code);
 		m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
-		err_code = nrf_ble_qwr_conn_handle_assign(&m_qwr, p_ble_evt->evt.gap_evt.conn_handle);
+		err_code = nrf_ble_qwr_conn_handle_assign(estc_ble_qwr_get(), p_ble_evt->evt.gap_evt.conn_handle);
 		APP_ERROR_CHECK(err_code);
 		for (uint8_t i = 0U; i < conn_sub_idx; i++)
 		{
@@ -198,6 +175,7 @@ void estc_ble_default_ble_event_handler(ble_evt_t const *p_ble_evt, void *p_cont
 		err_code = sd_ble_gap_disconnect(p_ble_evt->evt.gatts_evt.conn_handle,
 										 BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
 		APP_ERROR_CHECK(err_code);
+		notifications_to_send--;
 		break;
 
 	case BLE_GATTS_EVT_HVN_TX_COMPLETE:
@@ -209,7 +187,16 @@ void estc_ble_default_ble_event_handler(ble_evt_t const *p_ble_evt, void *p_cont
 		break;
 
 	case BLE_GATTS_EVT_WRITE:
-		NRF_LOG_INFO("Received write request.");
+		{
+			NRF_LOG_INFO("Received write request.");
+			ble_gatts_evt_write_t write_evt = p_ble_evt->evt.gatts_evt.params.write;
+			estc_ble_write_mngr_handle(
+				p_ble_evt->evt.gatts_evt.conn_handle, 
+				write_evt.handle, 
+				write_evt.data, 
+				write_evt.offset, 
+				write_evt.len);
+		}
 		break;
 
 	default:

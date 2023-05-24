@@ -34,9 +34,16 @@ typedef enum
 	ESTC_BLE_CHAR_TYPE_STRING,
 } estc_ble_srv_char_value_type_t;
 
+typedef enum 
+{
+	ESTC_BLE_CHAR_AVAIL_ALWAYS,
+	ESTC_BLE_CHAR_AVAIL_AFTER_PAIRING,
+} estc_ble_char_avail_t;
+
 typedef struct
 {
 	estc_ble_srv_char_value_type_t value_type; /**< Type of the value of a characteristic. */
+	estc_ble_char_avail_t          available;  /**< Availability of the characteristic to the GATT client. */
 	uint16_t permissions;					   /**< Should be composed of @ref estc_ble_gatt_srv_char_allowed_ops_t. */
 	uint16_t description_size;				   /**< If description is present, should be != 0. */
 	uint16_t value_size;					   /**< Size of a value in Bytes. */
@@ -45,15 +52,14 @@ typedef struct
 	uint8_t characteristic_uuid_type;		   /**< Will be filled by @ref estc_ble_srv_char_register */
 	uint8_t *value;							   /**< Pointer to a characteristic value*/
 	uint8_t const *description_string;		   /**< UTF-8 string */
-	bool is_value_on_stack;					   /**< If value is on stack ble_stack will copy the value to its buffer. */
 } estc_ble_srv_char_cfg_t;
 
 typedef struct
 {
-	estc_ble_service_t value_handle;
-	estc_ble_service_t user_description_handle;
-	estc_ble_service_t client_char_desc_handle;
-	estc_ble_service_t server_char_desc_handle;
+	uint16_t value_handle;
+	uint16_t user_description_handle;
+	uint16_t client_char_desc_handle;
+	uint16_t server_char_desc_handle;
 } estc_ble_srv_char_handles_t;
 
 /***
@@ -81,8 +87,30 @@ ret_code_t estc_ble_srv_char_register(estc_ble_service_t *service,
 									  estc_ble_srv_char_cfg_t *config,
 									  estc_ble_srv_char_handles_t *handles);
 
+/**
+ * @brief Send notification.
+ * 
+ * @param[in] conn_handle - connection handle which should recieve notification.
+ * 
+ * @param[in] value_handle - handle of the value which should is a subject of notification.
+ * 
+ * @param[in] data - pointer to a value which should be sent with notification.
+ * 
+ * @param[in] data_len - pointer to a variable representing length of the data.
+*/
 void estc_ble_srv_char_notify(uint16_t conn_handle, uint16_t value_handle, uint8_t *data, uint16_t *data_len);
 
+/**
+ * @brief Send indication.
+ * 
+ * @param[in] conn_handle - connection handle which should recieve indication.
+ * 
+ * @param[in] value_handle - handle of the value which should is a subject of indication.
+ * 
+ * @param[in] data - pointer to a value which should be sent with indication.
+ * 
+ * @param[in] data_len - pointer to a variable representing length of the data.
+*/
 void estc_ble_srv_char_indicate(uint16_t conn_handle, uint16_t value_handle, uint8_t *data, uint16_t *data_len);
 
 #endif // ESTC_BLE_SERVICE_CHARACTERISTIC_H_
