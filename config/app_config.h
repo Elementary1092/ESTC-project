@@ -100,17 +100,17 @@
 #endif
 
 #ifndef NRF_DFU_APP_DATA_AREA_SIZE
-#define NRF_DFU_APP_DATA_AREA_SIZE 12288
+#define NRF_DFU_APP_DATA_AREA_SIZE 20480
 #endif // NRF_DFU_APP_DATA_AREA_SIZE
 
 // <e> NRFX_NVMC_ENABLED - nrfx_nvmc - NVMC peripheral driver
 //==========================================================
 #ifndef NRFX_NVMC_ENABLED
 #define NRFX_NVMC_ENABLED 1
-#endif
+#endif // NRFX_NVMC_ENABLED
 
 #ifndef ESTC_MAX_LINE_SIZE
 #define ESTC_MAX_LINE_SIZE 64
-#endif
+#endif // ESTC_MAX_LINE_SIZE
 
 #endif // APP_CONFIG_H

@@ -17,11 +17,13 @@ union float_uint32_u
 	uint32_t ui;
 };
 
+static uint32_t control_word = HSV_SAVED_VALUE_CONTROL_WORD;
+
 hsv_ctx_t hsv_picker_flash_try_init(void)
 {
 	uint32_t buffer[3] = {0UL};
 	uint32_t addr = flash_memory_seek_page_first_free_addr(FLASH_MEMORY_FIRST_PAGE);
-	if (addr == 0U)
+	if (addr == 0U || addr == FLASH_MEMORY_FIRST_PAGE)
 	{
 		return (hsv_ctx_t) {
 			.is_valid = false,
@@ -33,7 +35,7 @@ hsv_ctx_t hsv_picker_flash_try_init(void)
 		addr,
 		buffer,
 		3UL,
-		HSV_SAVED_VALUE_CONTROL_WORD,
+		&control_word,
 		FLASH_MEMORY_NO_FLAGS);
 
 	if (err != FLASH_MEMORY_NO_ERR)
@@ -80,7 +82,7 @@ bool hsv_picker_flash_update_saved_value(hsv_ctx_t const *hsv)
 		buffer,
 		3UL,
 		FLASH_MEMORY_FIRST_PAGE,
-		HSV_SAVED_VALUE_CONTROL_WORD,
+		&control_word,
 		FLASH_MEMORY_ERASE_PAGE_IF_NECESSARY);
 
 	if (err != FLASH_MEMORY_NO_ERR)
